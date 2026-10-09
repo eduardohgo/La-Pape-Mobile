@@ -25,3 +25,29 @@ Carlos Eduardo Hidalgo Toledo
 ## Estado del proyecto
 
 En configuración inicial.
+
+## Análisis estático
+
+Con las dependencias del proyecto instaladas, ejecutar:
+
+```bash
+npm run lint
+npx tsc --noEmit
+```
+
+ESLint utiliza la configuración plana recomendada por Expo SDK 57 para JavaScript,
+TypeScript, React y sus hooks. Analiza el código fuente, los scripts y la
+configuración JavaScript; excluye las dependencias y los archivos generados por
+Expo. El comando falla si encuentra errores o advertencias. TypeScript conserva
+el modo estricto de `tsconfig.json`.
+
+Para repetir el análisis sin utilizar la caché:
+
+```bash
+npm run lint -- --no-cache
+```
+
+Las versiones resueltas están registradas en `package-lock.json`. Estos comandos
+realizan comprobaciones automatizadas; las pruebas en dispositivo físico se
+registran por separado en las Issues correspondientes. La configuración de
+GitHub Actions se realizará cuando se trabaje en el pipeline.
