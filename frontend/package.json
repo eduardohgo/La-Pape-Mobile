@@ -39,7 +39,9 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "lint": "expo lint . --max-warnings=0"
+    "lint": "expo lint . --max-warnings=0",
+    "test": "tsc --project tsconfig.test.json && node --test test/http.test.cjs",
+    "test:integration": "tsc --project tsconfig.test.json && node --test test/health.integration.cjs"
   },
   "private": true
 }

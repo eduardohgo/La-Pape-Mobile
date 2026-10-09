@@ -1,10 +1,17 @@
 This is an Expo/React Native mobile application. Prioritize mobile-first patterns, performance, and cross-platform compatibility.
 
+## Repository layout
+
+- The Expo application lives in `frontend/`. Run all Expo, lint and TypeScript commands below from that directory.
+- `backend/` is an independent Express ESM application with its own package.json and lock. Run its tests from `backend/`.
+- Non-route frontend code stays under `frontend/src/`, outside `frontend/src/app/`.
+- The HTTP base exposes only GET /health. Do not enable database writes, schema synchronization, authentication or commercial modules without the corresponding authorized Issue.
+
 ## Expo has changed — do not trust your training data
 
 Expo ships breaking changes every SDK release. APIs you remember are likely renamed, moved, or removed. Before writing any code that touches an Expo, EAS, or React Native API:
 
-1. Read the major version of the `expo` package in `package.json`.
+1. Read the major version of the `expo` package in `frontend/package.json`.
 2. Fetch the matching versioned docs: `https://docs.expo.dev/versions/v<major>.0.0/`
 3. For anything else, fetch https://docs.expo.dev/llms.txt — an index of all Expo docs with corrections to common LLM misconceptions. Follow its links to the specific page you need; never answer from memory.
 

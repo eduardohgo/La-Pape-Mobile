@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "Node16",
+    "moduleResolution": "Node16",
+    "strict": true,
+    "skipLibCheck": true,
+    "lib": ["ES2022", "DOM"],
+    "types": ["node", "react-native"],
+    "rootDir": "src",
+    "outDir": ".test-build"
+  },
+  "include": ["src/config/env.ts", "src/services/**/*.ts"]
+}
