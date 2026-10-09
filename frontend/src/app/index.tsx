@@ -1,5 +1,7 @@
 import { StyleSheet, Text, View } from 'react-native';
 
+import { ApiHealthCheck } from '@/components/api-health-check';
+
 export default function HomeScreen() {
   return (
     <View style={styles.container}>
@@ -10,6 +12,7 @@ export default function HomeScreen() {
       <Text style={styles.text}>
         React Native + Expo
       </Text>
+      {__DEV__ && <ApiHealthCheck />}
     </View>
   );
 }
