@@ -95,3 +95,66 @@ test('external cancellation is distinct and pre-cancelled requests never fetch',
   await assert.rejects(client.get('/health', isHealthResponse, { signal: controller.signal }), matchError('cancelled'));
   assert.equal(calls, 1);
 });
+
+
+const { createCatalogService, isCategoryResponse, isProductResponse } = require('../.test-build/services/catalog.service.js');
+const PRODUCT_ID = 'e9096108-10c1-4483-9a3c-f61283d3c24f';
+const BRAND_ID = 'de3f0474-45fa-4bf8-bb53-7c47227eeb9d';
+const CATEGORY_ID = '155b7072-240d-459e-a843-fc2ca3502169';
+const TEST_PRODUCT = {
+  id: PRODUCT_ID, sku: 'LAP-CUA-001', name: 'Cuaderno',
+  category_id: CATEGORY_ID, category_name: 'Cuadernos',
+  brand_id: BRAND_ID, brand_name: 'Scribe',
+  price: '89.90', currency: 'MXN', image_url: null,
+};
+
+test('catalog contract validates remote data and nullable photos', () => {
+  assert.equal(isCategoryResponse({ data: [{ id: CATEGORY_ID, name: 'Cuadernos', description: null }] }), true);
+  assert.equal(isProductResponse({ data: [TEST_PRODUCT], page: { hasMore: false, nextCursor: null } }), true);
+  assert.equal(isProductResponse({ data: [{ ...TEST_PRODUCT, price: 'invalid' }], page: { hasMore: false, nextCursor: null } }), false);
+  assert.equal(isProductResponse({ data: [{ ...TEST_PRODUCT, image_url: 'http://unsafe.test/item.png' }], page: { hasMore: false, nextCursor: null } }), false);
+  assert.equal(isProductResponse({ data: [TEST_PRODUCT], page: { hasMore: true, nextCursor: null } }), false);
+});
+
+test('catalog gets products and categories from HTTP; never substitutes local demo items', async () => {
+  const called = [];
+  const service = createCatalogService(config, async (url, options) => {
+    called.push(url);
+    assert.equal(options.method, 'GET');
+    assert.deepEqual(options.headers, { Accept: 'application/json' });
+    if (url.endsWith('/categories')) return Response.json({ data: [] });
+    if (url.endsWith('/products?limit=50')) {
+      return Response.json({ data: [], page: { hasMore: false, nextCursor: null } });
+    }
+    throw new Error('Unexpected route');
+  });
+  assert.deepEqual(await service.categories(), []);
+  assert.deepEqual(await service.products(), []);
+  assert.deepEqual(called, [
+    'http://127.0.0.1:3000/categories',
+    'http://127.0.0.1:3000/products?limit=50',
+  ]);
+});
+
+test('catalog follows server cursors and avoids duplicate page fetches', async () => {
+  const calls = [];
+  const service = createCatalogService(config, async (url) => {
+    calls.push(url);
+    if (calls.length === 1) return Response.json({
+      data: [TEST_PRODUCT], page: { hasMore: true, nextCursor: PRODUCT_ID },
+    });
+    return Response.json({
+      data: [], page: { hasMore: false, nextCursor: null },
+    });
+  });
+  const products = await service.products();
+  assert.equal(products.length, 1);
+  assert.equal(products[0].image_url, null);
+  assert.equal(calls.length, 2);
+  assert.equal(calls[1], `http://127.0.0.1:3000/products?limit=50&after=${PRODUCT_ID}`);
+});
+
+test('catalog does not confuse API failures with an empty catalog', async () => {
+  const service = createCatalogService(config, async () => Response.json({ error: 'unavailable' }, { status: 503 }));
+  await assert.rejects(service.products(), matchError('http', 503));
+});
