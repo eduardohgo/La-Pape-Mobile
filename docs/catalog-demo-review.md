@@ -37,11 +37,11 @@
 
 **Los otros ocho candidatos:** no existe en la revisión actual evidencia suficiente que confirme marca y artículo; las parejas registradas son referencias históricas, no una validación de producto específico. Revisar especialmente cartulina/Maped y engrapadora/BIC, sin asumir por plausibilidad.
 
-**Decisión pendiente:** confirmar con el responsable si las marcas se mostrarán explícitamente como «por verificar» durante el prototipo, o si se ocultarán hasta validar productos reales. Mantener los valores fuente en el manifiesto sin aprobarlos por inferencia.
+**Decisión aprobada:** durante el prototipo, las marcas **no se mostrarán** en las tarjetas del catálogo móvil ni se presentarán como verificadas en el detalle. Se mantienen como referencias históricas en el manifiesto para validación posterior. La tarjeta mostrará nombre, categoría, precio con etiqueta «Precio de demostración» e imagen genérica local cuando `image_url` sea NULL. El backend puede conservar sus campos de marca como datos de catálogo, pero la interfaz no debe exhibirlos hasta su validación. No se modifican ni aprueban registros en Neon.
 
 ## Próximos pasos (sin ejecución automática)
 
-1. Resolver política visual sobre marcas no verificadas.
+1. Aplicar la política visual acordada: no mostrar marcas pendientes de verificación en las tarjetas ni en el detalle del prototipo.
 2. Crear el placeholder visual neutral para Expo sin falsear `image_url`.
 3. Revisar los datos producto a producto; documentar qué es demo y qué está verificado.
 4. Antes de cualquier importación, ejecutar validación del manifiesto, revisión de SQL generado y aprobación humana de los registros que se vayan a publicar.
