@@ -36,12 +36,15 @@ export default function ProductDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const theme = useTheme();
   const insets = useSafeAreaInsets();
-  const [state, setState] = useState<DetailState>({ status: 'loading' });
+  const [resolved, setResolved] = useState<{ key: string; result: DetailState } | null>(null);
   const [reload, setReload] = useState(0);
+  const requestKey = `${id}:${reload}`;
+  // A new product or retry renders loading until its own request finishes.
+  // No synchronous state update is needed inside the effect.
+  const state: DetailState = resolved?.key === requestKey ? resolved.result : { status: 'loading' };
 
   useEffect(() => {
     const controller = new AbortController();
-    setState({ status: 'loading' });
 
     async function load() {
       try {
@@ -49,17 +52,17 @@ export default function ProductDetailScreen() {
         const product = demoMode
           ? await service.demoProduct(id, { signal: controller.signal })
           : await service.product(id, { signal: controller.signal });
-        if (!controller.signal.aborted) setState({ status: 'loaded', product });
+        if (!controller.signal.aborted) setResolved({ key: requestKey, result: { status: 'loaded', product } });
       } catch (error) {
         if (controller.signal.aborted) return;
         const notFound = error instanceof ApiError &&
           (error.status === 404 || error.kind === 'configuration');
-        setState({ status: notFound ? 'not-found' : 'error' });
+        setResolved({ key: requestKey, result: { status: notFound ? 'not-found' : 'error' } });
       }
     }
     void load();
     return () => controller.abort();
-  }, [id, reload]);
+  }, [id, requestKey]);
 
   const product = state.status === 'loaded' ? state.product : null;
   const description = product && 'description' in product
