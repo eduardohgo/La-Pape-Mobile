@@ -99,3 +99,27 @@ Versiones Expo, React Native y dependencias existentes se conservaron. Referenci
 [ubicación en subcarpetas](https://docs.expo.dev/guides/monorepos/),
 [variables públicas](https://docs.expo.dev/guides/environment-variables/),
 [red en React Native 0.86](https://reactnative.dev/docs/0.86/network).
+
+
+## Vista previa local del catálogo (PB-06)
+
+La pestaña **Catálogo** reutiliza la ruta inicial `explore` mientras se completa PB-02.
+Durante `__DEV__` (Expo Go/Metro), se ven diez tarjetas estáticas de demostración
+tomadas de `src/features/catalog/demo-products.ts` para revisar composición, filtros
+de categoría y presentación de precios provisionales en MXN. La etiqueta
+**«Precio de demostración»** y el aviso **«Vista previa · Solo desarrollo»** son
+obligatorios. Ninguno de esos artículos proviene de una consulta a Neon:
+`GET /products` devuelve por ahora una lista vacía.
+
+- Sin marcas en tarjetas: no están verificadas.
+- Sin fotos del respaldo: se usa un ícono neutral; `imageUrl` permanece `null`.
+- Sin carrito, compras, promociones, existencias ni botones ficticios.
+- La vista previa **no se renderiza en builds de producción**; hasta que exista
+  catálogo verificado la pantalla muestra el estado «Catálogo en preparación».
+- La pantalla Inicio y el diagnóstico `GET /health` siguen independientes.
+- No cambiar a datos remotos ni habilitar publicación sin validar contrato,
+  procedencia, estado de producto y aprobaciones. Documento:
+  `../docs/catalog-demo-review.md`.
+
+Ejecutar `npm run lint`, `npx tsc --noEmit` y comprobar Expo Go en un iPhone
+antes de considerar completada la interfaz. Esta vista previa no cierra #19 ni PB-06.
