@@ -4,6 +4,7 @@ import { Pool } from 'pg';
 const categoriesSql = readFileSync(new URL('../../db/queries/categories.sql', import.meta.url), 'utf8');
 const productsSql = readFileSync(new URL('../../db/queries/products-list.sql', import.meta.url), 'utf8');
 const detailSql = readFileSync(new URL('../../db/queries/product-detail.sql', import.meta.url), 'utf8');
+const demoSql = readFileSync(new URL('../../db/queries/demo-products.sql', import.meta.url), 'utf8');
 
 export function createCatalogRepository(config, PoolClass = Pool) {
   if (!config) throw new Error('DATABASE_URL requerida para catálogo');
@@ -25,6 +26,7 @@ export function createCatalogRepository(config, PoolClass = Pool) {
     } finally { client.release(); }
   }
   return {
+    listDemoProducts: () => read(demoSql),
     listCategories: () => read(categoriesSql),
     listProducts: (categoryId, after, limit) => read(productsSql, [categoryId, after, limit]),
     getProduct: async id => (await read(detailSql, [id]))[0] ?? null,
