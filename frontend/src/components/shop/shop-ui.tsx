@@ -45,7 +45,6 @@ export function ProductVisual({ product, large = false }: {
       ) : (
         <>
           <StationeryArt kind={productIllustration(product.name, product.category_name)} width={large ? 200 : 102} height={large ? 212 : 105} />
-          <Text style={styles.photoCaption}>Ilustración · foto pendiente</Text>
         </>
       )}
     </View>
@@ -81,9 +80,9 @@ export function ShopModal({ visible, onClose, children }: { visible: boolean; on
 export function PendingFeatureModal({ feature, onClose }: { feature: string | null; onClose: () => void }) {
   return (
     <ShopModal visible={feature !== null} onClose={onClose}>
-      <Text style={styles.eyebrow}>PRÓXIMAMENTE</Text>
+      <Text style={styles.eyebrow}>LA PAPE</Text>
       <Text accessibilityRole="header" style={styles.modalTitle}>{feature}</Text>
-      <Text style={styles.modalMessage}>Esta función aún no está disponible. Puedes seguir explorando los productos sin realizar compras.</Text>
+      <Text style={styles.modalMessage}>Descubre más artículos e ideas para crear en nuestro catálogo.</Text>
       <Pressable onPress={onClose} accessibilityRole="button" style={styles.action}><Text style={styles.actionText}>Seguir explorando</Text></Pressable>
     </ShopModal>
   );
@@ -98,7 +97,7 @@ export function CatalogTabBar({ onPending, onCatalog }: { onPending: (feature: s
         <Pressable onPress={onCatalog} style={styles.navItem} accessibilityRole="button" accessibilityLabel="Catálogo, seleccionado" accessibilityState={{ selected: true }}><HomeIcon name="grid" color="#EDB800" filled /><Text style={styles.navActive}>Categorías</Text><View style={styles.indicator} /></Pressable>
         <Pressable onPress={() => onPending('Carrito')} style={styles.navItem} accessibilityRole="button" accessibilityLabel="Carrito: próximamente"><HomeIcon name="cart" color={palette.muted} /><Text style={styles.navLabel}>Carrito</Text></Pressable>
         <Pressable onPress={() => onPending('Favoritos')} style={styles.navItem} accessibilityRole="button" accessibilityLabel="Favoritos: próximamente"><HomeIcon name="heart" color={palette.muted} /><Text style={styles.navLabel}>Favoritos</Text></Pressable>
-        <Pressable onPress={() => onPending('Perfil')} style={styles.navItem} accessibilityRole="button" accessibilityLabel="Perfil: próximamente"><HomeIcon name="user" color={palette.muted} /><Text style={styles.navLabel}>Perfil</Text></Pressable>
+        <Pressable onPress={() => onPending('Acceder')} style={styles.navItem} accessibilityRole="button" accessibilityLabel="Acceder"><HomeIcon name="user" color={palette.muted} /><Text style={styles.navLabel}>Acceder</Text></Pressable>
       </View>
     </View>
   );
@@ -125,7 +124,6 @@ const styles = StyleSheet.create({
   photoDecorations: { borderRadius: 24 },
   photoBlueShape: { position: 'absolute', width: 140, height: 140, top: -36, right: -45, borderRadius: 48, backgroundColor: '#7CD3EC', transform: [{ rotate: '24deg' }] },
   photoPinkShape: { position: 'absolute', width: 110, height: 100, bottom: -40, left: -35, borderRadius: 38, backgroundColor: '#F889B4', transform: [{ rotate: '-25deg' }] },
-  photoCaption: { color: '#746978', fontSize: 9, textAlign: 'center', paddingHorizontal: 4 },
   realPhoto: { width: '100%', height: 109 }, realPhotoLarge: { height: 240 },
   status: { padding: 24, borderRadius: 22, backgroundColor: '#FFF8E9', alignItems: 'center', gap: 13, marginTop: 16 },
   statusTitle: { color: palette.ink, fontWeight: '800', fontSize: 18, textAlign: 'center' },
