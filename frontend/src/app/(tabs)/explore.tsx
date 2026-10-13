@@ -1,260 +1,230 @@
-import { Image } from 'expo-image';
-import { router } from 'expo-router';
-import { useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { router, usePathname } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { Keyboard, Pressable, ScrollView, StyleSheet, Text, TextInput, View, useWindowDimensions } from 'react-native';
 
-import { BottomTabInset } from '@/constants/theme';
-import { useTheme } from '@/hooks/use-theme';
+import { HomeIcon } from '@/components/home/home-icon';
+import { CatalogTabBar, PendingFeatureModal, ProductVisual, ShopHeader, ShopModal, ShopStatus, palette } from '@/components/shop/shop-ui';
 import { type CatalogCategory, type CatalogProduct, type DemoCatalogProduct, getCatalogService } from '@/services/catalog.service';
+import { filterCatalogProducts } from '@/utils/catalog-search';
 
-// Public variables only. Never include Neon credentials in Expo.
-// Preview can run ONLY in Metro/dev builds and must be explicitly enabled.
+// Keep the same explicit development-only demo gate as the existing catalog.
 const demoMode = __DEV__ && process.env.EXPO_PUBLIC_CATALOG_MODE === 'demo';
 type VisibleProduct = CatalogProduct | DemoCatalogProduct;
+type CatalogState =
+  | { status: 'loading' }
+  | { status: 'error' }
+  | { status: 'loaded'; products: VisibleProduct[]; categories: CatalogCategory[] };
 
-const categoryIllustrations: Record<string, string> = {
-  Cuadernos: '📓',
-  Arte: '🎨',
-  Oficina: '✏️',
-};
+function categoryColor(name: string) {
+  return name === 'Arte' ? '#FDEBF2' : name === 'Cuadernos' ? '#F0EBFC' : name === 'Oficina' ? '#E3F5FC' : '#FFF7D9';
+}
 
-function ProductCard({ product }: { product: VisibleProduct }) {
-  const theme = useTheme();
-  const icon = categoryIllustrations[product.category_name] ?? '📦';
+function CategoryChip({ category, selected, onPress, modal = false }: {
+  category: { id: string; name: string }; selected: boolean; onPress: () => void; modal?: boolean;
+}) {
   return (
     <Pressable
-      style={[styles.card, { backgroundColor: theme.background, borderColor: theme.backgroundSelected }]}
+      onPress={onPress}
       accessibilityRole="button"
-      accessibilityHint="Abrir detalle del producto"
-      onPress={() => router.push({ pathname: '/products/[id]', params: { id: product.id } })}
-      accessibilityLabel={`${product.name}. ${product.category_name}. ${product.price} pesos mexicanos. ${demoMode ? 'Precio de demostración. ' : ''}Compras no disponibles.`}>
-      <View style={[styles.photo, { backgroundColor: theme.backgroundElement }]}>
-        {product.image_url ? (
-          <Image source={{ uri: product.image_url }} style={styles.productImage} contentFit="contain" />
-        ) : (
-          <>
-            <Text style={styles.photoIcon} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
-              {icon}
-            </Text>
-            <Text style={[styles.missingPhoto, { color: theme.textSecondary }]}>Sin fotografía</Text>
-          </>
-        )}
-      </View>
-      <View style={styles.cardContent}>
-        <Text style={[styles.categoryText, { color: theme.textSecondary }]}>{product.category_name}</Text>
-        <Text style={[styles.productName, { color: theme.text }]} numberOfLines={3}>
-          {product.name}
-        </Text>
-        <Text style={[styles.price, { color: theme.text }]}>${product.price}</Text>
-        <Text style={styles.demoPriceLabel}>{demoMode ? 'PRECIO DE DEMOSTRACIÓN' : 'MXN'}</Text>
-      </View>
+      accessibilityLabel={(modal ? 'Filtrar por ' : 'Categoría ') + category.name}
+      accessibilityState={{ selected }}
+      style={({ pressed }) => [styles.chip, { backgroundColor: selected ? '#BC2862' : categoryColor(category.name) }, pressed && styles.pressed]}>
+      <Text style={[styles.chipLabel, { color: selected ? '#FFFFFF' : palette.ink }]}>{category.name}</Text>
     </Pressable>
   );
 }
 
+function ProductCard({ product, onFavorite }: { product: VisibleProduct; onFavorite: () => void }) {
+  return (
+    <View style={styles.card}>
+      <Pressable
+        onPress={() => router.push({ pathname: '/products/[id]', params: { id: product.id } })}
+        style={({ pressed }) => [styles.cardLink, pressed && styles.pressed]}
+        accessibilityRole="button"
+        accessibilityLabel={product.name + '. ' + product.price + ' pesos mexicanos.' + (demoMode ? ' Precio de demostración.' : '')}
+        accessibilityHint="Abrir detalle del producto por su identificador. Compras no disponibles.">
+        <ProductVisual product={product} />
+        <View style={styles.cardInfo}>
+          <Text style={styles.cardCategory}>{product.category_name}</Text>
+          <Text style={styles.productName} numberOfLines={3}>{product.name}</Text>
+          <Text style={styles.price}>{'$'}{product.price} <Text style={styles.currency}>{product.currency}</Text></Text>
+          {demoMode && <Text style={styles.priceDemo}>PRECIO DEMO</Text>}
+        </View>
+      </Pressable>
+      <Pressable style={styles.favorite} accessibilityRole="button" accessibilityLabel={'Favoritos de ' + product.name + ': próximamente'} onPress={onFavorite}>
+        <HomeIcon name="heart" size={20} color={palette.muted} />
+      </Pressable>
+      <Pressable disabled accessibilityRole="button" accessibilityState={{ disabled: true }} accessibilityLabel={'Agregar ' + product.name + ' al carrito: próximamente'} style={styles.addButton}>
+        <HomeIcon name="cart" color="#A5466D" size={17} />
+        <Text style={styles.addLabel}>Agregar · próximamente</Text>
+      </Pressable>
+    </View>
+  );
+}
+
 export default function CatalogScreen() {
-  const theme = useTheme();
-  const insets = useSafeAreaInsets();
-  const [categories, setCategories] = useState<CatalogCategory[]>([]);
-  const [products, setProducts] = useState<VisibleProduct[]>([]);
+  const pathname = usePathname();
+  const { width, fontScale } = useWindowDimensions();
+  const columns = fontScale > 1.35 ? 1 : width >= 600 ? 3 : 2;
+  const scroll = useRef<ScrollView>(null);
+  const searchInput = useRef<TextInput>(null);
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
+  const [query, setQuery] = useState('');
   const [reload, setReload] = useState(0);
+  const [resolved, setResolved] = useState<{ key: number; result: CatalogState } | null>(null);
+  const [feature, setFeature] = useState<string | null>(null);
+  const [showFilters, setShowFilters] = useState(false);
+  const state = useMemo<CatalogState>(() => resolved?.key === reload
+    ? resolved.result : { status: 'loading' }, [resolved, reload]);
 
   useEffect(() => {
     const controller = new AbortController();
     async function load() {
-      setLoading(true);
-      setError(false);
       try {
         const service = getCatalogService();
+        let products: VisibleProduct[];
+        let categories: CatalogCategory[];
         if (demoMode) {
-          const previews: DemoCatalogProduct[] = await service.demoProducts({ signal: controller.signal });
-          if (controller.signal.aborted) return;
-          const uniqueCategories: CatalogCategory[] = [];
-          const seenCategories = new Set<string>();
-          for (const product of previews) {
-            if (!seenCategories.has(product.category_id)) {
-              seenCategories.add(product.category_id);
-              uniqueCategories.push({
-                id: product.category_id,
-                name: product.category_name,
-                description: null,
-              });
-            }
-          }
-          setCategories(uniqueCategories);
-          setProducts(previews);
+          products = await service.demoProducts({ signal: controller.signal });
+          const unique = new Map<string, CatalogCategory>();
+          for (const product of products) unique.set(product.category_id, {
+            id: product.category_id, name: product.category_name, description: null,
+          });
+          categories = [...unique.values()];
         } else {
-          const [loadedCategories, loadedProducts] = await Promise.all([
+          [categories, products] = await Promise.all([
             service.categories({ signal: controller.signal }),
             service.products({ signal: controller.signal }),
           ]);
-          if (controller.signal.aborted) return;
-          setCategories(loadedCategories);
-          setProducts(loadedProducts);
         }
+        if (!controller.signal.aborted) setResolved({
+          key: reload,
+          result: { status: 'loaded', products, categories: categories.slice().sort((a, b) => a.name.localeCompare(b.name, 'es')) },
+        });
       } catch {
-        if (!controller.signal.aborted) setError(true);
-      } finally {
-        if (!controller.signal.aborted) setLoading(false);
+        if (!controller.signal.aborted) setResolved({ key: reload, result: { status: 'error' } });
       }
     }
     void load();
     return () => controller.abort();
   }, [reload]);
 
-  const filtered = useMemo(
-    () => selectedCategory === 'all'
-      ? products
-      : products.filter((product) => product.category_id === selectedCategory),
-    [products, selectedCategory],
-  );
-  const rows = Array.from({ length: Math.ceil(filtered.length / 2) }, (_, index) =>
-    filtered.slice(index * 2, index * 2 + 2));
+  const filtered = useMemo(() => state.status === 'loaded'
+    ? filterCatalogProducts(state.products, query, selectedCategory) : [], [state, query, selectedCategory]);
+  const rows = Array.from({ length: Math.ceil(filtered.length / columns) }, (_, index) => filtered.slice(index * columns, (index + 1) * columns));
+  const categories = [{ id: 'all', name: 'Todos' }, ...(state.status === 'loaded' ? state.categories : [])];
+  function resetFilters() { setQuery(''); setSelectedCategory('all'); }
+  function openFilters() { Keyboard.dismiss(); setShowFilters(true); }
 
   return (
-    <ScrollView
-      style={[styles.screen, { backgroundColor: theme.background }]}
-      contentContainerStyle={[
-        styles.content,
-        { paddingTop: insets.top + 16, paddingBottom: insets.bottom + BottomTabInset + 32 },
-      ]}>
-      <View style={styles.header}>
-        <Text style={styles.brand}>LA PAPE</Text>
-        <Text style={[styles.heading, { color: theme.text }]}>Catálogo</Text>
-        <Text style={[styles.subtitle, { color: theme.textSecondary }]}>
-          {demoMode ? 'Artículos del respaldo original, mostrados solo para pruebas.' : 'Productos consultados desde nuestra API de La Pape.'}
-        </Text>
-      </View>
-
-      {__DEV__ && (
-        <View style={styles.notice}>
-          <Text style={styles.noticeTitle}>{demoMode ? 'DEMOSTRACIÓN · SIN VENTAS' : 'DESARROLLO · SIN COMPRAS'}</Text>
-          <Text style={styles.noticeText}>
-            {demoMode
-              ? 'Los artículos proceden del ZIP anterior y se consultan desde Neon. Precios provisionales, fotografías genéricas, marcas ocultas y compras deshabilitadas.'
-              : 'El catálogo se consulta desde Express y Neon. No hay funciones de compra habilitadas.'}
-          </Text>
-        </View>
-      )}
-
-      {loading ? (
-        <View style={styles.status}>
-          <ActivityIndicator size="large" color="#1F5489" />
-          <Text style={[styles.statusText, { color: theme.textSecondary }]}>Consultando catálogo…</Text>
-        </View>
-      ) : error ? (
-        <View style={[styles.status, { backgroundColor: theme.backgroundElement, borderRadius: 16 }]}>
-          <Text style={[styles.statusTitle, { color: theme.text }]}>No se pudo consultar el catálogo</Text>
-          <Text style={[styles.statusText, { color: theme.textSecondary }]}>
-            Comprueba que Express esté encendido y que la URL de la API sea accesible desde este teléfono.
-          </Text>
-          <Pressable accessibilityRole="button" style={styles.retry} onPress={() => setReload((value) => value + 1)}>
-            <Text style={styles.retryText}>Volver a intentar</Text>
-          </Pressable>
-        </View>
-      ) : products.length === 0 ? (
-        <View style={[styles.status, { backgroundColor: theme.backgroundElement, borderRadius: 16 }]}>
-          <Text style={styles.emptyIcon}>📦</Text>
-          <Text style={[styles.statusTitle, { color: theme.text }]}>{demoMode ? 'Aún no hay artículos de demostración' : 'Todavía no hay productos publicados'}</Text>
-          <Text style={[styles.statusText, { color: theme.textSecondary }]}>
-            {demoMode
-              ? 'Todavía no se ha cargado el conjunto de prueba del ZIP en Neon.'
-              : 'La conexión funciona, pero Neon aún no tiene artículos aprobados para mostrar.'}
-          </Text>
-          {!demoMode && __DEV__ && (
-            <Text style={[styles.statusText, { color: theme.textSecondary }]}>
-              Los diez productos de demostración están separados del catálogo comercial.
-            </Text>
-          )}
-          <Pressable accessibilityRole="button" style={styles.retry} onPress={() => setReload((value) => value + 1)}>
-            <Text style={styles.retryText}>Actualizar catálogo</Text>
-          </Pressable>
-        </View>
-      ) : (
-        <>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.filters}
-            accessibilityLabel="Filtrar productos por categoría">
-            {[{ id: 'all', name: 'Todos' }, ...categories].map((item) => {
-              const selected = item.id === selectedCategory;
-              return (
-                <Pressable
-                  key={item.id}
-                  accessibilityRole="button"
-                  accessibilityState={{ selected }}
-                  onPress={() => setSelectedCategory(item.id)}
-                  style={[styles.filterChip, { backgroundColor: selected ? '#1F5489' : theme.backgroundElement }]}>
-                  <Text style={[styles.filterLabel, { color: selected ? '#FFFFFF' : theme.text }]}>{item.name}</Text>
-                </Pressable>
-              );
-            })}
-          </ScrollView>
-
-          <View style={styles.sectionTitle}>
-            <Text style={[styles.sectionHeading, { color: theme.text }]}>{demoMode ? 'Productos de demostración' : 'Productos'}</Text>
-            <Text style={[styles.counter, { color: theme.textSecondary }]}>{filtered.length} artículos</Text>
-          </View>
-          {filtered.length === 0 ? (
-            <Text style={[styles.statusText, { color: theme.textSecondary }]}>No hay productos en esta categoría.</Text>
-          ) : (
-            <View style={styles.grid}>
-              {rows.map((pair) => (
-                <View key={pair[0].id} style={styles.row}>
-                  <ProductCard product={pair[0]} />
-                  {pair[1] ? <ProductCard product={pair[1]} /> : <View style={styles.emptyCell} />}
-                </View>
-              ))}
+    <View style={styles.screen}>
+      {pathname === '/explore' && <StatusBar style="dark" />}
+      <ScrollView ref={scroll} style={styles.scroll} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled" contentContainerStyle={styles.scrollContent}>
+        <ShopHeader right={
+          <Pressable style={styles.roundButton} onPress={() => setFeature('Carrito')} accessibilityRole="button" accessibilityLabel="Carrito: próximamente"><HomeIcon name="cart" /></Pressable>
+        }>
+          <View style={styles.searchRow}>
+            <View style={styles.searchBox}>
+              <HomeIcon name="search" size={22} color={palette.muted} />
+              <TextInput
+                ref={searchInput}
+                value={query}
+                onChangeText={setQuery}
+                style={styles.searchInput}
+                placeholder="Nombre, categoría o SKU"
+                placeholderTextColor="#78727F"
+                accessibilityLabel="Buscar productos por nombre, categoría o SKU"
+                autoCapitalize="none"
+                autoCorrect={false}
+                returnKeyType="search"
+                maxLength={120}
+              />
+              {query.length > 0 && <Pressable accessibilityRole="button" accessibilityLabel="Limpiar búsqueda" onPress={() => { setQuery(''); searchInput.current?.focus(); }} style={styles.clearButton}><HomeIcon name="close" size={17} color={palette.muted} /></Pressable>}
             </View>
-          )}
-          <Text style={[styles.footer, { color: theme.textSecondary }]}>
-            Marcas no verificadas ocultas. No se muestran existencias ni opciones de compra.
-          </Text>
-        </>
-      )}
-    </ScrollView>
+            <Pressable onPress={openFilters} accessibilityRole="button" accessibilityLabel="Abrir filtros de categoría" style={styles.filterButton}>
+              <HomeIcon name="filter" size={22} /><Text style={styles.filterButtonLabel}>Filtros</Text>
+            </Pressable>
+          </View>
+        </ShopHeader>
+
+        <View style={styles.body}>
+          <View style={styles.titleRow}><Text accessibilityRole="header" style={styles.heading}>Catálogo<Text style={styles.headingSpark}> ✦</Text></Text><View style={styles.titleShape} /></View>
+          <View style={styles.chips} accessibilityLabel="Categorías del catálogo">
+            {categories.map(category => <CategoryChip key={category.id} category={category} selected={category.id === selectedCategory} onPress={() => setSelectedCategory(category.id)} />)}
+          </View>
+          <View style={styles.notice}>
+            <Text style={styles.noticeLabel}>{demoMode ? 'DEMO · SIN VENTAS' : 'CONSULTA · SIN COMPRAS'}</Text>
+            <Text style={styles.noticeText}>{demoMode ? 'Precios provisionales. Fotografías, marcas e inventario pendientes de verificación.' : 'Información del catálogo. Compras aún no disponibles.'}</Text>
+          </View>
+
+          {state.status === 'loading' ? <ShopStatus title="Consultando catálogo…" loading /> :
+            state.status === 'error' ? <ShopStatus title="No pudimos cargar el catálogo" message="Comprueba la conexión con Express y vuelve a intentarlo." onRetry={() => setReload(value => value + 1)} /> :
+              state.products.length === 0 ? <ShopStatus title={demoMode ? 'Aún no hay artículos de demostración' : 'Todavía no hay productos publicados'} message="La API no devolvió artículos para mostrar. Puedes actualizar el catálogo." onRetry={() => setReload(value => value + 1)} retryLabel="Actualizar catálogo" /> :
+                <>
+                  <View style={styles.resultsHeader}>
+                    <Text style={styles.resultsCount} accessibilityLiveRegion="polite">{filtered.length} {filtered.length === 1 ? 'artículo' : 'artículos'}</Text>
+                    {(query.trim() !== '' || selectedCategory !== 'all') && <Pressable accessibilityRole="button" onPress={resetFilters} style={styles.resetButton}><Text style={styles.resetLabel}>Limpiar filtros</Text></Pressable>}
+                  </View>
+                  {filtered.length === 0 ? <ShopStatus title="No encontramos coincidencias" message="Prueba otro nombre, categoría o SKU, o limpia los filtros." onRetry={resetFilters} retryLabel="Mostrar todos" /> :
+                    <View style={styles.grid}>{rows.map(row => <View key={row[0].id} style={styles.productRow}>
+                      {row.map(product => <View key={product.id} style={styles.cell}><ProductCard product={product} onFavorite={() => setFeature('Favoritos')} /></View>)}
+                      {Array.from({ length: columns - row.length }, (_, index) => <View key={'empty-' + index} style={styles.cell} />)}
+                    </View>)}</View>}
+                </>
+          }
+          <Text style={styles.footer}>Ideas para aprender y crear. Compras no disponibles.</Text>
+        </View>
+      </ScrollView>
+      <CatalogTabBar onPending={setFeature} onCatalog={() => { Keyboard.dismiss(); scroll.current?.scrollTo({ y: 0, animated: true }); }} />
+      <PendingFeatureModal feature={feature} onClose={() => setFeature(null)} />
+      <ShopModal visible={showFilters} onClose={() => setShowFilters(false)}>
+        <Text accessibilityRole="header" style={styles.modalTitle}>Filtrar por categoría</Text>
+        <Text style={styles.modalText}>Las categorías se combinan con tu búsqueda.</Text>
+        <View style={styles.modalChips}>{categories.map(category => <CategoryChip key={category.id} category={category} selected={category.id === selectedCategory} modal onPress={() => { setSelectedCategory(category.id); setShowFilters(false); }} />)}</View>
+        <Pressable onPress={() => { resetFilters(); setShowFilters(false); }} accessibilityRole="button" style={styles.resetButton}><Text style={styles.resetLabel}>Limpiar búsqueda y categoría</Text></Pressable>
+      </ShopModal>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1 },
-  content: { width: '100%', maxWidth: 780, alignSelf: 'center', paddingHorizontal: 18 },
-  header: { gap: 5, marginBottom: 22 },
-  brand: { fontSize: 12, fontWeight: '900', letterSpacing: 2.4, color: '#C66728' },
-  heading: { fontSize: 32, fontWeight: '800', letterSpacing: -0.5 },
-  subtitle: { fontSize: 14, lineHeight: 21 },
-  notice: { backgroundColor: '#FFF4E5', borderColor: '#F1CE9B', borderWidth: 1, padding: 14, borderRadius: 14, marginBottom: 20, gap: 6 },
-  noticeTitle: { fontSize: 11, fontWeight: '800', color: '#78400D', letterSpacing: 0.5 },
-  noticeText: { fontSize: 12, lineHeight: 19, color: '#75481D' },
-  filters: { gap: 8, paddingBottom: 18 },
-  filterChip: { minHeight: 40, justifyContent: 'center', borderRadius: 22, paddingHorizontal: 15 },
-  filterLabel: { fontSize: 13, fontWeight: '700' },
-  sectionTitle: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12, gap: 8 },
-  sectionHeading: { fontSize: 18, fontWeight: '800' },
-  counter: { fontSize: 12, fontWeight: '600' },
-  grid: { gap: 12 },
-  row: { flexDirection: 'row', alignItems: 'stretch', gap: 12 },
-  card: { flex: 1, minWidth: 0, borderRadius: 17, borderWidth: 1, padding: 9, overflow: 'hidden' },
-  photo: { height: 110, borderRadius: 12, alignItems: 'center', justifyContent: 'center', overflow: 'hidden' },
-  productImage: { width: '100%', height: '100%' },
-  photoIcon: { fontSize: 36 },
-  missingPhoto: { fontSize: 10, fontWeight: '700' },
-  cardContent: { flexGrow: 1, paddingHorizontal: 3, paddingTop: 11, paddingBottom: 7 },
-  categoryText: { fontSize: 11, fontWeight: '600', marginBottom: 6 },
-  productName: { fontSize: 13, lineHeight: 18, fontWeight: '700', minHeight: 54 },
-  price: { marginTop: 8, fontSize: 21, fontWeight: '900' },
-  demoPriceLabel: { marginTop: 4, fontSize: 9, color: '#AD642A', fontWeight: '800', letterSpacing: 0.2 },
-  emptyCell: { flex: 1 },
-  footer: { fontSize: 12, lineHeight: 19, marginTop: 22, textAlign: 'center' },
-  status: { marginTop: 24, alignItems: 'center', padding: 26, gap: 14 },
-  statusTitle: { fontSize: 18, fontWeight: '800', textAlign: 'center' },
-  statusText: { fontSize: 13, textAlign: 'center', lineHeight: 20 },
-  emptyIcon: { fontSize: 40 },
-  retry: { backgroundColor: '#1F5489', paddingHorizontal: 21, paddingVertical: 12, borderRadius: 12 },
-  retryText: { color: '#FFFFFF', fontWeight: '700', fontSize: 14 },
+  screen: { flex: 1, backgroundColor: '#FFFFFF' }, scroll: { flex: 1 }, scrollContent: { paddingBottom: 20 },
+  roundButton: { width: 46, height: 46, borderRadius: 23, backgroundColor: '#FFFFFF', alignItems: 'center', justifyContent: 'center' },
+  searchRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  searchBox: { flex: 1, minHeight: 50, flexDirection: 'row', alignItems: 'center', backgroundColor: '#FFFFFF', borderRadius: 26, paddingLeft: 14, paddingRight: 5, gap: 8 },
+  searchInput: { flex: 1, minWidth: 0, minHeight: 50, fontSize: 12, color: palette.ink, paddingVertical: 10 },
+  clearButton: { width: 40, height: 44, justifyContent: 'center', alignItems: 'center' },
+  filterButton: { minWidth: 48, minHeight: 52, borderRadius: 18, backgroundColor: '#FFFFFF', alignItems: 'center', justifyContent: 'center', gap: 3 },
+  filterButtonLabel: { fontSize: 9, color: palette.ink, fontWeight: '600' },
+  body: { width: '100%', maxWidth: 620, alignSelf: 'center', paddingHorizontal: 18, paddingTop: 22 },
+  titleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 },
+  heading: { fontSize: 31, fontWeight: '900', color: palette.ink, letterSpacing: -0.9 },
+  headingSpark: { color: palette.pink, fontSize: 23 },
+  titleShape: { width: 35, height: 23, backgroundColor: '#DAF4FC', borderRadius: 11, transform: [{ rotate: '-18deg' }] },
+  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 7, marginBottom: 13 },
+  chip: { minHeight: 42, paddingHorizontal: 15, paddingVertical: 11, justifyContent: 'center', borderRadius: 23 },
+  chipLabel: { fontSize: 12, fontWeight: '700' },
+  notice: { backgroundColor: '#FFF8E9', borderRadius: 14, padding: 12, gap: 4, marginBottom: 12 },
+  noticeLabel: { color: '#85520C', fontSize: 9, fontWeight: '900', letterSpacing: 0.5 },
+  noticeText: { color: '#796846', fontSize: 10, lineHeight: 16 },
+  resultsHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 12 },
+  resultsCount: { color: palette.muted, fontSize: 12, fontWeight: '600' },
+  resetButton: { minHeight: 44, justifyContent: 'center', paddingHorizontal: 4 },
+  resetLabel: { color: palette.blue, fontSize: 12, fontWeight: '700' },
+  grid: { gap: 12 }, productRow: { flexDirection: 'row', alignItems: 'stretch', gap: 10 }, cell: { flex: 1, minWidth: 0 },
+  card: { flex: 1, backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#F0EDF2', borderRadius: 19, padding: 8, boxShadow: '0 3px 9px rgba(45,33,57,0.035)' },
+  cardLink: { flex: 1 }, cardInfo: { paddingHorizontal: 3, paddingTop: 11, paddingBottom: 9 },
+  cardCategory: { fontSize: 9, fontWeight: '600', color: palette.muted, marginBottom: 5 },
+  productName: { fontSize: 13, fontWeight: '700', color: palette.ink, lineHeight: 18, minHeight: 54 },
+  price: { color: palette.ink, fontSize: 21, fontWeight: '900', marginTop: 8 }, currency: { fontSize: 10, fontWeight: '700' },
+  priceDemo: { fontSize: 8, color: '#8C4F18', fontWeight: '800', marginTop: 4, letterSpacing: 0.4 },
+  favorite: { position: 'absolute', top: 3, right: 3, width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
+  addButton: { backgroundColor: '#FBE3ED', borderRadius: 22, minHeight: 44, paddingHorizontal: 7, paddingVertical: 8, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 5 },
+  addLabel: { color: '#94405F', fontSize: 9, lineHeight: 13, fontWeight: '700', flexShrink: 1, textAlign: 'center' },
+  footer: { color: palette.muted, fontSize: 11, lineHeight: 18, textAlign: 'center', marginTop: 24 },
+  modalTitle: { color: palette.ink, fontSize: 23, fontWeight: '900', textAlign: 'center' },
+  modalText: { color: palette.muted, fontSize: 13, lineHeight: 20, marginTop: 10, textAlign: 'center' },
+  modalChips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, justifyContent: 'center', marginTop: 20 },
+  pressed: { opacity: 0.78 },
 });

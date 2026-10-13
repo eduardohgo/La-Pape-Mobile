@@ -1,6 +1,6 @@
 import { Image } from 'expo-image';
 
-type IconName = 'search' | 'cart' | 'heart' | 'user' | 'home' | 'grid' | 'arrow' | 'close';
+type IconName = 'search' | 'cart' | 'heart' | 'user' | 'home' | 'grid' | 'arrow' | 'close' | 'back' | 'filter';
 
 const paths: Record<IconName, string> = {
   search: '<circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 5 5"/>',
@@ -11,6 +11,8 @@ const paths: Record<IconName, string> = {
   grid: '<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>',
   arrow: '<path d="M3 12h17m-6-6 6 6-6 6"/>',
   close: '<path d="m6 6 12 12M6 18 18 6"/>',
+  back: '<path d="m15 5-7 7 7 7"/>',
+  filter: '<path d="M3 4h18l-7 8v7l-4 2v-9Z"/>',
 };
 
 // Small original vectors, decoded by the already installed expo-image module.

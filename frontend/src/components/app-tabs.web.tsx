@@ -54,7 +54,7 @@ export function CustomTabList(props: TabListProps) {
   const colors = Colors[scheme === 'unspecified' ? 'light' : scheme];
 
   return (
-    <View {...props} style={[styles.tabListContainer, pathname === '/' && styles.hidden]}>
+    <View {...props} style={[styles.tabListContainer, (pathname === '/' || pathname === '/explore') && styles.hidden]}>
       <ThemedView type="backgroundElement" style={styles.innerContainer}>
         <ThemedText type="smallBold" style={styles.brandText}>
           Expo Starter

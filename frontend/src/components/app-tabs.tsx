@@ -11,7 +11,7 @@ export default function AppTabs() {
 
   return (
     <NativeTabs
-      hidden={pathname === '/'}
+      hidden={pathname === '/' || pathname === '/explore'}
       backgroundColor={colors.background}
       indicatorColor={colors.backgroundElement}
       labelStyle={{ selected: { color: colors.text } }}>
@@ -23,7 +23,7 @@ export default function AppTabs() {
         />
       </NativeTabs.Trigger>
 
-      <NativeTabs.Trigger name="explore">
+      <NativeTabs.Trigger name="explore" disableAutomaticContentInsets>
         <NativeTabs.Trigger.Label>Catálogo</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon
           src={require('@/assets/images/tabIcons/explore.png')}
