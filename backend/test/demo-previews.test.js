@@ -5,6 +5,7 @@ import test from 'node:test';
 const manifest = JSON.parse(readFileSync(new URL('../db/catalog-review.json', import.meta.url), 'utf8'));
 const sql = readFileSync(new URL('../db/migrations/002_demo_previews.sql', import.meta.url), 'utf8');
 const query = readFileSync(new URL('../db/queries/demo-products.sql', import.meta.url), 'utf8');
+const detailQuery = readFileSync(new URL('../db/queries/demo-product-detail.sql', import.meta.url), 'utf8');
 
 test('prepared demonstration migration contains the exact ten legacy ZIP identities and decimal prices', () => {
   assert.equal(manifest.source.archive, '10 (1).zip');
@@ -43,4 +44,14 @@ test('demo migration is isolated, gated and does not publish commercial catalog 
   assert.match(query, /WHERE is_demo = true/);
   assert.match(query, /AND is_for_sale = false/);
   assert.doesNotMatch(query, /JOIN\s+catalog\./i);
+});
+
+
+test('demo detail SQL selects only one safe read-only demo product by UUID', () => {
+  assert.match(detailQuery, /SELECT[\s\S]*FROM demo\.product_previews/);
+  assert.match(detailQuery, /WHERE id = \$1::uuid/);
+  assert.match(detailQuery, /AND is_demo = true/);
+  assert.match(detailQuery, /AND is_for_sale = false/);
+  assert.match(detailQuery, /LIMIT 1/);
+  assert.doesNotMatch(detailQuery, /JOIN\s+catalog\.|\bUPDATE\b|\bDELETE\b|\bINSERT\b/i);
 });
