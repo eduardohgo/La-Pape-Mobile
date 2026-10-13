@@ -101,25 +101,44 @@ Versiones Expo, React Native y dependencias existentes se conservaron. Referenci
 [red en React Native 0.86](https://reactnative.dev/docs/0.86/network).
 
 
-## Vista previa local del catálogo (PB-06)
+## Catálogo conectado a la API (PB-06)
 
-La pestaña **Catálogo** reutiliza la ruta inicial `explore` mientras se completa PB-02.
-Durante `__DEV__` (Expo Go/Metro), se ven diez tarjetas estáticas de demostración
-tomadas de `src/features/catalog/demo-products.ts` para revisar composición, filtros
-de categoría y presentación de precios provisionales en MXN. La etiqueta
-**«Precio de demostración»** y el aviso **«Vista previa · Solo desarrollo»** son
-obligatorios. Ninguno de esos artículos proviene de una consulta a Neon:
-`GET /products` devuelve por ahora una lista vacía.
+La pestaña **Catálogo** reutiliza temporalmente la ruta `explore` mientras se
+termina la navegación PB-02. Ahora consume la API Express a través de
+`src/services/catalog.service.ts`: `GET /categories` y `GET /products?limit=50`,
+con validación de tipos en tiempo de ejecución, paginación por cursor,
+cancelación, error de conexión, reintento y estado vacío.
 
-- Sin marcas en tarjetas: no están verificadas.
-- Sin fotos del respaldo: se usa un ícono neutral; `imageUrl` permanece `null`.
-- Sin carrito, compras, promociones, existencias ni botones ficticios.
-- La vista previa **no se renderiza en builds de producción**; hasta que exista
-  catálogo verificado la pantalla muestra el estado «Catálogo en preparación».
-- La pantalla Inicio y el diagnóstico `GET /health` siguen independientes.
-- No cambiar a datos remotos ni habilitar publicación sin validar contrato,
-  procedencia, estado de producto y aprobaciones. Documento:
-  `../docs/catalog-demo-review.md`.
+- **No hay fallback silencioso al catálogo estático.** Las diez fichas de
+  `demo-products.ts` son material histórico de prototipo y ya no se importan
+  en la pantalla. Cuando Neon tenga cero productos publicados, se muestra
+  «Todavía no hay productos publicados».
+- Las fotos NULL muestran un ícono genérico; las marcas no verificadas no se
+  muestran en la UI. No hay botones de compra ni datos de inventario.
+- En desarrollo, el precio se identifica visualmente como demostración. Antes
+  de habilitar venta pública deben verificarse precios, inventario y estados.
+- No hay endpoint de escritura ni autenticación nueva. Las rutas de Express
+  están detrás de `CATALOG_API_ENABLED=true` y deben verificarse en LAN
+  desde Expo Go, nunca con secretos dentro de `EXPO_PUBLIC_*`.
 
-Ejecutar `npm run lint`, `npx tsc --noEmit` y comprobar Expo Go en un iPhone
-antes de considerar completada la interfaz. Esta vista previa no cierra #19 ni PB-06.
+### Prueba de integración en dispositivo
+
+1. En `backend/.env`, establecer `HOST=0.0.0.0`,
+   `CATALOG_API_ENABLED=true` y la conexión privada `DATABASE_URL` de
+   `lapape_catalog_api`. **No publicar ese archivo.** Mantener la PC en una
+   red Wi-Fi privada (no pública).
+2. En `frontend/.env.local`, usar `EXPO_PUBLIC_API_URL=http://<IPV4_PC>:3000`
+   con la IP LAN local real (no 127.0.0.1, que desde iPhone apunta al iPhone).
+3. Iniciar `npm start` en backend y `npx expo start --lan --clear` en frontend.
+   iPhone y computadora deben compartir Wi-Fi. Autorizar Node solo en la red
+   privada en el firewall cuando sea necesario.
+4. Abrir `http://<IPV4_PC>:3000/products` desde Safari en iPhone y luego
+   la pestaña Catálogo en Expo Go. Actualmente ambas deben mostrar
+   **cero productos**. Una respuesta `503` es fallo de API, no catálogo vacío.
+5. Ejecutar `npm test`, `npm run lint`, `npx tsc --noEmit` y revisar
+   disposición visual en Expo Go. Los resultados aún no han sido informados
+   después de estos cambios.
+
+No se crea ni publica ningún producto en esta implementación. La importación de
+las diez fichas candidatas requiere una revisión y autorización específica,
+además de separación explícita entre datos de demostración y mercancía real.
