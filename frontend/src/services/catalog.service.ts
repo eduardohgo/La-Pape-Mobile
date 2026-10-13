@@ -31,6 +31,25 @@ export type CatalogPage = Readonly<{
   page: { hasMore: boolean; nextCursor: string | null };
 }>;
 
+export type DemoCatalogProduct = Readonly<{
+  id: string;
+  sku: string;
+  name: string;
+  category_id: string;
+  category_name: string;
+  price: string;
+  currency: 'MXN';
+  image_url: null;
+  is_demo: true;
+  is_for_sale: false;
+}>;
+
+export type DemoCatalogResponse = Readonly<{
+  mode: 'demo';
+  purchasable: false;
+  data: DemoCatalogProduct[];
+}>;
+
 function record(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
@@ -67,9 +86,30 @@ export function isProductResponse(value: unknown): value is CatalogPage {
   });
 }
 
+export function isDemoCatalogResponse(value: unknown): value is DemoCatalogResponse {
+  if (!record(value) || value.mode !== 'demo' || value.purchasable !== false ||
+      !Array.isArray(value.data) || value.data.length > 20) return false;
+  return value.data.every((item: unknown) =>
+    record(item) &&
+    typeof item.id === 'string' && UUID.test(item.id) &&
+    typeof item.category_id === 'string' && UUID.test(item.category_id) &&
+    nonempty(item.sku) && nonempty(item.name) && nonempty(item.category_name) &&
+    typeof item.price === 'string' && DECIMAL.test(item.price) &&
+    item.currency === 'MXN' && item.image_url === null &&
+    item.is_demo === true && item.is_for_sale === false);
+}
+
 export function createCatalogService(config: ApiConfig, request: FetchFunction = fetch) {
   const client = createHttpClient(config, request);
   return {
+    async demoProducts(options: RequestOptions = {}): Promise<DemoCatalogProduct[]> {
+      const response: DemoCatalogResponse = await client.get<DemoCatalogResponse>(
+        '/demo/products',
+        isDemoCatalogResponse,
+        options,
+      );
+      return response.data;
+    },
     async categories(options: RequestOptions = {}): Promise<CatalogCategory[]> {
       const response = await client.get('/categories', isCategoryResponse, options);
       return response.data;
