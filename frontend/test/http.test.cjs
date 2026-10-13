@@ -196,3 +196,57 @@ test('demo preview rejects server errors instead of using the ten static fixture
     Response.json({ error: 'demo unavailable' }, { status: 503 }));
   await assert.rejects(service.demoProducts(), matchError('http', 503));
 });
+
+
+test('demo detail validates identity and reads only the requested item from the API', async () => {
+  const { createCatalogService, isDemoProductDetailResponse } = require('../.test-build/services/catalog.service.js');
+  const preview = {
+    id: PRODUCT_ID, sku: 'LAP-CUA-001', name: 'Cuaderno profesional cuadriculado',
+    category_id: CATEGORY_ID, category_name: 'Cuadernos',
+    price: '89.90', currency: 'MXN', image_url: null,
+    is_demo: true, is_for_sale: false,
+  };
+  const payload = { mode: 'demo', purchasable: false, data: preview };
+  assert.equal(isDemoProductDetailResponse(payload), true);
+  for (const invalid of [
+    { ...payload, purchasable: true },
+    { ...payload, data: { ...preview, is_for_sale: true } },
+    { ...payload, data: { ...preview, is_demo: false } },
+    { ...payload, data: { ...preview, price: 'invalid' } },
+    { ...payload, data: { ...preview, image_url: 'https://unverified.example/photo.png' } },
+  ]) assert.equal(isDemoProductDetailResponse(invalid), false);
+
+  let calls = 0;
+  const service = createCatalogService(config, async (url, options) => {
+    assert.equal(url, `http://127.0.0.1:3000/demo/products/${PRODUCT_ID}`);
+    assert.equal(options.method, 'GET');
+    calls += 1;
+    return Response.json(payload);
+  });
+  assert.deepEqual(await service.demoProduct(PRODUCT_ID), preview);
+  assert.equal(calls, 1);
+  await assert.rejects(service.demoProduct('../products'), matchError('configuration'));
+  assert.equal(calls, 1);
+});
+
+test('commercial detail validates description but does not mark merchandise as demo', async () => {
+  const { createCatalogService, isCatalogProductDetailResponse } = require('../.test-build/services/catalog.service.js');
+  const item = { ...TEST_PRODUCT, description: 'Cuaderno de 100 hojas' };
+  assert.equal(isCatalogProductDetailResponse({ data: item }), true);
+  assert.equal(isCatalogProductDetailResponse({ data: TEST_PRODUCT }), false);
+  assert.equal(isCatalogProductDetailResponse({ data: { ...item, price: 89.9 } }), false);
+  const service = createCatalogService(config, async (url) => {
+    assert.equal(url, `http://127.0.0.1:3000/products/${PRODUCT_ID}`);
+    return Response.json({ data: item });
+  });
+  assert.deepEqual(await service.product(PRODUCT_ID), item);
+});
+
+test('missing demo details return 404 and invalid remote contracts do not produce fake products', async () => {
+  const { createCatalogService } = require('../.test-build/services/catalog.service.js');
+  const missing = createCatalogService(config, async () => Response.json({ error: 'not found' }, { status: 404 }));
+  await assert.rejects(missing.demoProduct(PRODUCT_ID), matchError('http', 404));
+  const invalid = createCatalogService(config, async () =>
+    Response.json({ mode: 'demo', purchasable: false, data: { name: 'fake' } }));
+  await assert.rejects(invalid.demoProduct(PRODUCT_ID), matchError('invalid-response'));
+});
