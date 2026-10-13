@@ -5,6 +5,7 @@ import { rateLimit } from 'express-rate-limit';
 import { createHealthRouter } from './routes/health.routes.js';
 import { errorHandler, notFound } from './middlewares/errors.js';
 import { createCatalogRouter } from './routes/catalog.routes.js';
+import { createDemoCatalogRouter } from './routes/demo-catalog.routes.js';
 import { createCatalogRepository } from './catalog/catalog.repository.js';
 
 export function createApp(config, { catalogRepository } = {}) {
@@ -36,6 +37,9 @@ export function createApp(config, { catalogRepository } = {}) {
   if (config.catalogApiEnabled) {
     const repository = catalogRepository ?? createCatalogRepository(config.database);
     app.use(createCatalogRouter(repository));
+    if (config.nodeEnv === 'development' && config.catalogDemoApiEnabled) {
+      app.use(createDemoCatalogRouter(repository));
+    }
   }
   app.use(notFound);
   app.use(errorHandler);
