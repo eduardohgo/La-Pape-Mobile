@@ -1,15 +1,15 @@
 # Catálogo de demostración — decisiones y revisión de marcas
 
-**Estado:** propuesta de demostración aprobada en conversación; **no implica aprobación comercial ni importación**.
+**Estado:** importación de demostración autorizada y aplicada en Neon `development` el 13 de octubre de 2026; **no implica aprobación comercial**.
 **Fuente:** `backend/db/catalog-review.json` (10 candidatos, 3 categorías, 6 marcas del respaldo antiguo).
-**Destino futuro:** catálogo móvil La Pape, API Express y Neon `lapape_mobile_dev`.
+**Destino:** vista previa móvil La Pape, API Express y Neon `development` / `lapape_mobile_dev`.
 
 ## Acuerdos
 
 - Utilizar los importes del respaldo **solo como precios provisionales de demostración**, etiquetados claramente como «Precio de demostración». No presentarlos como precios comerciales reales.
 - Sin compras, pagos, reservas ni indicadores de existencias hasta confirmar información real e inventario.
 - Todos los `catalog.imageUrl` siguen en `null`. En Expo, representar fotos faltantes con un **componente visual genérico** (ícono/ilustración neutral local), sin asignar URLs inventadas, reutilizar fotos de otras marcas o inventar marcas.
-- No insertar, aprobar, publicar ni modificar los candidatos en Neon hasta completar revisión y autorización explícita. La migración 001 ya fue aplicada y no debe reejecutarse.
+- La inserción autorizada de los diez candidatos se realizó **solo en `demo.product_previews`** mediante la migración 002; el manifiesto no se marcó como aprobado y `catalog.products` conserva cero productos. La migración 001 no debe reejecutarse.
 - Los 200 registros sintéticos del respaldo no se importarán.
 - Las seis marcas enumeradas en el manifiesto son datos **no verificados** del respaldo; no deducir que cada artículo corresponde realmente a la marca.
 - El esquema del catálogo actualmente requiere marca y precio, y no incluye un indicador de precio `demo`. Antes de exponer precios en una API pública debe existir un mecanismo claro para evitar confusión con ventas reales (por ejemplo, modo de demostración separado y compras inactivas). Esta decisión no se resuelve marcando `is_published=true` indiscriminadamente.
@@ -47,9 +47,9 @@
 4. Antes de cualquier importación, ejecutar validación del manifiesto, revisión de SQL generado y aprobación humana de los registros que se vayan a publicar.
 5. Conectar el cliente Expo al backend únicamente cuando API y entorno de demostración estén validados.
 
-**No cambia** el estado de GitHub Projects, los PR #121/#122, ni ninguna tabla o fila en Neon.
+**Nota histórica:** estos acuerdos se documentaron antes de aplicar 002. La aplicación autorizada sí modificó Neon exclusivamente para crear `demo` y sus diez filas. Los PR #121/#122 permanecen pendientes de integración.
 
-## Carga técnica preparada (NO ejecutada)
+## Carga técnica aplicada y validada en Neon (13 de octubre de 2026)
 
 Se preparó `backend/db/migrations/002_demo_previews.sql` con los **mismos diez UUID,
 SKU, nombres, categorías y precios del manifiesto derivado de `10 (1).zip`**.
@@ -62,9 +62,7 @@ La propuesta crea un esquema independiente `demo` con una tabla
 `image_url IS NULL` y permisos de solo lectura para el rol técnico. No inserta
 nada en `catalog.products`, no altera el SQL de migración 001 y no habilita compras.
 
-**Estado:** archivo únicamente preparado en GitHub. NO ha sido ejecutado en Neon.
-La base existente mantiene cero filas de catálogo. Antes de ejecutar se necesita
-revisión técnica del SQL y **nueva autorización explícita del responsable**.
+**Estado:** el responsable autorizó expresamente la ejecución de la migración 002 en Neon `development` / `lapape_mobile_dev`. Se ejecutaron las 13 instrucciones en una transacción. Verificación posterior: exactamente diez filas en `demo.product_previews`, todas con `is_demo=true`, `is_for_sale=false`, `image_url=NULL`, y `catalog.products`, `catalog.categories`, `catalog.brands` conservan cero filas. Se comprobó coincidencia de los diez UUID, SKU, nombres, categorías y precios con `catalog-review.json`. El rol `lapape_catalog_api` puede leer la tabla y no puede insertar ni borrar. **No ejecutar de nuevo la migración 002.**
 
 Ya está **preparado en código** `GET /demo/products`, habilitable únicamente
 en desarrollo mediante `CATALOG_DEMO_API_ENABLED=true` junto con
@@ -75,5 +73,4 @@ una respuesta vacía por datos locales. El frontend etiqueta los precios como
 «PRECIO DE DEMOSTRACIÓN», oculta marcas y no ofrece compras.
 La API comercial sigue leyendo `catalog.products` y no incorpora filas de demo.
 
-**Pendiente:** comprobar pruebas locales, autorizar y aplicar migración 002,
-validar exactamente diez registros y verificar Safari/Expo Go en el iPhone.
+**Pendiente:** levantar de nuevo el backend con `CATALOG_DEMO_API_ENABLED=true`, confirmar `GET /demo/products` desde Safari en el iPhone, configurar `EXPO_PUBLIC_CATALOG_MODE=demo` y validar las diez tarjetas en Expo Go. Las pruebas locales anteriores a la migración aprobaron 48/48 backend, 14/14 frontend y ESLint/TypeScript; la conexión de la ruta demo en dispositivo todavía no ha sido comprobada.
