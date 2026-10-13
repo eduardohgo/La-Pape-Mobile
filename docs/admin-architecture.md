@@ -174,8 +174,11 @@ implementado y aprobado posteriormente, ejecutado una vez por el operador autori
 5. Auditar provisión y activación con datos mínimos. Deshabilitar el mecanismo de
    primer dueño definitivamente; invitaciones posteriores solo por DUENO existente.
 
-Para baja/democión de dueños, una transacción y bloqueo compartido entre operaciones
-concurrentes contará DUENO activos y rechazará dejar cero; también habrá
+Para baja/democión de dueños, todas las operaciones que activan, desactivan o cambian
+DUENO tomarán un bloqueo exclusivo sobre el mismo registro de coordinación
+(por ejemplo, `SELECT ... FOR UPDATE`). Bajo una transacción READ COMMITTED, el
+conteo de DUENO activos se hará después de obtener ese bloqueo y rechazará dejar
+cero. Un bloqueo `FOR SHARE` no serializa esas decisiones. También habrá
 reautenticación, MFA y auditoría. No se permite autoescalamiento desde perfil, cambio
 de contraseña o tokens. El caso inicial con DUENO invitado es exclusivamente el
 bootstrap; no equivale a autorizar bajas que dejen el negocio sin dueño activo.
