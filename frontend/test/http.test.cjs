@@ -1,9 +1,9 @@
 const assert = require('node:assert/strict');
 const test = require('node:test');
-const { createHttpClient } = require('../.test-build/services/http/client.js');
-const { ApiError } = require('../.test-build/services/http/errors.js');
-const { parseApiConfig } = require('../.test-build/config/env.js');
-const { isHealthResponse } = require('../.test-build/services/health.service.js');
+const { createHttpClient } = require('../.test-build/services/http/cliente-http.js');
+const { ApiError } = require('../.test-build/services/http/errores-http.js');
+const { parseApiConfig } = require('../.test-build/config/configuracion-api.js');
+const { isHealthResponse } = require('../.test-build/services/servicio-salud-api.js');
 const config = parseApiConfig({ url: 'http://127.0.0.1:3000' }, true);
 const matchError = (kind, status) => (error) => error instanceof ApiError && error.kind === kind && error.status === status;
 
@@ -97,7 +97,7 @@ test('external cancellation is distinct and pre-cancelled requests never fetch',
 });
 
 
-const { createCatalogService, isCategoryResponse, isProductResponse } = require('../.test-build/services/catalog.service.js');
+const { createCatalogService, isCategoryResponse, isProductResponse } = require('../.test-build/services/servicio-catalogo.js');
 const PRODUCT_ID = 'e9096108-10c1-4483-9a3c-f61283d3c24f';
 const BRAND_ID = 'de3f0474-45fa-4bf8-bb53-7c47227eeb9d';
 const CATEGORY_ID = '155b7072-240d-459e-a843-fc2ca3502169';
@@ -161,7 +161,7 @@ test('catalog does not confuse API failures with an empty catalog', async () => 
 
 
 test('demo preview from Neon is explicitly non-purchasable and has no brand field', async () => {
-  const { createCatalogService, isDemoCatalogResponse } = require('../.test-build/services/catalog.service.js');
+  const { createCatalogService, isDemoCatalogResponse } = require('../.test-build/services/servicio-catalogo.js');
   const item = {
     id: 'e9096108-10c1-4483-9a3c-f61283d3c24f',
     sku: 'LAP-CUA-001',
@@ -191,7 +191,7 @@ test('demo preview from Neon is explicitly non-purchasable and has no brand fiel
 });
 
 test('demo preview rejects server errors instead of using the ten static fixtures', async () => {
-  const { createCatalogService } = require('../.test-build/services/catalog.service.js');
+  const { createCatalogService } = require('../.test-build/services/servicio-catalogo.js');
   const service = createCatalogService(config, async () =>
     Response.json({ error: 'demo unavailable' }, { status: 503 }));
   await assert.rejects(service.demoProducts(), matchError('http', 503));
@@ -199,7 +199,7 @@ test('demo preview rejects server errors instead of using the ten static fixture
 
 
 test('demo detail validates identity and reads only the requested item from the API', async () => {
-  const { createCatalogService, isDemoProductDetailResponse } = require('../.test-build/services/catalog.service.js');
+  const { createCatalogService, isDemoProductDetailResponse } = require('../.test-build/services/servicio-catalogo.js');
   const preview = {
     id: PRODUCT_ID, sku: 'LAP-CUA-001', name: 'Cuaderno profesional cuadriculado',
     category_id: CATEGORY_ID, category_name: 'Cuadernos',
@@ -230,7 +230,7 @@ test('demo detail validates identity and reads only the requested item from the 
 });
 
 test('commercial detail validates description but does not mark merchandise as demo', async () => {
-  const { createCatalogService, isCatalogProductDetailResponse } = require('../.test-build/services/catalog.service.js');
+  const { createCatalogService, isCatalogProductDetailResponse } = require('../.test-build/services/servicio-catalogo.js');
   const item = { ...TEST_PRODUCT, description: 'Cuaderno de 100 hojas' };
   assert.equal(isCatalogProductDetailResponse({ data: item }), true);
   assert.equal(isCatalogProductDetailResponse({ data: TEST_PRODUCT }), false);
@@ -243,7 +243,7 @@ test('commercial detail validates description but does not mark merchandise as d
 });
 
 test('missing demo details return 404 and invalid remote contracts do not produce fake products', async () => {
-  const { createCatalogService } = require('../.test-build/services/catalog.service.js');
+  const { createCatalogService } = require('../.test-build/services/servicio-catalogo.js');
   const missing = createCatalogService(config, async () => Response.json({ error: 'not found' }, { status: 404 }));
   await assert.rejects(missing.demoProduct(PRODUCT_ID), matchError('http', 404));
   const invalid = createCatalogService(config, async () =>

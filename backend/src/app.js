@@ -2,11 +2,11 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import { rateLimit } from 'express-rate-limit';
-import { createHealthRouter } from './routes/health.routes.js';
-import { errorHandler, notFound } from './middlewares/errors.js';
-import { createCatalogRouter } from './routes/catalog.routes.js';
-import { createDemoCatalogRouter } from './routes/demo-catalog.routes.js';
-import { createCatalogRepository } from './catalog/catalog.repository.js';
+import { createHealthRouter } from './routes/rutas-salud.js';
+import { errorHandler, notFound } from './middlewares/manejo-errores.js';
+import { createCatalogRouter } from './routes/rutas-catalogo.js';
+import { createDemoCatalogRouter } from './routes/rutas-catalogo-demo.js';
+import { createCatalogRepository } from './repositories/repositorio-catalogo.js';
 
 export function createApp(config, { catalogRepository } = {}) {
   const app = express();

@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { once } from 'node:events';
 import test from 'node:test';
 import { createApp } from '../src/app.js';
-import { loadConfig } from '../src/config/env.js';
+import { loadConfig } from '../src/config/variables-entorno.js';
 
 const ID = 'e9096108-10c1-4483-9a3c-f61283d3c24f';
 async function serve(t, enabled, repository) {

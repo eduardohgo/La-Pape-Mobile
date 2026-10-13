@@ -1,6 +1,6 @@
-import { getApiConfig, type ApiConfig } from '../config/env';
-import { ApiError } from './http/errors';
-import { createHttpClient, type FetchFunction, type RequestOptions } from './http/client';
+import { getApiConfig, type ApiConfig } from '../config/configuracion-api';
+import { ApiError } from './http/errores-http';
+import { createHttpClient, type FetchFunction, type RequestOptions } from './http/cliente-http';
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const DECIMAL = /^(?:0|[1-9][0-9]{0,7})\.[0-9]{2}$/;

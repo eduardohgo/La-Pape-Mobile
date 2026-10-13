@@ -15,6 +15,11 @@ La-Pape-Mobile/
 Cada aplicación tiene su propio package.json y package-lock.json. No comparten
 dependencias ni requieren iniciar la otra para funcionar. Node.js 22.13 o superior.
 
+La organización actual del código se explica en
+[docs/guia-estructura-proyecto.md](docs/guia-estructura-proyecto.md), con el mapa
+de nombres anteriores y actuales. Esta reorganización se realizó exclusivamente
+en la computadora local: no incluyó operaciones de Git, GitHub o GitHub Projects.
+
 ## Ejecutar desde VS Code
 
 Abrir la raíz y usar dos terminales PowerShell independientes.
@@ -39,8 +44,7 @@ Terminal del frontend:
 ```powershell
 cd frontend
 npm ci
-Copy-Item .env.example .env.local
-# Editar únicamente la dirección pública y el entorno en .env.local.
+# Conservar .env.local si ya existe. .env.example es una referencia sin secretos.
 npm start -- --clear
 ```
 
@@ -59,9 +63,10 @@ No ejecutar el script de reinicio del proyecto para esta integración.
    `localhost` desde el iPhone representa el propio teléfono.
 5. Abrir `http://IP_DE_LA_PC:3000/health` en Safari y verificar `ok: true`.
 6. En `frontend/`, ejecutar `npm start -- --lan --clear`, escanear el QR con
-   el iPhone y abrir Expo Go. En Home, usar el control de diagnóstico
-   **Comprobar API** (solo disponible en desarrollo); verificar el resultado y
-   la navegación Home → Explore → Home. Recargar y repetir.
+   el iPhone y abrir Expo Go. Verificar Inicio → Catálogo → Detalle → Catálogo,
+   búsqueda por nombre/SKU/categoría, filtros y reintento. Recargar y repetir.
+   El componente de diagnóstico histórico se conserva en el código, pero ya
+   no se muestra en Inicio.
 
 Si Windows solicita acceso de red, permitir Node solo en la red privada de
 confianza. No se cambian reglas de firewall automáticamente. Si Expo Go/iOS
@@ -93,20 +98,23 @@ npm run check
 
 Ver [frontend/README.md](frontend/README.md), [backend/README.md](backend/README.md)
 y [docs/issue-19.md](docs/issue-19.md) para configuración, límites y evidencia.
-No hay despliegue, migraciones automáticas, sincronización, autenticación ni compras
-habilitadas en esta base. La Issue #19 permanece en Testing hasta la validación
-manual del responsable; PB-01 permanece abierto.
+No hay despliegue, migraciones automáticas, sincronización, autenticación ni
+compras habilitadas en esta base. Esta revisión local no modifica las Issues
+ni los estados del Project. Los resultados de sus etapas anteriores se conservan
+en sus respectivos informes.
 
 ## Preparación de Neon y catálogo
 
 El destino de desarrollo confirmado es Neon PostgreSQL 18, proyecto
 `twilight-moon-02635569`, rama `development`, base `lapape_mobile_dev`.
 El responsable confirmó que ChatGPT aplicó y validó 001: tres tablas de catálogo,
-dos FK validadas, cero filas, imagen nullable y ninguna tabla inesperada. No repetir
-esa migración; el archivo aplicado se conserva sin cambios. Codex registra la
-confirmación sin ejecutar SQL en esta actualización.
+dos FK validadas, imagen nullable y ninguna tabla inesperada. Posteriormente se
+aplicó 002 con autorización: diez fichas separadas en `demo.product_previews`,
+sin habilitar ventas; las tablas comerciales permanecen vacías según la evidencia
+registrada. No repetir estas migraciones. Sus archivos se conservan sin cambios
+y esta reorganización no ejecuta SQL ni verifica nuevamente Neon.
 Los scripts de esquema, consultas de lectura y revisión de candidatos están en
 `backend/db/`. No se ejecutan al iniciar Express ni desde Expo.
-Los diez candidatos siguen pendientes de aprobación; se excluyen productos e
-inventarios sintéticos y datos personales. Ver el
+Los diez artículos demo siguen pendientes de aprobación comercial; se excluyen
+productos e inventarios sintéticos y datos personales. Ver el
 [plan revisable y sus límites](docs/neon-catalog-preparation.md).

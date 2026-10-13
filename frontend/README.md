@@ -1,212 +1,116 @@
-# La Pape Mobile
+# Frontend de La Pape Mobile
 
-Aplicación móvil de La Pape.
+Aplicación React Native con Expo SDK 57, Expo Router y TypeScript estricto.
+Ejecuta sus comandos desde `frontend/`; Express se ejecuta por separado desde
+`../backend/`. La organización de archivos realizada en esta revisión es local.
+No cambia las pantallas, sus direcciones, los contratos HTTP ni las dependencias.
 
-Esta carpeta contiene la aplicación móvil de La Pape. Ejecutar Expo y sus herramientas desde `frontend/`. El backend independiente está en `../backend/`.
+## Encontrar el código
 
-## Objetivo
+| Qué quieres revisar | Archivo |
+|---|---|
+| Inicio | `src/pantallas/pantalla-inicio.tsx` |
+| Catálogo, tarjetas, búsqueda y selección de categoría | `src/pantallas/pantalla-catalogo.tsx` |
+| Detalle individual y regreso al catálogo | `src/pantallas/pantalla-detalle-producto.tsx` |
+| Encabezado, barra de Catálogo, estados y modales compartidos | `src/components/catalogo/componentes-catalogo.tsx` |
+| Iconos e ilustraciones de papelería | `src/components/compartidos/` |
+| Productos destacados de Inicio | `src/hooks/use-productos-inicio.ts` |
+| Búsqueda local por nombre, categoría y SKU | `src/utils/busqueda-catalogo.ts` |
+| Consultas y validación de categorías, productos y detalle | `src/services/servicio-catalogo.ts` |
+| Solicitudes GET, timeouts y cancelación | `src/services/http/cliente-http.ts` |
+| Tipos de error HTTP, red y configuración | `src/services/http/errores-http.ts` |
+| Validación de configuración pública de la API | `src/config/configuracion-api.ts` |
+| Navegación nativa y su versión web | `src/components/navegacion/pestanas-app.tsx` y `.web.tsx` |
 
-Desarrollar una aplicación móvil que permita llevar las principales funcionalidades de La Pape a dispositivos móviles, manteniendo un proceso organizado de desarrollo, control de versiones y seguimiento de actividades.
+Las rutas especiales permanecen en `src/app/`: `index.tsx`, `explore.tsx` y
+`products/[id].tsx` importan las pantallas correspondientes. `_layout.tsx`
+conserva el Stack y las pestañas. Las direcciones siguen siendo `/`, `/explore`
+y `/products/<uuid>`. El alias `@/` continúa apuntando a `src/`.
 
-## Metodología de trabajo
+La [guía de estructura](../docs/guia-estructura-proyecto.md) explica las carpetas,
+los nombres anteriores y el recorrido completo hasta PostgreSQL.
 
-El proyecto será desarrollado utilizando la metodología Scrumban, combinando elementos de Scrum y Kanban para organizar las actividades mediante iteraciones y dar seguimiento al estado de cada tarea.
+## Ejecutar y comprobar
 
-## Control de versiones
-
-Para administrar y versionar el código fuente se utiliza Git y GitHub.
-
-El desarrollo se organizará mediante diferentes ramas para evitar trabajar directamente sobre la rama principal.
-
-## Responsable
-
-Carlos Eduardo Hidalgo Toledo
-
-## Estado del proyecto
-
-Base Expo funcional con diagnóstico de conexión GET /health solo en desarrollo. La validación en iPhone después del traslado permanece pendiente en #19.
-
-## Análisis estático
-
-Con las dependencias del proyecto instaladas, ejecutar:
-
-```bash
+```powershell
+npm start -- --lan --clear
+npm test
 npm run lint
 npx tsc --noEmit
 ```
 
-ESLint utiliza la configuración plana recomendada por Expo SDK 57 para JavaScript,
-TypeScript, React y sus hooks. Analiza el código fuente, los scripts y la
-configuración JavaScript; excluye las dependencias y los archivos generados por
-Expo. El comando falla si encuentra errores o advertencias. TypeScript conserva
-el modo estricto de `tsconfig.json`.
+Si las dependencias no están instaladas, se instalan desde esta carpeta con
+`npm ci`. La reorganización no actualiza paquetes ni requiere reinstalarlos.
+No ejecutar `npm run reset-project`: es un script conservado de la plantilla
+para reiniciar un proyecto, incompatible con conservar esta aplicación.
 
-Para repetir el análisis sin utilizar la caché:
+ESLint utiliza las reglas recomendadas por Expo SDK 57 y falla ante errores o
+advertencias. TypeScript conserva `strict: true`. Las pruebas unitarias compilan
+la configuración, el cliente HTTP, el servicio de catálogo y la búsqueda, usan
+respuestas simuladas y revisan también los controles del escaparate.
 
-```bash
-npm run lint -- --no-cache
-```
-
-Las versiones resueltas están registradas en `package-lock.json`. Estos comandos
-realizan comprobaciones automatizadas; las pruebas en dispositivo físico se
-registran por separado en las Issues correspondientes. La configuración de
-GitHub Actions se realizará cuando se trabaje en el pipeline.
-
-## Configuración pública y conexión
-
-Copiar `.env.example` a `.env.local` (ignorada por Git) y ajustar:
-
-- `EXPO_PUBLIC_API_URL`: origen de la API, sin `/api`, rutas, credenciales, query o fragmentos.
-- `EXPO_PUBLIC_API_ENV`: development, staging o production.
-- `EXPO_PUBLIC_API_TIMEOUT_MS`: entre 100 y 60000 milisegundos, 15000 por defecto.
-
-HTTP solo se acepta en una compilación de desarrollo, entorno development y una
-dirección de loopback o IPv4 privada de LAN. Staging y producción exigen HTTPS;
-una compilación release no acepta entorno development. La configuración se
-valida al solicitar salud, de modo que una URL ausente no impide abrir/navegar
-la aplicación. Un error de configuración devuelve un mensaje genérico.
-
-Usar la IPv4 real de la computadora para Expo Go en iPhone; localhost representa
-el propio teléfono. Reiniciar Metro tras cambiar configuración y recargar la app.
-Seguir la [guía de la raíz](../README.md) para LAN, permisos y restricciones iOS.
-No poner secretos en variables públicas. El cliente no almacena tokens,
-credenciales ni información de usuarios y no habilita autenticación o compras.
-
-`src/config/env.ts` valida configuración, `src/services/http/` administra errores
-y solicitudes GET JSON, y `src/services/health.service.ts` valida `{ok:true,ts}`.
-AbortController permite cancelar desde el llamador y al vencer el timeout;
-el límite abarca también la lectura de JSON. Se limpian temporizadores/listeners.
-No hay reintentos automáticos ni mensajes/URL/cuerpos del servidor en logs.
-
-El control **Comprobar API** en Home está condicionado por `__DEV__`. Conserva
-las pantallas y navegación actuales y no aparece en builds de producción.
-
-## Pruebas del cliente
+Después de tener instaladas las dependencias de `backend/`, puede ejecutarse:
 
 ```powershell
-npm test
-# Tras instalar también backend/:
 npm run test:integration
 ```
 
-Las pruebas unitarias compilan solo la capa HTTP con TypeScript y utilizan fetch
-simulado; no requieren el backend. La integración abre un servidor Express
-temporal en loopback, consume /health con el cliente TypeScript real y lo cierra.
-No utiliza PostgreSQL. `.test-build/` está ignorada por Git y ESLint.
+Esta integración usa el cliente TypeScript real y Express en loopback para
+`GET /health`. No se conecta a PostgreSQL. `.test-build/` y `.expo/` son
+directorios generados; no se editan como código fuente.
 
-Versiones Expo, React Native y dependencias existentes se conservaron. Referencias:
-[Expo SDK 57](https://docs.expo.dev/versions/v57.0.0/),
-[ubicación en subcarpetas](https://docs.expo.dev/guides/monorepos/),
-[variables públicas](https://docs.expo.dev/guides/environment-variables/),
-[red en React Native 0.86](https://reactnative.dev/docs/0.86/network).
+## API y modo demostración
 
+La app nunca se conecta directamente a Neon. `servicio-catalogo.ts` consume:
 
-## Catálogo conectado a la API (PB-06)
+- `GET /categories` y `GET /products` para el catálogo comercial.
+- `GET /products/:id` para un producto comercial identificado por UUID.
+- `GET /demo/products` y `GET /demo/products/:id` para los diez artículos de
+  demostración, solo si `__DEV__` y `EXPO_PUBLIC_CATALOG_MODE=demo`.
 
-La pestaña **Catálogo** reutiliza temporalmente la ruta `explore` mientras se
-termina la navegación PB-02. En modo normal consume la API Express a través de
-`src/services/catalog.service.ts`: `GET /categories` y `GET /products?limit=50`,
-con validación de tipos en tiempo de ejecución, paginación por cursor,
-cancelación, error de conexión, reintento y estado vacío.
+El servicio valida las respuestas en tiempo de ejecución, pagina el catálogo
+comercial y conserva cancelación y manejo de errores. Una API fallida no se
+sustituye por productos locales. La búsqueda y los filtros se aplican a los
+artículos ya recibidos; no crean endpoints ni modifican los datos originales.
 
-- **No hay fallback silencioso al catálogo estático.** Las diez fichas de
-  `demo-products.ts` son material histórico de prototipo y ya no se importan
-  en la pantalla. Cuando Neon tenga cero productos publicados, se muestra
-  «Todavía no hay productos publicados».
-- Las fotos NULL muestran un ícono genérico; las marcas no verificadas no se
-  muestran en la UI. No hay botones de compra ni datos de inventario.
-- En desarrollo, el precio se identifica visualmente como demostración. Antes
-  de habilitar venta pública deben verificarse precios, inventario y estados.
-- No hay endpoint de escritura ni autenticación nueva. Las rutas de Express
-  están detrás de `CATALOG_API_ENABLED=true` y deben verificarse en LAN
-  desde Expo Go, nunca con secretos dentro de `EXPO_PUBLIC_*`.
+Los diez artículos demo de Neon permanecen en `demo.product_previews`, separados
+de `catalog.products`, con `is_demo=true` e `is_for_sale=false`. La migración 002
+ya se aplicó con autorización anterior; no ejecutarla de nuevo. Los precios
+siguen pendientes de aprobación comercial. El escaparate actual omite mensajes
+internos de diagnóstico y mantiene las restricciones: no hay carrito real,
+compras, pagos, autenticación ni inventarios ficticios. Ver
+[la revisión del escaparate](../docs/storefront-cleanup.md).
 
-### Prueba de integración en dispositivo
+Si una imagen falta o falla, la pantalla presenta una ilustración original.
+No se inventan fotografías, marcas, existencias o descripciones. El archivo
+`src/features/catalogo/productos-demo-referencia.ts` es un prototipo histórico,
+sin consumidores en las pantallas; se conserva para estudiar su evolución.
+El componente `src/components/diagnostico/comprobacion-api.tsx` también se
+conserva, pero ya no se muestra en Inicio.
 
-1. En `backend/.env`, establecer `HOST=0.0.0.0`,
-   `CATALOG_API_ENABLED=true` y la conexión privada `DATABASE_URL` de
-   `lapape_catalog_api`. **No publicar ese archivo.** Mantener la PC en una
-   red Wi-Fi privada (no pública).
-2. En `frontend/.env.local`, usar `EXPO_PUBLIC_API_URL=http://<IPV4_PC>:3000`
-   con la IP LAN local real (no 127.0.0.1, que desde iPhone apunta al iPhone).
-3. Iniciar `npm start` en backend y `npx expo start --lan --clear` en frontend.
-   iPhone y computadora deben compartir Wi-Fi. Autorizar Node solo en la red
-   privada en el firewall cuando sea necesario.
-4. Abrir `http://<IPV4_PC>:3000/products` desde Safari en iPhone y luego
-   la pestaña Catálogo en Expo Go. Actualmente ambas deben mostrar
-   **cero productos**. Una respuesta `503` es fallo de API, no catálogo vacío.
-5. Ejecutar `npm test`, `npm run lint`, `npx tsc --noEmit` y revisar
-   disposición visual en Expo Go. Los resultados aún no han sido informados
-   después de estos cambios.
+## Configuración pública y iPhone
 
-No se crea ni publica ningún producto en esta implementación. La importación de
-las diez fichas candidatas requiere una revisión y autorización específica,
-además de separación explícita entre datos de demostración y mercancía real.
+Conservar la configuración local existente. Los ejemplos sin secretos se
+encuentran en `.env.example`. Solo estos valores pueden ser públicos:
 
-### Demostración separada de los diez productos del ZIP
+- `EXPO_PUBLIC_API_URL`: origen de Express, sin `/api`, rutas o credenciales.
+- `EXPO_PUBLIC_API_ENV`: development, staging o production.
+- `EXPO_PUBLIC_API_TIMEOUT_MS`: entre 100 y 60000 milisegundos; 15000 por defecto.
+- `EXPO_PUBLIC_CATALOG_MODE`: demo únicamente para revisión interna en desarrollo.
 
-Los diez artículos de `10 (1).zip` **no están aprobados comercialmente**.
-La migración `backend/db/migrations/002_demo_previews.sql` fue **autorizada y aplicada**
-el 13 de octubre de 2026 exclusivamente en Neon `development` / `lapape_mobile_dev`.
-La tabla `demo.product_previews` contiene exactamente diez filas verificadas,
-separadas de `catalog.products` (que continúa vacía). **No volver a ejecutar 002.**
+En iPhone usar la IPv4 LAN real de la computadora; `localhost` señala el propio
+teléfono. Reiniciar Metro y recargar Expo Go después de un cambio autorizado de
+configuración. HTTP solo se admite en desarrollo con direcciones locales o LAN
+privadas; staging y producción exigen HTTPS. Nunca introducir DATABASE_URL,
+contraseñas, tokens o credenciales en variables `EXPO_PUBLIC_*`.
 
-La ruta `GET /demo/products` devuelve `{mode:'demo',purchasable:false,data:[]}`
-con productos `is_demo=true` y `is_for_sale=false`, sin marcas, fotos ni
-inventarios. **No es el endpoint público comercial.** Solo se monta con
-`NODE_ENV=development`, `CATALOG_API_ENABLED=true` y
-`CATALOG_DEMO_API_ENABLED=true`, sobre una red privada controlada.
+El cliente `fetch` aplica timeout también durante la lectura de JSON, admite
+`AbortController`, limpia temporizadores y no reintenta automáticamente.
+No expone cuerpos de error, URLs privadas ni mensajes internos del servidor.
 
-Para visualizar exclusivamente esa ruta desde Expo Go, configura en
-`frontend/.env.local`:
-
-```dotenv
-EXPO_PUBLIC_API_URL=http://192.168.1.82:3000
-EXPO_PUBLIC_API_ENV=development
-EXPO_PUBLIC_CATALOG_MODE=demo
-```
-
-La dirección de ejemplo es la IPv4 observada en esta prueba y puede cambiar.
-**No uses `localhost` en iPhone; jamás incluyas credenciales en variables públicas.**
-Recarga Metro después del cambio. Sin modo demo, `EXPO_PUBLIC_CATALOG_MODE=live`
-(por defecto) consume `GET /categories` y `GET /products`, que siguen mostrando
-únicamente publicaciones revisadas. No hay fallback a diez datos locales.
-En builds de producción, el modo demo se ignora incluso si la variable quedó
-configurada, y el backend niega esa ruta fuera de desarrollo.
-
-Pruebas requeridas: `npm test`, `npm run lint`, `npx tsc --noEmit` en
-`frontend/` y `npm test` y `npm run check` en `backend/`. Verificar las rutas
-reales desde Safari y Expo Go después de autorizar la carga en Neon. El
-resultado todavía NO está validado en dispositivo después de estos cambios.
-
-
-### PB-07 — pantalla de detalle del producto (pendiente de validar en iPhone)
-
-Se añadió navegación real con Expo Router: `src/app/(tabs)/` mantiene
-Inicio y Catálogo, y la pila raíz presenta `src/app/products/[id].tsx`.
-Al tocar una tarjeta del Catálogo se abre `/products/<uuid>`; la pantalla
-ofrece Volver al catálogo, carga, error, producto inexistente y reintento.
-Las pestañas nativas se conservan como navegación principal y quedan
-debajo de la pantalla de detalle.
-
-- En modo `EXPO_PUBLIC_CATALOG_MODE=demo` la ficha solicita
-  `GET /demo/products/:id` a Express. Es una ruta de desarrollo, de solo
-  lectura, que toma el producto de `demo.product_previews` en Neon,
-  sin marcas ni existencias verificadas y con `purchasable:false`.
-- En modo normal utiliza la ruta comercial ya existente
-  `GET /products/:id` (solo para productos revisados y publicados).
-  La respuesta incluye una descripción aprobada.
-- Las diez fichas demo no contienen descripción aprobada en
-  `demo.product_previews`; el detalle muestra explícitamente que está
-  pendiente de revisión, sin inventar contenido ni importar datos.
-- No hay botones de compra, carrito, stock o importación SQL.
-  No se cambió la migración 002 ni se hicieron escrituras en Neon.
-
-Se añadieron pruebas de contrato y navegación API. **Todavía falta ejecutar**
-`npm test`, `npm run lint`, `npx tsc --noEmit` en frontend
-y `npm test`, `npm run check` en backend, así como comprobar
-`/demo/products/<uuid>` desde Safari y la navegación en Expo Go.
-
-La integración visual definitiva de Inicio, Catálogo y Detalle se realizará
-después, pantalla por pantalla, con una guía visual compartida y las capturas
-que facilite el responsable.
+Los resultados históricos y las comprobaciones actuales son distintos: los
+informes [Inicio](../docs/home-redesign.md),
+[Catálogo/Detalle](../docs/catalog-detail-redesign.md) e
+[#19](../docs/issue-19.md) conservan la evidencia de sus respectivas etapas.
+La reorganización local y sus verificaciones se registran en la guía de
+estructura; no constituyen una nueva comprobación personal en el iPhone.

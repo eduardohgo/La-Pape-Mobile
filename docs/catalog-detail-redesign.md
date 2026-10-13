@@ -1,5 +1,7 @@
 # Rediseño de Catálogo y Detalle — PB-06 / PB-07
 
+> Informe histórico de esta etapa. Las rutas locales de archivos se actualizaron durante la organización posterior; la evidencia, los commits y los estados aquí descritos conservan su significado histórico. La estructura vigente y la extracción de pantallas están en [guia-estructura-proyecto.md](guia-estructura-proyecto.md).
+
 Fecha de revisión: 13 de octubre de 2026. Rama de trabajo
 `codex/pb06-pb07-catalog-detail-design`, basada en el commit `3b055a4`
 del rediseño aprobado de Inicio. Las Figuras 6 y 7 proporcionadas por el
@@ -80,11 +82,11 @@ otro backend o app, y no se realizan merges o despliegues.
 |---|---|
 | `frontend/src/app/(tabs)/explore.tsx` | Rediseño de Catálogo, búsqueda local, filtros y tarjetas |
 | `frontend/src/app/products/[id].tsx` | Rediseño de Detalle, regreso explícito y estados conservados |
-| `frontend/src/components/shop/shop-ui.tsx` | Encabezado, presentación de producto, estados, avisos y barra de Catálogo |
-| `frontend/src/utils/catalog-search.ts` | Búsqueda local combinada con categoría, sin modificar datos |
-| `frontend/src/components/app-tabs.tsx` | Visibilidad de la barra nativa e insets de Catálogo |
-| `frontend/src/components/app-tabs.web.tsx` | Ocultar la barra anterior también en Catálogo |
-| `frontend/src/components/home/home-icon.tsx` | Añadir iconos de regreso y filtros; iconos existentes conservados |
+| `frontend/src/components/catalogo/componentes-catalogo.tsx` | Encabezado, presentación de producto, estados, avisos y barra de Catálogo |
+| `frontend/src/utils/busqueda-catalogo.ts` | Búsqueda local combinada con categoría, sin modificar datos |
+| `frontend/src/components/navegacion/pestanas-app.tsx` | Visibilidad de la barra nativa e insets de Catálogo |
+| `frontend/src/components/navegacion/pestanas-app.web.tsx` | Ocultar la barra anterior también en Catálogo |
+| `frontend/src/components/compartidos/iconos-papeleria.tsx` | Añadir iconos de regreso y filtros; iconos existentes conservados |
 | `frontend/test/catalog-search.test.cjs` | Nueve pruebas de búsqueda y combinación de filtros |
 | `frontend/tsconfig.test.json` | Incluir la utilidad de búsqueda en la compilación de pruebas |
 | `frontend/package.json` | Ejecutar las nuevas pruebas junto con las existentes; sin dependencias nuevas |

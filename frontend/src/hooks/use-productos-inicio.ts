@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-import { type CatalogProduct, type DemoCatalogProduct, getCatalogService } from '@/services/catalog.service';
+import { type CatalogProduct, type DemoCatalogProduct, getCatalogService } from '@/services/servicio-catalogo';
 
 export type HomeProduct = CatalogProduct | DemoCatalogProduct;
 export const homeDemoMode = __DEV__ && process.env.EXPO_PUBLIC_CATALOG_MODE === 'demo';

@@ -1,4 +1,4 @@
-import { ApiError } from '../services/http/errors';
+import { ApiError } from '../services/http/errores-http';
 
 export type ApiEnvironment = 'development' | 'staging' | 'production';
 export type ApiConfig = Readonly<{ baseUrl: string; timeoutMs: number; environment: ApiEnvironment }>;

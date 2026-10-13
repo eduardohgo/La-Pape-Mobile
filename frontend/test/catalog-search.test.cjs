@@ -1,6 +1,6 @@
 const assert = require('node:assert/strict');
 const test = require('node:test');
-const { filterCatalogProducts } = require('../.test-build/utils/catalog-search.js');
+const { filterCatalogProducts } = require('../.test-build/utils/busqueda-catalogo.js');
 
 // Minimal fixtures for search behavior only; never used as application catalog data.
 const products = Object.freeze([

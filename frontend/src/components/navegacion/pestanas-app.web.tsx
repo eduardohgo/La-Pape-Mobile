@@ -10,9 +10,9 @@ import { usePathname } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import { Pressable, useColorScheme, View, StyleSheet } from 'react-native';
 
-import { ExternalLink } from './external-link';
-import { ThemedText } from './themed-text';
-import { ThemedView } from './themed-view';
+import { ExternalLink } from '../plantilla/enlace-externo';
+import { ThemedText } from '../plantilla/texto-tematico';
+import { ThemedView } from '../plantilla/vista-tematica';
 
 import { Colors, MaxContentWidth, Spacing } from '@/constants/theme';
 

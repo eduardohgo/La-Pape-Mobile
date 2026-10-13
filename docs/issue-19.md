@@ -1,5 +1,10 @@
 # Issue #19 — base HTTP y separación de aplicaciones
 
+> Bitácora histórica de la base HTTP inicial. El catálogo y detalle se incorporaron
+> en etapas posteriores. La organización local vigente, las rutas renombradas y
+> sus comprobaciones están en [guia-estructura-proyecto.md](guia-estructura-proyecto.md).
+> Esta revisión local no cambia los resultados ni estados históricos aquí registrados.
+
 Implementación autorizada el 8 de octubre de 2026, PB-01, Sprint 1.
 La Issue no tenía cuerpo con criterios adicionales. Se utiliza el alcance
 expreso del responsable y se deja la comprobación física pendiente.

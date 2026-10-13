@@ -1,5 +1,7 @@
 # Rediseño de Inicio — PB-02 / #21
 
+> Informe histórico de esta etapa. Las rutas locales de archivos se actualizaron durante la organización posterior; la evidencia, los commits y los estados aquí descritos conservan su significado histórico. La estructura vigente y la extracción de pantallas están en [guia-estructura-proyecto.md](guia-estructura-proyecto.md).
+
 Fecha de revisión: 13 de octubre de 2026. Rama `codex/pb02-home-redesign`,
 creada desde la base funcional `f3d79b4` de `chatgpt/pb07-product-detail`.
 La referencia es la imagen de Inicio proporcionada por el responsable.
@@ -45,13 +47,13 @@ de un panel desplegable visible solo en desarrollo.
 
 ## Navegación conservada
 
-`app-tabs.tsx` conserva `NativeTabs` y sus dos Trigger. Solo oculta la barra
+`pestanas-app.tsx` conserva `NativeTabs` y sus dos Trigger. Solo oculta la barra
 del contenedor cuando la ruta activa es `/`; Inicio presenta su propia barra.
 No se ocultan ni desmontan Trigger, por lo que las rutas siguen disponibles.
 Se desactivan los insets automáticos únicamente para `index`, que administra
 las áreas seguras superior e inferior. Catálogo mantiene su barra y propiedades.
 
-`app-tabs.web.tsx` conserva TabList y TabTrigger montados; su barra anterior se
+`pestanas-app.web.tsx` conserva TabList y TabTrigger montados; su barra anterior se
 oculta únicamente en `/`. Se corrige el destino de Inicio a `/`, compatible con
 las rutas tipadas. Detalle sigue fuera de las pestañas, en el Stack original.
 La barra de estado usa texto oscuro únicamente mientras Inicio está activo.
@@ -67,11 +69,11 @@ contenedores recortados. La barra propia no duplica la barra del navegador.
 | Archivo | Cambio |
 |---|---|
 | `frontend/src/app/(tabs)/index.tsx` | Pantalla de Inicio, estilos, destacados y avisos |
-| `frontend/src/components/app-tabs.tsx` | Visibilidad de barra solo en Inicio e insets de index |
-| `frontend/src/components/app-tabs.web.tsx` | Visibilidad solo en Inicio y enlace raíz tipado |
-| `frontend/src/components/home/home-icon.tsx` | Iconos SVG originales para Inicio |
-| `frontend/src/components/home/stationery-art.tsx` | Assets locales y selección de ilustración genérica |
-| `frontend/src/hooks/use-home-products.ts` | Consumo del servicio existente, carga/error/reintento/cancelación |
+| `frontend/src/components/navegacion/pestanas-app.tsx` | Visibilidad de barra solo en Inicio e insets de index |
+| `frontend/src/components/navegacion/pestanas-app.web.tsx` | Visibilidad solo en Inicio y enlace raíz tipado |
+| `frontend/src/components/compartidos/iconos-papeleria.tsx` | Iconos SVG originales para Inicio |
+| `frontend/src/components/compartidos/ilustraciones-papeleria.tsx` | Assets locales y selección de ilustración genérica |
+| `frontend/src/hooks/use-productos-inicio.ts` | Consumo del servicio existente, carga/error/reintento/cancelación |
 | `frontend/assets/images/home/hero-stationery.svg` | Ilustración del banner |
 | `frontend/assets/images/home/notebook.svg` | Cuaderno ilustrado |
 | `frontend/assets/images/home/markers.svg` | Marcadores ilustrados |

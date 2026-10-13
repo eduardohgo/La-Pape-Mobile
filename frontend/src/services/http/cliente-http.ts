@@ -1,5 +1,5 @@
-import type { ApiConfig } from '../../config/env';
-import { ApiError } from './errors';
+import type { ApiConfig } from '../../config/configuracion-api';
+import { ApiError } from './errores-http';
 
 export type RequestOptions = { signal?: AbortSignal; query?: Readonly<Record<string, string>> };
 export type FetchFunction = typeof fetch;

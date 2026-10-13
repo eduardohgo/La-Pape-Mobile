@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { Button, StyleSheet, Text, View } from 'react-native';
 
-import { checkApiHealth } from '@/services/health.service';
-import { ApiError } from '@/services/http/errors';
+import { checkApiHealth } from '@/services/servicio-salud-api';
+import { ApiError } from '@/services/http/errores-http';
 
 export function ApiHealthCheck() {
   const active = useRef<AbortController | null>(null);

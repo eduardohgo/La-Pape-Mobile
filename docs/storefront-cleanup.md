@@ -11,6 +11,12 @@ debe parecer una papelería y no una herramienta de diagnóstico.
 
 ## Interfaz
 
+Después de la organización local, las implementaciones están en
+`frontend/src/pantallas/pantalla-inicio.tsx`, `pantalla-catalogo.tsx` y
+`pantalla-detalle-producto.tsx`. Las rutas originales de Expo Router conservan
+sus direcciones e importan estas pantallas. Ver
+[la guía de estructura](guia-estructura-proyecto.md) para el mapa de renombrados.
+
 - **Inicio:** elimina la comprobación manual de API, el subtítulo de demo,
   las etiquetas de precio provisional y los mensajes técnicos de ilustración.
   Destacados continúan llegando del mismo servicio HTTP; las imágenes de

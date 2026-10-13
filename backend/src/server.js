@@ -1,6 +1,6 @@
 import { pathToFileURL } from 'node:url';
 import { createApp } from './app.js';
-import { loadConfig } from './config/env.js';
+import { loadConfig } from './config/variables-entorno.js';
 
 export function startServer(config = loadConfig()) {
   const app = createApp(config);

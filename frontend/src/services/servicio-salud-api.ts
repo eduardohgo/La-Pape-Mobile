@@ -1,5 +1,5 @@
-import { getApiConfig } from '../config/env';
-import { createHttpClient, type RequestOptions } from './http/client';
+import { getApiConfig } from '../config/configuracion-api';
+import { createHttpClient, type RequestOptions } from './http/cliente-http';
 
 export type HealthResponse = { ok: true; ts: number };
 

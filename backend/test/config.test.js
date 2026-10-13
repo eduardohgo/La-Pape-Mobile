@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { Client } from 'pg';
-import { loadConfig } from '../src/config/env.js';
-import { createDatabasePool } from '../src/db/pool.js';
+import { loadConfig } from '../src/config/variables-entorno.js';
+import { createDatabasePool } from '../src/db/conexion-postgres.js';
 
 test('defaults support a local HTTP base without database credentials', () => {
   const config = loadConfig({});

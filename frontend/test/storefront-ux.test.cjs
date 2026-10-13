@@ -5,10 +5,10 @@ const { cwd } = require('node:process');
 const test = require('node:test');
 
 const files = [
-  'src/app/(tabs)/index.tsx',
-  'src/app/(tabs)/explore.tsx',
-  'src/app/products/[id].tsx',
-  'src/components/shop/shop-ui.tsx',
+  'src/pantallas/pantalla-inicio.tsx',
+  'src/pantallas/pantalla-catalogo.tsx',
+  'src/pantallas/pantalla-detalle-producto.tsx',
+  'src/components/catalogo/componentes-catalogo.tsx',
 ];
 
 const content = Object.fromEntries(files.map((file) => [
@@ -29,10 +29,10 @@ test('all storefront screens exclude provisional-price and photo-review labels',
 });
 
 test('internal demo protections and real product lookup stay in place', () => {
-  const home = content['src/app/(tabs)/index.tsx'];
-  const catalog = content['src/app/(tabs)/explore.tsx'];
-  const detail = content['src/app/products/[id].tsx'];
-  const service = readFileSync(join(cwd(), 'src/services/catalog.service.ts'), 'utf8');
+  const home = content['src/pantallas/pantalla-inicio.tsx'];
+  const catalog = content['src/pantallas/pantalla-catalogo.tsx'];
+  const detail = content['src/pantallas/pantalla-detalle-producto.tsx'];
+  const service = readFileSync(join(cwd(), 'src/services/servicio-catalogo.ts'), 'utf8');
 
   assert.match(home, /useHomeProducts\(\)/);
   assert.match(catalog, /__DEV__ && process\.env\.EXPO_PUBLIC_CATALOG_MODE === 'demo'/);
@@ -43,8 +43,8 @@ test('internal demo protections and real product lookup stay in place', () => {
 });
 
 test('product cards navigate to actual details without purchase actions', () => {
-  const catalog = content['src/app/(tabs)/explore.tsx'];
-  const detail = content['src/app/products/[id].tsx'];
+  const catalog = content['src/pantallas/pantalla-catalogo.tsx'];
+  const detail = content['src/pantallas/pantalla-detalle-producto.tsx'];
 
   assert.match(catalog, /Ver detalle/);
   assert.match(catalog, /router\.push\(\{ pathname: '\/products\/\[id\]'/);

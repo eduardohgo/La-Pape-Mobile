@@ -4,8 +4,8 @@ import { useState, type ReactNode } from 'react';
 import { ActivityIndicator, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { HomeIcon } from '@/components/home/home-icon';
-import { StationeryArt, productIllustration } from '@/components/home/stationery-art';
+import { HomeIcon } from '@/components/compartidos/iconos-papeleria';
+import { StationeryArt, productIllustration } from '@/components/compartidos/ilustraciones-papeleria';
 
 export const palette = { ink: '#252334', muted: '#726D7D', yellow: '#FFDC57', pink: '#EF4C8B', blue: '#2379B6' };
 
@@ -94,7 +94,7 @@ export function CatalogTabBar({ onPending, onCatalog }: { onPending: (feature: s
     <View style={[styles.bottomBar, { paddingBottom: Math.max(insets.bottom, 10) }]}>
       <View style={styles.barInner}>
         <Pressable onPress={() => router.navigate('/')} style={styles.navItem} accessibilityRole="button" accessibilityLabel="Ir a Inicio"><HomeIcon name="home" color={palette.muted} /><Text style={styles.navLabel}>Inicio</Text></Pressable>
-        <Pressable onPress={onCatalog} style={styles.navItem} accessibilityRole="button" accessibilityLabel="Catálogo, seleccionado" accessibilityState={{ selected: true }}><HomeIcon name="grid" color="#EDB800" filled /><Text style={styles.navActive}>Categorías</Text><View style={styles.indicator} /></Pressable>
+        <Pressable onPress={onCatalog} style={styles.navItem} accessibilityRole="button" accessibilityLabel="Catálogo, seleccionado" accessibilityState={{ selected: true }}><HomeIcon name="grid" color="#EDB800" filled /><Text style={styles.navActive}>Catálogo</Text><View style={styles.indicator} /></Pressable>
         <Pressable onPress={() => onPending('Carrito')} style={styles.navItem} accessibilityRole="button" accessibilityLabel="Carrito: próximamente"><HomeIcon name="cart" color={palette.muted} /><Text style={styles.navLabel}>Carrito</Text></Pressable>
         <Pressable onPress={() => onPending('Favoritos')} style={styles.navItem} accessibilityRole="button" accessibilityLabel="Favoritos: próximamente"><HomeIcon name="heart" color={palette.muted} /><Text style={styles.navLabel}>Favoritos</Text></Pressable>
         <Pressable onPress={() => onPending('Acceder')} style={styles.navItem} accessibilityRole="button" accessibilityLabel="Acceder"><HomeIcon name="user" color={palette.muted} /><Text style={styles.navLabel}>Acceder</Text></Pressable>

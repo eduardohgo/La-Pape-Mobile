@@ -10,5 +10,5 @@
     "rootDir": "src",
     "outDir": ".test-build"
   },
-  "include": ["src/config/env.ts", "src/services/**/*.ts", "src/utils/catalog-search.ts"]
+  "include": ["src/config/configuracion-api.ts", "src/services/**/*.ts", "src/utils/busqueda-catalogo.ts"]
 }

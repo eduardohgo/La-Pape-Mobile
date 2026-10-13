@@ -3,8 +3,8 @@ import { once } from 'node:events';
 import { createServer } from 'node:http';
 import test from 'node:test';
 import { createApp } from '../src/app.js';
-import { loadConfig } from '../src/config/env.js';
-import { errorHandler } from '../src/middlewares/errors.js';
+import { loadConfig } from '../src/config/variables-entorno.js';
+import { errorHandler } from '../src/middlewares/manejo-errores.js';
 import { startServer, stopServer } from '../src/server.js';
 
 async function localServer(t, env = {}) {

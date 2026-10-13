@@ -1,4 +1,4 @@
-# Base HTTP de La Pape para Issue #19
+# Backend Express de La Pape Mobile
 
 Base independiente de Node.js y Express dentro del repositorio mobile. Node.js >=22.13; mantiene JavaScript ESM del backend de referencia. Instala sus dependencias desde esta carpeta con `npm ci`. `npm start` carga una `.env` local, si existe, mediante la opción oficial de Node. `npm run dev` añade recarga del servidor. No hay despliegue ni modificación de servicios existentes.
 
@@ -12,31 +12,59 @@ npm start
 
 La configuración predeterminada escucha en `127.0.0.1:3000`. Para probar desde un dispositivo en la misma red, configura explícitamente `HOST=0.0.0.0` en una `.env` ignorada y usa la IP LAN de la computadora. La conexión HTTP local corresponde a desarrollo; un API público deberá usar HTTPS. `.env.example` documenta nombres y valores no sensibles. Nunca publiques credenciales de BD ni claves dentro de variables `EXPO_PUBLIC_*`.
 
-## Contrato y estructura
+## Contratos y estructura actual
 
-`GET /health` devuelve únicamente `{ "ok": true, "ts": <milisegundos> }` y `Cache-Control: no-store`. Verifica que el proceso HTTP responde; no verifica PostgreSQL ni servicios de negocio. Las demás rutas reciben 404 JSON. La base no contiene autenticación, productos, pedidos o pantallas.
+`GET /health` devuelve únicamente `{ "ok": true, "ts": <milisegundos> }` y
+`Cache-Control: no-store`. Verifica que el proceso HTTP responde; no verifica
+PostgreSQL ni servicios de negocio. El catálogo actual dispone además de las
+lecturas siguientes, si `CATALOG_API_ENABLED=true`:
+
+- `GET /categories`.
+- `GET /products`, con filtros/paginación validados.
+- `GET /products/:id`, con UUID validado.
+- En desarrollo y con `CATALOG_DEMO_API_ENABLED=true`: `GET /demo/products` y
+  `GET /demo/products/:id`, sin ventas ni escrituras.
+
+Las rutas no existentes devuelven 404 JSON. No hay autenticación, compras,
+carrito, pedidos ni endpoints administrativos habilitados.
 
 - `src/app.js`: ensamblaje de middleware y rutas; no abre un puerto al importarse.
 - `src/server.js`: arranque/cierre del servidor; no consulta BD.
-- `src/config/env.js`: valida entorno, puerto, host, CORS y configuración opcional de PostgreSQL sin reflejar valores inválidos.
-- `src/routes/health.routes.js`, `src/controllers/health.controller.js`, `src/services/health.service.js`: ruta, controlador y servicio de salud.
-- `src/middlewares/errors.js`: 404, errores JSON 400/413/403 y mensaje genérico 500.
-- `src/db/pool.js`: factory perezoso de `pg.Pool`, preparado para trabajo posterior.
+- `src/config/variables-entorno.js`: valida entorno, puerto, host, CORS y configuración de PostgreSQL sin reflejar valores inválidos.
+- `src/routes/rutas-salud.js`, `src/controllers/controlador-salud.js`, `src/services/servicio-salud.js`: ruta, controlador y servicio de salud.
+- `src/routes/rutas-catalogo.js`, `src/routes/rutas-catalogo-demo.js`: endpoints comerciales de lectura y de demostración.
+- `src/repositories/repositorio-catalogo.js`: carga las consultas SQL y usa un pool para ejecutar transacciones `READ ONLY`.
+- `src/middlewares/manejo-errores.js`: 404, errores JSON 400/413/403 y mensaje genérico 500.
+- `src/db/conexion-postgres.js`: factory independiente de `pg.Pool`, sin conectar al construirse; conservada y probada, pero el catálogo utiliza su propio pool dentro del repositorio.
+- `db/queries/`: consultas SQL existentes; `db/migrations/`: historial de migraciones, nunca ejecutadas al arrancar Express.
+
+La [guía de estructura](../docs/guia-estructura-proyecto.md) explica cómo localizar
+estos módulos y los renombrados locales. `app.js`, `server.js`, los endpoints,
+los contratos y las consultas conservan su comportamiento.
 
 `FRONTEND_ORIGINS` admite una lista de orígenes completos separados por comas; por defecto `http://localhost:8081,http://localhost:19006`. Solicitudes nativas sin `Origin` están admitidas. CORS no autentica ni autoriza usuarios. Se permiten encabezados `Content-Type` y `Authorization`, sin cookies de sesión. `TRUST_PROXY` vale 0 por defecto; se podrá configurar 1 al desplegar detrás de un proxy conocido. El límite global es de 100 solicitudes por IP/15 minutos; el cuerpo JSON máximo es 65536 bytes. Son valores configurables y validados.
 
-## PostgreSQL: esquema aplicado, runtime sin consultas
+## PostgreSQL: esquema aplicado y catálogo de lectura
 
 El responsable confirmó la aplicación y validación real de `001_catalog_schema.sql`
 por ChatGPT en Neon PostgreSQL 18, rama development, base lapape_mobile_dev:
 tres tablas de catálogo, dos FK validadas, cero filas y `image_url` nullable, sin
 tablas inesperadas. Esta evidencia está en [el registro de validación](../docs/neon-verification-results.md).
-No repetir 001. El runtime de Express sigue sin consultar PostgreSQL ni habilitar
-endpoints de catálogo; los candidatos todavía no están aprobados ni importados.
+No repetir 001. Posteriormente se autorizó y aplicó 002 para los diez artículos
+de `demo.product_previews`, separados del catálogo comercial y sin aprobación
+para venta; ver [el registro de demostración](../docs/catalog-demo-review.md).
+No repetir 002. La organización local no ejecuta estas migraciones ni consulta
+o modifica la base real.
 
 El destino de desarrollo confirmado por el responsable es **La Pape Mobile**, proyecto Neon `twilight-moon-02635569`, rama `development`, base `lapape_mobile_dev`, PostgreSQL 18. Estos identificadores no contienen credenciales. Esta preparación no conecta ni modifica el proyecto y no crea otro.
 
-`DATABASE_URL` es opcional durante esta base. Para la futura API se utilizará la URL **pooled** de Neon (host con `-pooler`) de un rol con permisos de lectura. `DATABASE_URL_UNPOOLED` queda reservado a la conexión directa de administración para migraciones aprobadas; `loadConfig` no lee esa variable y el servidor no ejecuta migraciones al arrancar. No se ha creado ni configurado un rol en Neon.
+`DATABASE_URL` es opcional si el catálogo está deshabilitado y se usa únicamente
+salud HTTP; es necesaria cuando se habilita el catálogo. El backend utiliza la
+URL **pooled** de Neon (host con `-pooler`) con un rol de lectura. La evidencia
+anterior registra el rol `lapape_catalog_api`; esta reorganización no cambia
+sus permisos. `DATABASE_URL_UNPOOLED` queda reservado a la conexión directa de
+administración para migraciones aprobadas; `loadConfig` no lee esa variable y
+el servidor no ejecuta migraciones al arrancar.
 
 Las URLs deben usar protocolo PostgreSQL, identificar una base y no contener fragmentos. Se admite únicamente un `sslmode=require` o `sslmode=verify-full` y, opcionalmente, un `channel_binding=prefer`. Ambos modos SSL se traducen a TLS con verificación de certificado y de nombre de servidor; se eliminan esos parámetros de la URL antes de entregarla a `pg`, porque los parámetros SSL de una connection string pueden reemplazar el objeto `ssl` explícito. Los parámetros desconocidos o repetidos y los modos `disable`, `allow`, `prefer`, `no-verify` y `verify-ca` se rechazan, igual que `sslcert`, `sslkey` y `sslrootcert`.
 
@@ -44,7 +72,13 @@ Las URLs deben usar protocolo PostgreSQL, identificar una base y no contener fra
 
 Se exige `rejectUnauthorized: true` para servidores remotos y para producción. Solo una BD de loopback fuera de producción puede usar TLS desactivado cuando la URL no requiere TLS o channel binding; `PG_SSL=true` también exige verificación TLS en desarrollo local. `PG_SSL=false` se rechaza siempre que TLS sea obligatorio. No se copió el bypass `rejectUnauthorized:false` del ZIP. Las variables de conexión deben existir solo en el entorno del backend o una `.env` ignorada; nunca en `EXPO_PUBLIC_*` ni en logs.
 
-El pool se construye vacío: ni la factory ni la ruta de salud llaman `connect`, `query`, sincronizaciones, migraciones o seeds. El servidor HTTP tampoco instancia ese pool por ahora. Las pruebas usan configuración ficticia y comprueban la configuración que interpreta un `pg.Client` sin llamar a `connect`, además de un pool real vacío antes de cerrarlo. No se conectan a PostgreSQL, Neon ni otros servicios.
+Ambas construcciones de pool son perezosas. `conexion-postgres.js` no llama a
+`connect` o `query` y salud no accede a la base. Si el catálogo está habilitado,
+`app.js` construye el repositorio; cada solicitud de catálogo obtiene un cliente,
+inicia una transacción `BEGIN READ ONLY`, ejecuta su consulta parametrizada y
+libera el cliente. No se ejecutan sincronizaciones, migraciones o seeds. Los
+tests utilizan configuración ficticia, pools simulados y repositorios en memoria;
+no se conectan a Neon ni a otros servicios.
 
 ## Reutilización del ZIP confirmado
 
@@ -68,6 +102,10 @@ Estos problemas deben mapearse a las actividades técnicas existentes antes de i
 
 `npm test` ejecuta pruebas reales con `node:test`: configuración y valores inválidos, TLS de producción/remoto, rechazo de parámetros TLS ambiguos, pool vacío sin operaciones, salud sin acceso a BD, CORS/orígenes nativos/preflight, 404 sin reflejar la URL, JSON inválido, límite de cuerpo, rate limit, error interno sanitizado y cierre HTTP. Las pruebas escuchan únicamente en loopback y puertos temporales; no contactan los servicios desplegados.
 
-La validación móvil y cualquier futura conectividad real con PostgreSQL permanecen pendientes. Esta base no equivale a completar todos los criterios de la Issue #19.
+El responsable confirmó anteriormente la conexión Expo Go → Express → Neon.
+Las pruebas automatizadas de esta reorganización local no sustituyen una nueva
+revisión en su iPhone. No se modifican el Project ni los criterios de ninguna
+Issue durante esta tarea. Los resultados actuales se registran en la guía de
+estructura; los informes históricos conservan la evidencia de cada etapa.
 
 Referencias oficiales: [Node env-file](https://nodejs.org/docs/latest-v22.x/api/cli.html#--env-file-if-existsfile), [Express: seguridad](https://expressjs.com/en/advanced/best-practice-security/), [pg Pool](https://node-postgres.com/apis/pool), [pg y TLS](https://node-postgres.com/features/ssl).
