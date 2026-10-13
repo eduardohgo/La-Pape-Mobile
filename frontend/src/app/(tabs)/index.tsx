@@ -5,10 +5,9 @@ import { useRef, useState } from 'react';
 import { ActivityIndicator, Modal, Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { ApiHealthCheck } from '@/components/api-health-check';
 import { HomeIcon } from '@/components/home/home-icon';
 import { StationeryArt, productIllustration, type StationeryKind } from '@/components/home/stationery-art';
-import { homeDemoMode, useHomeProducts, type HomeProduct } from '@/hooks/use-home-products';
+import { useHomeProducts, type HomeProduct } from '@/hooks/use-home-products';
 
 const palette = { ink: '#252334', muted: '#726D7D', yellow: '#FFDC57', pink: '#EF4C8B', blue: '#2379B6' };
 const categories: { name: string; art: StationeryKind; background: string }[] = [
@@ -29,8 +28,8 @@ function FeaturedProduct({ product, onFavorite }: { product: HomeProduct; onFavo
       <Pressable
         style={({ pressed }) => [styles.productLink, pressed && styles.pressed]}
         accessibilityRole="button"
-        accessibilityLabel={`${product.name}, ${product.price} pesos mexicanos.${homeDemoMode ? ' Precio de demostración.' : ''}`}
-        accessibilityHint="Abrir la ficha existente del producto. Compras no disponibles."
+        accessibilityLabel={`${product.name}, ${product.price} pesos mexicanos.`}
+        accessibilityHint="Abrir información del producto."
         onPress={() => router.push({ pathname: '/products/[id]', params: { id: product.id } })}>
         <View style={styles.productArt}>
           {hasPhoto ? (
@@ -39,10 +38,8 @@ function FeaturedProduct({ product, onFavorite }: { product: HomeProduct; onFavo
             <StationeryArt kind={productIllustration(product.name, product.category_name)} width={94} height={100} />
           )}
         </View>
-        {!hasPhoto && <Text style={styles.photoPending}>Ilustración · foto pendiente</Text>}
         <Text style={styles.productName} numberOfLines={3}>{product.name}</Text>
         <Text style={styles.productPrice}>${product.price} <Text style={styles.currency}>MXN</Text></Text>
-        {homeDemoMode && <Text style={styles.demoPrice}>PRECIO DEMO</Text>}
       </Pressable>
       <Pressable style={styles.favoriteButton} onPress={onFavorite} accessibilityRole="button" accessibilityLabel={`Favoritos de ${product.name}: próximamente`}>
         <HomeIcon name="heart" size={19} color={palette.muted} />
@@ -71,7 +68,6 @@ export default function HomeScreen() {
   const scroll = useRef<ScrollView>(null);
   const { state, retry } = useHomeProducts();
   const [placeholder, setPlaceholder] = useState<string | null>(null);
-  const [showDiagnostics, setShowDiagnostics] = useState(false);
 
   return (
     <View style={styles.screen}>
@@ -98,7 +94,7 @@ export default function HomeScreen() {
             <Pressable
               style={styles.search}
               accessibilityRole="button"
-              accessibilityLabel="Buscar productos, marcas o categorías: próximamente"
+              accessibilityLabel="Buscar productos, marcas o categorías"
               onPress={() => setPlaceholder('Búsqueda')}>
               <HomeIcon name="search" size={23} color={palette.muted} />
               <Text style={styles.searchText} numberOfLines={1}>Buscar productos, marcas o categorías…</Text>
@@ -148,7 +144,7 @@ export default function HomeScreen() {
           </View>
 
           <SectionHeading title="Productos destacados" link="Ver todos" />
-          <Text style={styles.featuredSubtitle}>{homeDemoMode ? 'Catálogo demo · precios provisionales · sin ventas' : 'Una selección de nuestro catálogo · compras no disponibles'}</Text>
+          <Text style={styles.featuredSubtitle}>Descubre productos para aprender, crear e imaginar</Text>
           {state.status === 'loading' ? (
             <View style={styles.statusCard} accessibilityLiveRegion="polite"><ActivityIndicator color={palette.pink} /><Text style={styles.statusText}>Buscando ideas para ti…</Text></View>
           ) : state.status === 'error' ? (
@@ -165,12 +161,6 @@ export default function HomeScreen() {
             </ScrollView>
           )}
           <View style={styles.closingNote}><Text style={styles.closingStar}>✦</Text><Text style={styles.closingText}>Para aprender, crear y volver a imaginar.</Text><Text style={styles.closingStar}>✦</Text></View>
-          {__DEV__ && (
-            <View style={styles.diagnostics}>
-              <Pressable onPress={() => setShowDiagnostics((value) => !value)} accessibilityRole="button" accessibilityState={{ expanded: showDiagnostics }}><Text style={styles.diagnosticsLabel}>{showDiagnostics ? 'Ocultar' : 'Mostrar'} comprobación de API</Text></Pressable>
-              {showDiagnostics && <ApiHealthCheck />}
-            </View>
-          )}
         </View>
       </ScrollView>
 
@@ -200,7 +190,7 @@ export default function HomeScreen() {
             <Pressable onPress={() => setPlaceholder(null)} style={styles.modalClose} accessibilityRole="button" accessibilityLabel="Cerrar aviso"><HomeIcon name="close" /></Pressable>
             <Text style={styles.modalEyebrow}>MUY PRONTO</Text>
             <Text accessibilityRole="header" style={styles.modalTitle}>{placeholder}</Text>
-            <Text style={styles.modalText}>Estamos preparando esta función. Por ahora puedes descubrir los productos en el catálogo.</Text>
+            <Text style={styles.modalText}>Conoce más artículos de papelería en nuestro catálogo.</Text>
             <Pressable style={styles.modalAction} accessibilityRole="button" onPress={() => { setPlaceholder(null); openCatalog(); }}><Text style={styles.bannerButtonText}>Explorar catálogo</Text><HomeIcon name="arrow" size={18} color="#FFFFFF" /></Pressable>
             <Pressable onPress={() => setPlaceholder(null)} style={styles.modalDismiss} accessibilityRole="button"><Text style={styles.sectionLinkText}>Seguir en Inicio</Text></Pressable>
           </View>
@@ -269,11 +259,9 @@ const styles = StyleSheet.create({
   productLink: { padding: 10, paddingTop: 15, flex: 1 },
   productArt: { height: 105, alignItems: 'center', justifyContent: 'center', marginBottom: 5 },
   productPhoto: { width: '100%', height: '100%' },
-  photoPending: { color: '#81748A', fontSize: 8, marginBottom: 6 },
   productName: { fontSize: 12, fontWeight: '600', lineHeight: 16, color: palette.ink, minHeight: 48 },
   productPrice: { fontSize: 19, fontWeight: '900', color: palette.ink, marginTop: 8 },
   currency: { fontSize: 10, fontWeight: '700' },
-  demoPrice: { color: '#8C4F18', fontSize: 8, fontWeight: '800', marginTop: 4, letterSpacing: 0.4 },
   favoriteButton: { position: 'absolute', right: 2, top: 2, width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
   statusCard: { backgroundColor: '#FFF8E9', borderRadius: 18, padding: 22, alignItems: 'center', gap: 10 },
   statusTitle: { color: palette.ink, fontSize: 15, fontWeight: '800', textAlign: 'center' },
@@ -283,8 +271,6 @@ const styles = StyleSheet.create({
   closingNote: { flexDirection: 'row', gap: 8, alignItems: 'center', justifyContent: 'center', marginTop: 22, marginBottom: 12 },
   closingStar: { color: '#D1AD38', fontSize: 13 },
   closingText: { color: '#8F8197', fontSize: 10, flexShrink: 1, textAlign: 'center' },
-  diagnostics: { alignItems: 'center', paddingVertical: 10 },
-  diagnosticsLabel: { fontSize: 11, color: palette.muted, padding: 12 },
   bottomBar: { backgroundColor: '#FFFFFF', borderTopColor: '#F1EEF3', borderTopWidth: 1, paddingTop: 8, boxShadow: '0 -4px 16px rgba(45, 33, 57, 0.04)' },
   bottomBarInner: { width: '100%', maxWidth: 620, alignSelf: 'center', flexDirection: 'row', paddingHorizontal: 8 },
   navItem: { flex: 1, minHeight: 57, alignItems: 'center', gap: 5, paddingTop: 2 },
