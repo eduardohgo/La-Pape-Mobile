@@ -124,5 +124,8 @@ Asignación propuesta a Issues existentes, sin cambiar su planeación ni comenza
 No crear endpoints de esos módulos dentro de #19 ni copiar el registro con roles
 privilegiados, pregunta secreta sin challenge, OTP Math.random, logs de códigos,
 /test-email o seeds. Los controles y pruebas deben acordarse en cada actividad
-antes de habilitar autenticación/recuperación o transacciones. No se ejecutaron
-migraciones, seeds, schema sync, consultas de escritura ni despliegues.
+antes de habilitar autenticación/recuperación o transacciones. Durante la implementación
+de #19, Codex no ejecutó migraciones, seeds, schema sync, consultas de escritura ni
+despliegues. Posteriormente el responsable confirmó la aplicación y validación de
+001 por ChatGPT en Neon; ver [el registro actualizado](neon-verification-results.md).
+Ese avance del esquema no completa la validación del iPhone ni cambia #19 Testing.

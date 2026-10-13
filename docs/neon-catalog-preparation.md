@@ -1,17 +1,21 @@
 # Preparación del catálogo para Neon PostgreSQL 18
 
-Estado: archivos para revisión, **sin ejecución en Neon**. Fecha: 2026-10-12.
+Estado: **migración 001 aplicada y validada en Neon; catálogo todavía sin datos**.
+Confirmación recibida del responsable: 2026-10-12.
 Destino confirmado por el responsable: proyecto **La Pape Mobile**,
 `twilight-moon-02635569`, rama **development**, base **lapape_mobile_dev**, PostgreSQL **18**.
-El responsable informó que la base está vacía (0 tablas); no se ha vuelto a consultar
-ni se ha obtenido ninguna cadena de conexión. No se necesita otro proyecto ni Docker.
+ChatGPT realizó la ejecución y validación real, confirmadas por el responsable:
+`catalog.categories`, `catalog.brands` y `catalog.products` creadas, dos FK validadas,
+cero filas en las tres tablas, `image_url` nullable y ninguna tabla adicional
+inesperada. El estado anterior de cero tablas es histórico. Codex registra estos
+resultados sin consultar Neon, obtener credenciales ni repetir SQL.
 
 ## Alcance revisado
 
-Se prepara una proyección del catálogo, no una restauración completa de las 26 tablas
+Se conserva una proyección del catálogo, no una restauración completa de las 26 tablas
 ni un reemplazo completo del esquema Prisma del backend web. Se conservan los UUID
 de los productos candidatos y las relaciones normalizadas de categoría y marca.
-Las tablas propuestas en el esquema `catalog` son:
+Las tablas ya creadas en el esquema `catalog` son:
 
 | Tabla | Relación y protección |
 | --- | --- |
@@ -90,7 +94,7 @@ silenciosamente este importador.
 
 ## Archivos y ejecución posterior
 
-- `backend/db/migrations/001_catalog_schema.sql`: migración transaccional, sin datos,
+- `backend/db/migrations/001_catalog_schema.sql`: migración aplicada, transaccional, sin datos,
   con guardias de base, PostgreSQL 18 y estado inicial vacío. No contiene `DROP`,
   sincronización, credenciales ni importación del dump.
 - `backend/db/catalog-review.json`: lista cerrada de candidatos y decisiones pendientes.
@@ -103,31 +107,34 @@ silenciosamente este importador.
 - `backend/tools/check_sql.py`: análisis local con gramática PostgreSQL 18;
   no interpreta el SQL mediante un servidor ni conecta a bases.
 
-La migración inicial debe aplicarse una sola vez, tras aprobación. Una segunda
-ejecución se detiene y requiere revisar el estado; no borra ni recrea tablas.
+La migración inicial **ya se aplicó; no se debe repetir ni modificar su archivo**.
+Su comentario inicial de preparación se conserva como contenido histórico del
+archivo aplicado, no como declaración del estado actual. Una segunda ejecución
+se detendría ante el esquema existente; no debe usarse como verificación.
 Una migración posterior deberá tener un número nuevo, conservando las anteriores.
 La generación determinista y la versión Git permiten comparar exactamente el SQL
 aprobado. El directorio de salida `backend/db/generated/` está ignorado: el futuro
 archivo aprobado se incorporará explícitamente como una nueva migración revisada.
 
-Orden propuesto, **no ejecutado**:
+La creación y verificación del esquema ya están confirmadas. Continuación propuesta,
+**todavía no autorizada ni ejecutada**:
 
-1. Revisar estos archivos con ChatGPT y autorizar separadamente la creación del esquema.
-2. Seleccionar proyecto, rama y base exactos en Neon. El nombre de la base por sí solo
-   no demuestra la identidad del proyecto o de la rama; comprobar ambos en la consola.
-3. Con una conexión directa administrativa TLS verificada, ejecutar el preflight y
-   detenerse ante cualquier objeto inesperado. No restablecer ninguna base existente.
-4. Aplicar `001_catalog_schema.sql` y verificar tres tablas, dos FK y cero filas.
-5. Aprobar productos individualmente, corregir valores del manifiesto y validar.
-6. Generar una importación versionada, revisar UUID, precios, categorías, marcas,
-   imágenes y conteos, obtener autorización para esa importación y recién entonces aplicarla.
-7. Validar ausencia de sintéticos e inventarios, FK e identidad exacta de los productos.
-8. Preparar un rol de conexión de runtime con solo `USAGE` y `SELECT` sobre catálogo,
+1. Preparar la revisión individual de los diez candidatos: precios, marcas,
+   categorías, contenido y fotografía o aceptación explícita de ausencia.
+2. Registrar las decisiones aprobadas en el manifiesto y validar, sin importar aún.
+3. Generar una importación versionada, revisar UUID, precios, categorías, marcas,
+   imágenes y conteos, y obtener autorización específica para esa importación.
+4. Confirmar primero el destino exacto y las tres tablas existentes sin filas;
+   solo entonces aplicar exclusivamente la importación autorizada y validar ausencia
+   de sintéticos e inventarios, FK e identidad de productos.
+5. Preparar un rol de conexión de runtime con solo `USAGE` y `SELECT` sobre catálogo,
    sin privilegios de creación ni escritura y separado del propietario de migraciones.
-9. Implementar y probar endpoints únicamente al autorizar las Issues relacionadas.
+6. Conectar y probar los endpoints del catálogo únicamente al autorizar las Issues
+   relacionadas, reutilizando Express y las consultas existentes.
 
 No existe un comando de migración en `npm start` ni en `/health`. La protección
-`executionAuthorized:false` del archivo de destino documenta el estado de aprobación;
+`executionAuthorized:false` del archivo de destino documenta que no hay autorización
+para nuevas operaciones SQL ni importaciones, aunque 001 ya esté aplicada;
 no sustituye las guardias SQL ni la autorización humana.
 
 ## Conexiones del backend
@@ -220,4 +227,7 @@ Desde `frontend/`: `npm run lint -- --no-cache`, `npx --no-install tsc --noEmit`
 Estas pruebas comprueban sintaxis SQL/PLpgSQL, estructura de consultas de lectura,
 validación de datos, generación y TLS; no comprueban ejecución PostgreSQL, certificados
 del endpoint real, permisos del rol, integridad en Neon ni conectividad desde iPhone.
-Esas comprobaciones se registrarán después de autorización y ejecución real.
+La estructura inicial, sus dos FK, cero filas y nulabilidad de imagen ya cuentan con
+validación real confirmada por el responsable mediante ChatGPT. Certificados,
+permisos del runtime, consultas de catálogo, productos importados y conectividad
+desde el backend/iPhone requieren sus propias comprobaciones posteriores.

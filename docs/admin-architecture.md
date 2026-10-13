@@ -1,9 +1,11 @@
 # Arquitectura administrativa compartida: propuesta para revisión
 
 Fecha: 2026-10-12. Esta propuesta documenta trabajo futuro: **no implementa
-autenticación, tablas de usuarios, permisos ni endpoints administrativos**. No se
-ejecutó SQL, no se importaron cuentas ni inventarios y no se cambió ningún servicio.
-La migración `001_catalog_schema.sql` conserva únicamente el catálogo inicial.
+autenticación, tablas de usuarios, permisos ni endpoints administrativos**. Codex no
+ejecutó SQL al preparar o actualizar esta propuesta; no se importaron cuentas ni
+inventarios. El responsable confirmó que ChatGPT aplicó y validó 001 en Neon:
+tres tablas de catálogo, dos FK y cero filas. La identidad y administración futuras
+siguen sin implementarse; no requieren repetir el catálogo inicial.
 
 ## Decisión y límites de confianza
 

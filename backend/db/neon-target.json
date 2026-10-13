@@ -5,6 +5,15 @@
   "databaseName": "lapape_mobile_dev",
   "postgresMajor": 18,
   "reportedInitialTableCount": 0,
-  "verificationSource": "Confirmado por el responsable mediante ChatGPT; no consultado por estos scripts",
-  "executionAuthorized": false
+  "migration001Status": "applied_and_validated",
+  "confirmedOn": "2026-10-12",
+  "reportedCurrentTableCount": 3,
+  "catalogTables": ["catalog.categories", "catalog.brands", "catalog.products"],
+  "validatedForeignKeys": 2,
+  "reportedRowCounts": {"categories": 0, "brands": 0, "products": 0},
+  "imageUrlNullable": true,
+  "unexpectedTables": 0,
+  "verificationSource": "Ejecución y validación real realizadas por ChatGPT y confirmadas por el responsable; Codex no consultó ni ejecutó SQL en esta actualización",
+  "executionAuthorized": false,
+  "authorizationScope": "No autoriza repetir 001, importar candidatos ni ejecutar nuevas operaciones SQL"
 }

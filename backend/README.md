@@ -25,7 +25,14 @@ La configuración predeterminada escucha en `127.0.0.1:3000`. Para probar desde 
 
 `FRONTEND_ORIGINS` admite una lista de orígenes completos separados por comas; por defecto `http://localhost:8081,http://localhost:19006`. Solicitudes nativas sin `Origin` están admitidas. CORS no autentica ni autoriza usuarios. Se permiten encabezados `Content-Type` y `Authorization`, sin cookies de sesión. `TRUST_PROXY` vale 0 por defecto; se podrá configurar 1 al desplegar detrás de un proxy conocido. El límite global es de 100 solicitudes por IP/15 minutos; el cuerpo JSON máximo es 65536 bytes. Son valores configurables y validados.
 
-## PostgreSQL preparado, sin operaciones
+## PostgreSQL: esquema aplicado, runtime sin consultas
+
+El responsable confirmó la aplicación y validación real de `001_catalog_schema.sql`
+por ChatGPT en Neon PostgreSQL 18, rama development, base lapape_mobile_dev:
+tres tablas de catálogo, dos FK validadas, cero filas y `image_url` nullable, sin
+tablas inesperadas. Esta evidencia está en [el registro de validación](../docs/neon-verification-results.md).
+No repetir 001. El runtime de Express sigue sin consultar PostgreSQL ni habilitar
+endpoints de catálogo; los candidatos todavía no están aprobados ni importados.
 
 El destino de desarrollo confirmado por el responsable es **La Pape Mobile**, proyecto Neon `twilight-moon-02635569`, rama `development`, base `lapape_mobile_dev`, PostgreSQL 18. Estos identificadores no contienen credenciales. Esta preparación no conecta ni modifica el proyecto y no crea otro.
 

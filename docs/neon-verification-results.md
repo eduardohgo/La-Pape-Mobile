@@ -2,7 +2,29 @@
 
 Destino informado por el responsable: `twilight-moon-02635569` / `development` /
 `lapape_mobile_dev`, PostgreSQL 18, cero tablas iniciales. No se realizó una consulta
-ni una ejecución SQL en ese proyecto durante estas verificaciones.
+ni una ejecución SQL por Codex en ese proyecto durante las verificaciones locales
+de preparación descritas abajo. El estado inicial de cero tablas es histórico.
+
+## Validación real de 001 confirmada por el responsable
+
+Confirmación recibida el 2026-10-12: ChatGPT aplicó exitosamente
+`001_catalog_schema.sql` y realizó verificaciones reales en Neon. Codex registra
+el resultado comunicado; no afirma haber repetido la ejecución o una consulta independiente.
+
+| Comprobación real confirmada | Resultado |
+| --- | --- |
+| PostgreSQL / rama / base | 18 / development / lapape_mobile_dev |
+| Tablas creadas | catalog.categories, catalog.brands, catalog.products |
+| Claves foráneas validadas | 2 |
+| Filas | 0 categorías, 0 marcas, 0 productos |
+| image_url | Permite NULL |
+| Tablas adicionales inesperadas | Ninguna |
+
+001 queda aplicada y su archivo se conserva sin modificar ni volver a ejecutar.
+Los diez candidatos siguen sin aprobar y sin importar. Esta validación del esquema
+no equivale a validar los endpoints del catálogo ni la conexión desde el iPhone.
+
+## Verificaciones locales históricas de preparación
 
 | Comprobación local | Resultado | Alcance |
 | --- | --- | --- |
@@ -46,11 +68,13 @@ real de Neon ni una autenticación real con channel binding.
 
 La aplicación Express conserva únicamente `/health`, que no accede a PostgreSQL.
 Las pruebas HTTP locales escucharon en puertos temporales de loopback y cerraron sus
-listeners. No se ejecutaron restauraciones, migraciones, seeds, `db push`, `sync`,
+listeners. Codex no ejecutó restauraciones, migraciones, seeds, `db push`, `sync`,
 operaciones comerciales ni despliegues.
 
 La revisión SQL local **no valida ejecución, resolución de tipos, permisos ni FK en un
-servidor real**. La comprobación de esos puntos en Neon requiere autorización posterior.
+servidor real**. La ejecución y las dos FK del esquema inicial fueron confirmadas
+separadamente por el responsable mediante ChatGPT. Permisos del runtime, consultas,
+importación de datos y conectividad del backend aún requieren validación posterior.
 La validación del iPhone también permanece pendiente.
 
 GitHub leído sin cambios de estado: #19 Testing; #102 Done/completed; PB-01 In Progress;

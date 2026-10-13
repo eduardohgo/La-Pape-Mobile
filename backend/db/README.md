@@ -1,6 +1,6 @@
 # Preparación del catálogo para Neon PostgreSQL 18
 
-Estos archivos son una propuesta revisable. No se ejecutó SQL, no se abrió una conexión a Neon y no se activaron endpoints de catálogo. El servidor conserva únicamente `GET /health`.
+La migración **001 ya fue aplicada y validada realmente en Neon por ChatGPT**, según confirmación del responsable recibida el 2026-10-12. Codex registra esa evidencia sin consultar Neon ni volver a ejecutar SQL. El servidor conserva únicamente `GET /health`; los endpoints del catálogo siguen pendientes.
 
 ## Destino confirmado por el responsable
 
@@ -11,17 +11,21 @@ Estos archivos son una propuesta revisable. No se ejecutó SQL, no se abrió una
 | Rama | `development` |
 | Base | `lapape_mobile_dev` |
 | PostgreSQL | 18 |
-| Estado informado | 0 tablas |
+| Estado inicial histórico | 0 tablas |
+| Estado confirmado después de 001 | 3 tablas de catálogo, 2 FK validadas |
+| Filas cargadas | 0 categorías, 0 marcas y 0 productos |
+| Fotografía | `image_url` admite NULL |
+| Tablas inesperadas | Ninguna |
 
 No se necesita crear otro proyecto. Los identificadores anteriores no son credenciales. Las cadenas de conexión se obtendrán para este destino mediante el proceso autorizado y permanecerán fuera de Git y de Expo.
 
 ## Archivos y orden de revisión
 
-1. `migrations/001_catalog_schema.sql`: crea el esquema `catalog` con tres tablas vacías y sus restricciones. Usa una transacción y exige PostgreSQL 18, el nombre de base correcto y ausencia de tablas, vistas y secuencias de usuario. Si ya existe `catalog`, se detiene; no contiene `DROP`, sincronización automática ni `IF NOT EXISTS` que oculte diferencias.
+1. `migrations/001_catalog_schema.sql`: **aplicada; no volver a ejecutar**. Creó `catalog.categories`, `catalog.brands` y `catalog.products`. El archivo aplicado se conserva sin cambios, incluyendo su comentario inicial histórico de preparación. Sus guardias iniciales no corresponden al estado actual con tres tablas. Todo cambio futuro deberá ser una migración nueva revisada.
 2. `catalog-review.json`: diez candidatos pendientes, las tres categorías y seis marcas que relacionan esos candidatos. Es un manifiesto de revisión, no un seed ni datos aprobados.
 3. `../scripts/catalog-validate.js`: valida el manifiesto sin red ni base de datos.
 4. `../scripts/catalog-generate.js`: genera una futura importación SQL exclusivamente a partir de aprobaciones explícitas. Con el manifiesto actual se detiene porque hay cero productos aprobados y no crea archivos.
-5. `queries/` y `validation/`: consultas de lectura y comprobaciones previstas para una revisión/aplicación posterior. No se ejecutan al iniciar Express.
+5. `queries/` y `validation/`: consultas de lectura y comprobaciones del esquema/integridad. Las dos FK y la estructura inicial ya tienen validación real confirmada; el preflight de base sin tablas es una referencia histórica, no un paso que repetir ahora. Estos archivos no se ejecutan al iniciar Express.
 
 La primera importación será un archivo independiente, generado después de aprobar el catálogo. Se revisará su diff y se solicitará autorización antes de aplicarlo. No se ofrece un comando de restauración automática.
 
@@ -85,7 +89,7 @@ Actualmente ese comando debe fallar con `No approved products` y no crear el arc
 - Revisar con ChatGPT el SQL y las aprobaciones, y obtener autorización explícita.
 - Confirmar que la conexión directa corresponde al proyecto y a la rama indicados; `current_database()` verifica la base, pero SQL no acredita por sí solo el Project ID de Neon.
 - Usar conexión directa para migraciones y un rol de aplicación separado con permisos de lectura. La URL agrupada se reserva para el backend; nunca se entrega a Expo.
-- Verificar la base vacía, el comportamiento transaccional y las restricciones en el destino aprobado. La sintaxis y las pruebas offline no sustituyen esta validación en PostgreSQL.
+- Antes de una futura importación autorizada, comprobar el esquema ya existente y que sus tres tablas de catálogo continúen sin filas. No exigir una base sin tablas ni repetir 001. La validación confirmada del esquema no autoriza importar productos; permisos de runtime, consultas y conectividad real del backend siguen pendientes.
 - Mantener #19 en Testing y PR #121 abierto; esta preparación no valida el iPhone ni completa PB-02, PB-06 o PB-07.
 
 La administración compartida por Mobile y Web, sus permisos y tablas futuras se proponen en [docs/admin-architecture.md](../../docs/admin-architecture.md). Esta decisión no añade tablas de usuarios, autenticación ni rutas administrativas a la migración 001.

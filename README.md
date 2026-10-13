@@ -93,7 +93,7 @@ npm run check
 
 Ver [frontend/README.md](frontend/README.md), [backend/README.md](backend/README.md)
 y [docs/issue-19.md](docs/issue-19.md) para configuración, límites y evidencia.
-No hay despliegue, migración, sincronización automática, autenticación ni compras
+No hay despliegue, migraciones automáticas, sincronización, autenticación ni compras
 habilitadas en esta base. La Issue #19 permanece en Testing hasta la validación
 manual del responsable; PB-01 permanece abierto.
 
@@ -101,6 +101,10 @@ manual del responsable; PB-01 permanece abierto.
 
 El destino de desarrollo confirmado es Neon PostgreSQL 18, proyecto
 `twilight-moon-02635569`, rama `development`, base `lapape_mobile_dev`.
+El responsable confirmó que ChatGPT aplicó y validó 001: tres tablas de catálogo,
+dos FK validadas, cero filas, imagen nullable y ninguna tabla inesperada. No repetir
+esa migración; el archivo aplicado se conserva sin cambios. Codex registra la
+confirmación sin ejecutar SQL en esta actualización.
 Los scripts de esquema, consultas de lectura y revisión de candidatos están en
 `backend/db/`. No se ejecutan al iniciar Express ni desde Expo.
 Los diez candidatos siguen pendientes de aprobación; se excluyen productos e
