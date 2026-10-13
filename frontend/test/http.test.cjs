@@ -158,3 +158,41 @@ test('catalog does not confuse API failures with an empty catalog', async () => 
   const service = createCatalogService(config, async () => Response.json({ error: 'unavailable' }, { status: 503 }));
   await assert.rejects(service.products(), matchError('http', 503));
 });
+
+
+test('demo preview from Neon is explicitly non-purchasable and has no brand field', async () => {
+  const { createCatalogService, isDemoCatalogResponse } = require('../.test-build/services/catalog.service.js');
+  const item = {
+    id: 'e9096108-10c1-4483-9a3c-f61283d3c24f',
+    sku: 'LAP-CUA-001',
+    name: 'Cuaderno profesional cuadriculado',
+    category_id: '155b7072-240d-459e-a843-fc2ca3502169',
+    category_name: 'Cuadernos',
+    price: '89.90', currency: 'MXN', image_url: null,
+    is_demo: true, is_for_sale: false,
+  };
+  const payload = { mode: 'demo', purchasable: false, data: [item] };
+  assert.equal(isDemoCatalogResponse(payload), true);
+  assert.equal(isDemoCatalogResponse({ ...payload, purchasable: true }), false);
+  assert.equal(isDemoCatalogResponse({ ...payload, data: [{ ...item, is_for_sale: true }] }), false);
+  assert.equal(isDemoCatalogResponse({ ...payload, data: [{ ...item, is_demo: false }] }), false);
+  assert.equal(isDemoCatalogResponse({ ...payload, data: [{ ...item, image_url: 'https://unverified.example/photo.jpg' }] }), false);
+
+  let calls = 0;
+  const service = createCatalogService(config, async (url, options) => {
+    assert.equal(url, 'http://127.0.0.1:3000/demo/products');
+    assert.equal(options.method, 'GET');
+    calls += 1;
+    return Response.json(payload);
+  });
+  const rows = await service.demoProducts();
+  assert.deepEqual(rows, [item]);
+  assert.equal(calls, 1);
+});
+
+test('demo preview rejects server errors instead of using the ten static fixtures', async () => {
+  const { createCatalogService } = require('../.test-build/services/catalog.service.js');
+  const service = createCatalogService(config, async () =>
+    Response.json({ error: 'demo unavailable' }, { status: 503 }));
+  await assert.rejects(service.demoProducts(), matchError('http', 503));
+});
