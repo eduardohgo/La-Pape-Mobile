@@ -48,3 +48,28 @@
 5. Conectar el cliente Expo al backend únicamente cuando API y entorno de demostración estén validados.
 
 **No cambia** el estado de GitHub Projects, los PR #121/#122, ni ninguna tabla o fila en Neon.
+
+## Carga técnica preparada (NO ejecutada)
+
+Se preparó `backend/db/migrations/002_demo_previews.sql` con los **mismos diez UUID,
+SKU, nombres, categorías y precios del manifiesto derivado de `10 (1).zip`**.
+Se excluyeron los 200 productos sintéticos y los dos registros descartados. Las marcas
+históricas permanecen en `catalog-review.json`, pero **no forman parte de la
+representación visual ni de los datos de ejemplo**.
+
+La propuesta crea un esquema independiente `demo` con una tabla
+`demo.product_previews`. Tiene límites explícitos `is_demo=true`, `is_for_sale=false`,
+`image_url IS NULL` y permisos de solo lectura para el rol técnico. No inserta
+nada en `catalog.products`, no altera el SQL de migración 001 y no habilita compras.
+
+**Estado:** archivo únicamente preparado en GitHub. NO ha sido ejecutado en Neon.
+La base existente mantiene cero filas de catálogo. Antes de ejecutar se necesita
+revisión técnica del SQL y **nueva autorización explícita del responsable**.
+
+Para mostrar estas diez fichas **desde Neon y no desde fixtures locales** falta crear
+un endpoint específico de demo, habilitado exclusivamente en desarrollo y desactivado
+por defecto. La API pública normal seguirá leyendo productos comerciales revisados
+solo desde `catalog.products`; no deberá consultar automáticamente `demo`.
+Expo mostrará de forma visible «Datos de demostración» y continuará sin funciones
+de venta. Se requieren pruebas de seguridad, API y dispositivo antes de considerar
+la integración terminada.
