@@ -27,7 +27,7 @@ BEGIN
   IF EXISTS (SELECT 1 FROM catalog.products) THEN
     RAISE EXCEPTION 'Catalog contains records: verify production separation first';
   END IF;
-END
+END;
 $demo_guard$;
 
 CREATE SCHEMA demo;
@@ -79,6 +79,6 @@ BEGIN
      (SELECT count(*) FROM demo.product_previews WHERE NOT is_demo OR is_for_sale OR image_url IS NOT NULL) <> 0 THEN
     RAISE EXCEPTION 'Demo import postflight failed';
   END IF;
-END
+END;
 $demo_validate$;
 COMMIT;
