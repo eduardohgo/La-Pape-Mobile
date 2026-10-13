@@ -1,4 +1,5 @@
 import { Image } from 'expo-image';
+import { router } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -22,9 +23,11 @@ function ProductCard({ product }: { product: VisibleProduct }) {
   const theme = useTheme();
   const icon = categoryIllustrations[product.category_name] ?? '📦';
   return (
-    <View
+    <Pressable
       style={[styles.card, { backgroundColor: theme.background, borderColor: theme.backgroundSelected }]}
-      accessible
+      accessibilityRole="button"
+      accessibilityHint="Abrir detalle del producto"
+      onPress={() => router.push({ pathname: '/products/[id]', params: { id: product.id } })}
       accessibilityLabel={`${product.name}. ${product.category_name}. ${product.price} pesos mexicanos. ${demoMode ? 'Precio de demostración. ' : ''}Compras no disponibles.`}>
       <View style={[styles.photo, { backgroundColor: theme.backgroundElement }]}>
         {product.image_url ? (
@@ -46,7 +49,7 @@ function ProductCard({ product }: { product: VisibleProduct }) {
         <Text style={[styles.price, { color: theme.text }]}>${product.price}</Text>
         <Text style={styles.demoPriceLabel}>{demoMode ? 'PRECIO DE DEMOSTRACIÓN' : 'MXN'}</Text>
       </View>
-    </View>
+    </Pressable>
   );
 }
 
