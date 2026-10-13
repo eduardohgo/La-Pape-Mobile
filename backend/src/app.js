@@ -4,8 +4,10 @@ import helmet from 'helmet';
 import { rateLimit } from 'express-rate-limit';
 import { createHealthRouter } from './routes/health.routes.js';
 import { errorHandler, notFound } from './middlewares/errors.js';
+import { createCatalogRouter } from './routes/catalog.routes.js';
+import { createCatalogRepository } from './catalog/catalog.repository.js';
 
-export function createApp(config) {
+export function createApp(config, { catalogRepository } = {}) {
   const app = express();
   app.disable('x-powered-by');
   app.set('trust proxy', config.trustProxy);
@@ -31,6 +33,10 @@ export function createApp(config) {
   }));
   app.use(express.json({ limit: config.jsonBodyLimitBytes }));
   app.use(createHealthRouter());
+  if (config.catalogApiEnabled) {
+    const repository = catalogRepository ?? createCatalogRepository(config.database);
+    app.use(createCatalogRouter(repository));
+  }
   app.use(notFound);
   app.use(errorHandler);
   return app;
