@@ -69,3 +69,50 @@ test('demo errors are sanitized and do not reveal internal Postgres secrets', as
   const body = await response.text();
   assert.doesNotMatch(body, /token|private|postgresql/);
 });
+
+
+test('demo product detail reads one id, stays non-purchasable and omits unverified brands', async (t) => {
+  const config = loadConfig({
+    NODE_ENV: 'development', CATALOG_API_ENABLED: 'true', CATALOG_DEMO_API_ENABLED: 'true',
+  });
+  const demo = {
+    id: ID, sku: 'LAP-CUA-001', name: 'Cuaderno profesional cuadriculado',
+    category_id: ID, category_name: 'Cuadernos', price: '89.90',
+    currency: 'MXN', image_url: null, is_demo: true, is_for_sale: false,
+  };
+  const calls = [];
+  const base = await serve(t, config, {
+    getDemoProduct: async (id) => { calls.push(id); return id === ID ? demo : null; },
+  });
+  const response = await fetch(base + '/demo/products/' + ID);
+  assert.equal(response.status, 200);
+  assert.equal(response.headers.get('cache-control'), 'no-store');
+  assert.deepEqual(await response.json(), { mode: 'demo', purchasable: false, data: demo });
+  assert.deepEqual(calls, [ID]);
+  assert.equal((await fetch(base + '/demo/products/00000000-0000-4000-8000-000000000000')).status, 404);
+  assert.equal((await fetch(base + '/demo/products/bad-id')).status, 400);
+  assert.equal((await fetch(base + '/demo/products/' + ID + '?draft=1')).status, 400);
+  assert.deepEqual(calls, [ID, '00000000-0000-4000-8000-000000000000']);
+});
+
+test('demo detail is unavailable without feature flag or outside development', async (t) => {
+  for (const options of [
+    { NODE_ENV: 'development', CATALOG_API_ENABLED: 'true' },
+    { NODE_ENV: 'production', CATALOG_API_ENABLED: 'true', CATALOG_DEMO_API_ENABLED: 'true' },
+  ]) {
+    const base = await serve(t, loadConfig(options), { getDemoProduct: async () => { throw new Error('not reachable'); } });
+    assert.equal((await fetch(base + '/demo/products/' + ID)).status, 404);
+  }
+});
+
+test('demo detail sanitizes data store failures', async (t) => {
+  const config = loadConfig({
+    NODE_ENV: 'development', CATALOG_API_ENABLED: 'true', CATALOG_DEMO_API_ENABLED: 'true',
+  });
+  const base = await serve(t, config, {
+    getDemoProduct: async () => { throw new Error('postgresql://private:secret@internal'); },
+  });
+  const response = await fetch(base + '/demo/products/' + ID);
+  assert.equal(response.status, 503);
+  assert.doesNotMatch(await response.text(), /private|secret|postgresql/);
+});
