@@ -5,7 +5,12 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { BottomTabInset } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
-import { type CatalogCategory, type CatalogProduct, getCatalogService } from '@/services/catalog.service';
+import { type CatalogCategory, type CatalogProduct, type DemoCatalogProduct, getCatalogService } from '@/services/catalog.service';
+
+// Public variables only. Never include Neon credentials in Expo.
+// Preview can run ONLY in Metro/dev builds and must be explicitly enabled.
+const demoMode = __DEV__ && process.env.EXPO_PUBLIC_CATALOG_MODE === 'demo';
+type VisibleProduct = CatalogProduct | DemoCatalogProduct;
 
 const categoryIllustrations: Record<string, string> = {
   Cuadernos: '📓',
@@ -13,14 +18,14 @@ const categoryIllustrations: Record<string, string> = {
   Oficina: '✏️',
 };
 
-function ProductCard({ product }: { product: CatalogProduct }) {
+function ProductCard({ product }: { product: VisibleProduct }) {
   const theme = useTheme();
   const icon = categoryIllustrations[product.category_name] ?? '📦';
   return (
     <View
       style={[styles.card, { backgroundColor: theme.background, borderColor: theme.backgroundSelected }]}
       accessible
-      accessibilityLabel={`${product.name}. ${product.category_name}. ${product.price} pesos mexicanos. ${__DEV__ ? 'Precio de demostración. ' : ''}Compras no disponibles.`}>
+      accessibilityLabel={`${product.name}. ${product.category_name}. ${product.price} pesos mexicanos. ${demoMode ? 'Precio de demostración. ' : ''}Compras no disponibles.`}>
       <View style={[styles.photo, { backgroundColor: theme.backgroundElement }]}>
         {product.image_url ? (
           <Image source={{ uri: product.image_url }} style={styles.productImage} contentFit="contain" />
@@ -39,7 +44,7 @@ function ProductCard({ product }: { product: CatalogProduct }) {
           {product.name}
         </Text>
         <Text style={[styles.price, { color: theme.text }]}>${product.price}</Text>
-        <Text style={styles.demoPriceLabel}>{__DEV__ ? 'PRECIO DE DEMOSTRACIÓN' : 'MXN'}</Text>
+        <Text style={styles.demoPriceLabel}>{demoMode ? 'PRECIO DE DEMOSTRACIÓN' : 'MXN'}</Text>
       </View>
     </View>
   );
@@ -49,7 +54,7 @@ export default function CatalogScreen() {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
   const [categories, setCategories] = useState<CatalogCategory[]>([]);
-  const [products, setProducts] = useState<CatalogProduct[]>([]);
+  const [products, setProducts] = useState<VisibleProduct[]>([]);
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -62,13 +67,32 @@ export default function CatalogScreen() {
       setError(false);
       try {
         const service = getCatalogService();
-        const [loadedCategories, loadedProducts] = await Promise.all([
-          service.categories({ signal: controller.signal }),
-          service.products({ signal: controller.signal }),
-        ]);
-        if (controller.signal.aborted) return;
-        setCategories(loadedCategories);
-        setProducts(loadedProducts);
+        if (demoMode) {
+          const previews: DemoCatalogProduct[] = await service.demoProducts({ signal: controller.signal });
+          if (controller.signal.aborted) return;
+          const uniqueCategories: CatalogCategory[] = [];
+          const seenCategories = new Set<string>();
+          for (const product of previews) {
+            if (!seenCategories.has(product.category_id)) {
+              seenCategories.add(product.category_id);
+              uniqueCategories.push({
+                id: product.category_id,
+                name: product.category_name,
+                description: null,
+              });
+            }
+          }
+          setCategories(uniqueCategories);
+          setProducts(previews);
+        } else {
+          const [loadedCategories, loadedProducts] = await Promise.all([
+            service.categories({ signal: controller.signal }),
+            service.products({ signal: controller.signal }),
+          ]);
+          if (controller.signal.aborted) return;
+          setCategories(loadedCategories);
+          setProducts(loadedProducts);
+        }
       } catch {
         if (!controller.signal.aborted) setError(true);
       } finally {
@@ -99,16 +123,17 @@ export default function CatalogScreen() {
         <Text style={styles.brand}>LA PAPE</Text>
         <Text style={[styles.heading, { color: theme.text }]}>Catálogo</Text>
         <Text style={[styles.subtitle, { color: theme.textSecondary }]}>
-          Productos consultados desde nuestra API de La Pape.
+          {demoMode ? 'Artículos del respaldo original, mostrados solo para pruebas.' : 'Productos consultados desde nuestra API de La Pape.'}
         </Text>
       </View>
 
       {__DEV__ && (
         <View style={styles.notice}>
-          <Text style={styles.noticeTitle}>DESARROLLO · SIN COMPRAS</Text>
+          <Text style={styles.noticeTitle}>{demoMode ? 'DEMOSTRACIÓN · SIN VENTAS' : 'DESARROLLO · SIN COMPRAS'}</Text>
           <Text style={styles.noticeText}>
-            Los artículos se consultan en Express y Neon. Los precios se muestran solo para demostración;
-            las marcas e inventarios aún no se verifican.
+            {demoMode
+              ? 'Los artículos proceden del ZIP anterior y se consultan desde Neon. Precios provisionales, fotografías genéricas, marcas ocultas y compras deshabilitadas.'
+              : 'El catálogo se consulta desde Express y Neon. No hay funciones de compra habilitadas.'}
           </Text>
         </View>
       )}
@@ -131,13 +156,15 @@ export default function CatalogScreen() {
       ) : products.length === 0 ? (
         <View style={[styles.status, { backgroundColor: theme.backgroundElement, borderRadius: 16 }]}>
           <Text style={styles.emptyIcon}>📦</Text>
-          <Text style={[styles.statusTitle, { color: theme.text }]}>Todavía no hay productos publicados</Text>
+          <Text style={[styles.statusTitle, { color: theme.text }]}>{demoMode ? 'Aún no hay artículos de demostración' : 'Todavía no hay productos publicados'}</Text>
           <Text style={[styles.statusText, { color: theme.textSecondary }]}>
-            La conexión funciona, pero Neon aún no tiene artículos aprobados para mostrar.
+            {demoMode
+              ? 'Todavía no se ha cargado el conjunto de prueba del ZIP en Neon.'
+              : 'La conexión funciona, pero Neon aún no tiene artículos aprobados para mostrar.'}
           </Text>
-          {__DEV__ && (
+          {!demoMode && __DEV__ && (
             <Text style={[styles.statusText, { color: theme.textSecondary }]}>
-              Los diez productos de demostración todavía no se han importado.
+              Los diez productos de demostración están separados del catálogo comercial.
             </Text>
           )}
           <Pressable accessibilityRole="button" style={styles.retry} onPress={() => setReload((value) => value + 1)}>
@@ -167,7 +194,7 @@ export default function CatalogScreen() {
           </ScrollView>
 
           <View style={styles.sectionTitle}>
-            <Text style={[styles.sectionHeading, { color: theme.text }]}>Productos</Text>
+            <Text style={[styles.sectionHeading, { color: theme.text }]}>{demoMode ? 'Productos de demostración' : 'Productos'}</Text>
             <Text style={[styles.counter, { color: theme.textSecondary }]}>{filtered.length} artículos</Text>
           </View>
           {filtered.length === 0 ? (
