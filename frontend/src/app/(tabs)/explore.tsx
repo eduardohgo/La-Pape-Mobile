@@ -42,22 +42,25 @@ function ProductCard({ product, onFavorite }: { product: VisibleProduct; onFavor
         onPress={() => router.push({ pathname: '/products/[id]', params: { id: product.id } })}
         style={({ pressed }) => [styles.cardLink, pressed && styles.pressed]}
         accessibilityRole="button"
-        accessibilityLabel={product.name + '. ' + product.price + ' pesos mexicanos.' + (demoMode ? ' Precio de demostración.' : '')}
-        accessibilityHint="Abrir detalle del producto por su identificador. Compras no disponibles.">
+        accessibilityLabel={product.name + '. ' + product.price + ' pesos mexicanos.'}
+        accessibilityHint="Abrir el detalle de este artículo.">
         <ProductVisual product={product} />
         <View style={styles.cardInfo}>
           <Text style={styles.cardCategory}>{product.category_name}</Text>
           <Text style={styles.productName} numberOfLines={3}>{product.name}</Text>
           <Text style={styles.price}>{'$'}{product.price} <Text style={styles.currency}>{product.currency}</Text></Text>
-          {demoMode && <Text style={styles.priceDemo}>PRECIO DEMO</Text>}
         </View>
       </Pressable>
       <Pressable style={styles.favorite} accessibilityRole="button" accessibilityLabel={'Favoritos de ' + product.name + ': próximamente'} onPress={onFavorite}>
         <HomeIcon name="heart" size={20} color={palette.muted} />
       </Pressable>
-      <Pressable disabled accessibilityRole="button" accessibilityState={{ disabled: true }} accessibilityLabel={'Agregar ' + product.name + ' al carrito: próximamente'} style={styles.addButton}>
-        <HomeIcon name="cart" color="#A5466D" size={17} />
-        <Text style={styles.addLabel}>Agregar · próximamente</Text>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={'Ver detalles de ' + product.name}
+        onPress={() => router.push({ pathname: '/products/[id]', params: { id: product.id } })}
+        style={styles.addButton}>
+        <Text style={styles.addLabel}>Ver detalle</Text>
+        <HomeIcon name="arrow" color="#FFFFFF" size={17} />
       </Pressable>
     </View>
   );
@@ -153,14 +156,10 @@ export default function CatalogScreen() {
           <View style={styles.chips} accessibilityLabel="Categorías del catálogo">
             {categories.map(category => <CategoryChip key={category.id} category={category} selected={category.id === selectedCategory} onPress={() => setSelectedCategory(category.id)} />)}
           </View>
-          <View style={styles.notice}>
-            <Text style={styles.noticeLabel}>{demoMode ? 'DEMO · SIN VENTAS' : 'CONSULTA · SIN COMPRAS'}</Text>
-            <Text style={styles.noticeText}>{demoMode ? 'Precios provisionales. Fotografías, marcas e inventario pendientes de verificación.' : 'Información del catálogo. Compras aún no disponibles.'}</Text>
-          </View>
 
           {state.status === 'loading' ? <ShopStatus title="Consultando catálogo…" loading /> :
-            state.status === 'error' ? <ShopStatus title="No pudimos cargar el catálogo" message="Comprueba la conexión con Express y vuelve a intentarlo." onRetry={() => setReload(value => value + 1)} /> :
-              state.products.length === 0 ? <ShopStatus title={demoMode ? 'Aún no hay artículos de demostración' : 'Todavía no hay productos publicados'} message="La API no devolvió artículos para mostrar. Puedes actualizar el catálogo." onRetry={() => setReload(value => value + 1)} retryLabel="Actualizar catálogo" /> :
+            state.status === 'error' ? <ShopStatus title="No pudimos cargar el catálogo" message="Revisa tu conexión e inténtalo de nuevo." onRetry={() => setReload(value => value + 1)} /> :
+              state.products.length === 0 ? <ShopStatus title="Por ahora no hay artículos disponibles" message="Vuelve a visitarnos para conocer más de nuestra selección." onRetry={() => setReload(value => value + 1)} retryLabel="Actualizar catálogo" /> :
                 <>
                   <View style={styles.resultsHeader}>
                     <Text style={styles.resultsCount} accessibilityLiveRegion="polite">{filtered.length} {filtered.length === 1 ? 'artículo' : 'artículos'}</Text>
@@ -173,7 +172,7 @@ export default function CatalogScreen() {
                     </View>)}</View>}
                 </>
           }
-          <Text style={styles.footer}>Ideas para aprender y crear. Compras no disponibles.</Text>
+          <Text style={styles.footer}>Ideas para aprender, crear y descubrir.</Text>
         </View>
       </ScrollView>
       <CatalogTabBar onPending={setFeature} onCatalog={() => { Keyboard.dismiss(); scroll.current?.scrollTo({ y: 0, animated: true }); }} />
@@ -205,9 +204,6 @@ const styles = StyleSheet.create({
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 7, marginBottom: 13 },
   chip: { minHeight: 42, paddingHorizontal: 15, paddingVertical: 11, justifyContent: 'center', borderRadius: 23 },
   chipLabel: { fontSize: 12, fontWeight: '700' },
-  notice: { backgroundColor: '#FFF8E9', borderRadius: 14, padding: 12, gap: 4, marginBottom: 12 },
-  noticeLabel: { color: '#85520C', fontSize: 9, fontWeight: '900', letterSpacing: 0.5 },
-  noticeText: { color: '#796846', fontSize: 10, lineHeight: 16 },
   resultsHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 12 },
   resultsCount: { color: palette.muted, fontSize: 12, fontWeight: '600' },
   resetButton: { minHeight: 44, justifyContent: 'center', paddingHorizontal: 4 },
@@ -218,10 +214,9 @@ const styles = StyleSheet.create({
   cardCategory: { fontSize: 9, fontWeight: '600', color: palette.muted, marginBottom: 5 },
   productName: { fontSize: 13, fontWeight: '700', color: palette.ink, lineHeight: 18, minHeight: 54 },
   price: { color: palette.ink, fontSize: 21, fontWeight: '900', marginTop: 8 }, currency: { fontSize: 10, fontWeight: '700' },
-  priceDemo: { fontSize: 8, color: '#8C4F18', fontWeight: '800', marginTop: 4, letterSpacing: 0.4 },
   favorite: { position: 'absolute', top: 3, right: 3, width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
-  addButton: { backgroundColor: '#FBE3ED', borderRadius: 22, minHeight: 44, paddingHorizontal: 7, paddingVertical: 8, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 5 },
-  addLabel: { color: '#94405F', fontSize: 9, lineHeight: 13, fontWeight: '700', flexShrink: 1, textAlign: 'center' },
+  addButton: { backgroundColor: '#BC2862', borderRadius: 22, minHeight: 44, paddingHorizontal: 7, paddingVertical: 8, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 5 },
+  addLabel: { color: '#FFFFFF', fontSize: 11, lineHeight: 15, fontWeight: '800', flexShrink: 1, textAlign: 'center' },
   footer: { color: palette.muted, fontSize: 11, lineHeight: 18, textAlign: 'center', marginTop: 24 },
   modalTitle: { color: palette.ink, fontSize: 23, fontWeight: '900', textAlign: 'center' },
   modalText: { color: palette.muted, fontSize: 13, lineHeight: 20, marginTop: 10, textAlign: 'center' },
