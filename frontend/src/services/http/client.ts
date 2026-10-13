@@ -1,7 +1,7 @@
 import type { ApiConfig } from '../../config/env';
 import { ApiError } from './errors';
 
-export type RequestOptions = { signal?: AbortSignal };
+export type RequestOptions = { signal?: AbortSignal; query?: Readonly<Record<string, string>> };
 export type FetchFunction = typeof fetch;
 
 // Only GET JSON is exposed in this stage. Auth and mutations belong to later PBs.
@@ -10,6 +10,11 @@ export function createHttpClient(config: ApiConfig, fetchRequest: FetchFunction 
     async get<T>(path: string, validate: (data: unknown) => data is T, options: RequestOptions = {}): Promise<T> {
       if (!/^\/[a-zA-Z0-9/_-]+$/.test(path) || path.startsWith('//')) throw new ApiError('configuration');
       if (options.signal?.aborted) throw new ApiError('cancelled');
+      if (options.query && Object.keys(options.query).some((key) => !/^[a-zA-Z][a-zA-Z0-9_]*$/.test(key))) {
+        throw new ApiError('configuration');
+      }
+      const search = options.query ? new URLSearchParams(Object.entries(options.query)).toString() : '';
+      const requestUrl = `${config.baseUrl}${path}${search ? `?${search}` : ''}`;
       const controller = new AbortController();
       let rejectAbort: (error: ApiError) => void = () => {};
       const interrupted = new Promise<never>((_resolve, reject) => { rejectAbort = reject; });
@@ -25,7 +30,7 @@ export function createHttpClient(config: ApiConfig, fetchRequest: FetchFunction 
       const timer = setTimeout(() => abort('timeout'), config.timeoutMs);
       try {
         const work = async () => {
-          const response = await fetchRequest(`${config.baseUrl}${path}`, {
+          const response = await fetchRequest(requestUrl, {
             method: 'GET',
             headers: { Accept: 'application/json' },
             signal: controller.signal,
