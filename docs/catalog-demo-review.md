@@ -66,10 +66,14 @@ nada en `catalog.products`, no altera el SQL de migración 001 y no habilita com
 La base existente mantiene cero filas de catálogo. Antes de ejecutar se necesita
 revisión técnica del SQL y **nueva autorización explícita del responsable**.
 
-Para mostrar estas diez fichas **desde Neon y no desde fixtures locales** falta crear
-un endpoint específico de demo, habilitado exclusivamente en desarrollo y desactivado
-por defecto. La API pública normal seguirá leyendo productos comerciales revisados
-solo desde `catalog.products`; no deberá consultar automáticamente `demo`.
-Expo mostrará de forma visible «Datos de demostración» y continuará sin funciones
-de venta. Se requieren pruebas de seguridad, API y dispositivo antes de considerar
-la integración terminada.
+Ya está **preparado en código** `GET /demo/products`, habilitable únicamente
+en desarrollo mediante `CATALOG_DEMO_API_ENABLED=true` junto con
+`CATALOG_API_ENABLED=true`, y apagado por defecto. El SQL consulta `demo`
+en transacción de solo lectura. Expo tiene un modo opt-in
+`EXPO_PUBLIC_CATALOG_MODE=demo` solo en `__DEV__`; no sustituye silenciosamente
+una respuesta vacía por datos locales. El frontend etiqueta los precios como
+«PRECIO DE DEMOSTRACIÓN», oculta marcas y no ofrece compras.
+La API comercial sigue leyendo `catalog.products` y no incorpora filas de demo.
+
+**Pendiente:** comprobar pruebas locales, autorizar y aplicar migración 002,
+validar exactamente diez registros y verificar Safari/Expo Go en el iPhone.
