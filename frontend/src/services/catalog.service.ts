@@ -44,6 +44,16 @@ export type DemoCatalogProduct = Readonly<{
   is_for_sale: false;
 }>;
 
+export type CatalogProductDetail = CatalogProduct & Readonly<{ description: string }>;
+
+export type CatalogProductDetailResponse = Readonly<{ data: CatalogProductDetail }>;
+
+export type DemoProductDetailResponse = Readonly<{
+  mode: 'demo';
+  purchasable: false;
+  data: DemoCatalogProduct;
+}>;
+
 export type DemoCatalogResponse = Readonly<{
   mode: 'demo';
   purchasable: false;
@@ -99,6 +109,17 @@ export function isDemoCatalogResponse(value: unknown): value is DemoCatalogRespo
     item.is_demo === true && item.is_for_sale === false);
 }
 
+export function isCatalogProductDetailResponse(value: unknown): value is CatalogProductDetailResponse {
+  return record(value) && record(value.data) &&
+    typeof value.data.description === 'string' &&
+    isProductResponse({ data: [value.data], page: { hasMore: false, nextCursor: null } });
+}
+
+export function isDemoProductDetailResponse(value: unknown): value is DemoProductDetailResponse {
+  return record(value) && record(value.data) &&
+    isDemoCatalogResponse({ mode: value.mode, purchasable: value.purchasable, data: [value.data] });
+}
+
 export function createCatalogService(config: ApiConfig, request: FetchFunction = fetch) {
   const client = createHttpClient(config, request);
   return {
@@ -106,6 +127,24 @@ export function createCatalogService(config: ApiConfig, request: FetchFunction =
       const response: DemoCatalogResponse = await client.get<DemoCatalogResponse>(
         '/demo/products',
         isDemoCatalogResponse,
+        options,
+      );
+      return response.data;
+    },
+    async demoProduct(id: string, options: RequestOptions = {}): Promise<DemoCatalogProduct> {
+      if (!UUID.test(id)) throw new ApiError('configuration');
+      const response: DemoProductDetailResponse = await client.get<DemoProductDetailResponse>(
+        `/demo/products/${id}`,
+        isDemoProductDetailResponse,
+        options,
+      );
+      return response.data;
+    },
+    async product(id: string, options: RequestOptions = {}): Promise<CatalogProductDetail> {
+      if (!UUID.test(id)) throw new ApiError('configuration');
+      const response: CatalogProductDetailResponse = await client.get<CatalogProductDetailResponse>(
+        `/products/${id}`,
+        isCatalogProductDetailResponse,
         options,
       );
       return response.data;
