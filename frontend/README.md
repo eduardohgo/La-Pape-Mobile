@@ -104,7 +104,7 @@ Versiones Expo, React Native y dependencias existentes se conservaron. Referenci
 ## Catálogo conectado a la API (PB-06)
 
 La pestaña **Catálogo** reutiliza temporalmente la ruta `explore` mientras se
-termina la navegación PB-02. Ahora consume la API Express a través de
+termina la navegación PB-02. En modo normal consume la API Express a través de
 `src/services/catalog.service.ts`: `GET /categories` y `GET /products?limit=50`,
 con validación de tipos en tiempo de ejecución, paginación por cursor,
 cancelación, error de conexión, reintento y estado vacío.
@@ -142,3 +142,38 @@ cancelación, error de conexión, reintento y estado vacío.
 No se crea ni publica ningún producto en esta implementación. La importación de
 las diez fichas candidatas requiere una revisión y autorización específica,
 además de separación explícita entre datos de demostración y mercancía real.
+
+### Demostración separada de los diez productos del ZIP
+
+Los 10 artículos de `10 (1).zip` NO están aprobados comercialmente. Una vez que
+se revise y autorice `backend/db/migrations/002_demo_previews.sql`, existirán
+exclusivamente en `demo.product_previews`, nunca en `catalog.products`.
+La migración 002 aún NO ha sido aplicada.
+
+La ruta `GET /demo/products` devuelve `{mode:'demo',purchasable:false,data:[]}`
+con productos `is_demo=true` y `is_for_sale=false`, sin marcas, fotos ni
+inventarios. **No es el endpoint público comercial.** Solo se monta con
+`NODE_ENV=development`, `CATALOG_API_ENABLED=true` y
+`CATALOG_DEMO_API_ENABLED=true`, sobre una red privada controlada.
+
+Para visualizar exclusivamente esa ruta desde Expo Go, configura en
+`frontend/.env.local`:
+
+```dotenv
+EXPO_PUBLIC_API_URL=http://192.168.1.82:3000
+EXPO_PUBLIC_API_ENV=development
+EXPO_PUBLIC_CATALOG_MODE=demo
+```
+
+La dirección de ejemplo es la IPv4 observada en esta prueba y puede cambiar.
+**No uses `localhost` en iPhone; jamás incluyas credenciales en variables públicas.**
+Recarga Metro después del cambio. Sin modo demo, `EXPO_PUBLIC_CATALOG_MODE=live`
+(por defecto) consume `GET /categories` y `GET /products`, que siguen mostrando
+únicamente publicaciones revisadas. No hay fallback a diez datos locales.
+En builds de producción, el modo demo se ignora incluso si la variable quedó
+configurada, y el backend niega esa ruta fuera de desarrollo.
+
+Pruebas requeridas: `npm test`, `npm run lint`, `npx tsc --noEmit` en
+`frontend/` y `npm test` y `npm run check` en `backend/`. Verificar las rutas
+reales desde Safari y Expo Go después de autorizar la carga en Neon. El
+resultado todavía NO está validado en dispositivo después de estos cambios.
