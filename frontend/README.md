@@ -178,3 +178,35 @@ Pruebas requeridas: `npm test`, `npm run lint`, `npx tsc --noEmit` en
 `frontend/` y `npm test` y `npm run check` en `backend/`. Verificar las rutas
 reales desde Safari y Expo Go después de autorizar la carga en Neon. El
 resultado todavía NO está validado en dispositivo después de estos cambios.
+
+
+### PB-07 — pantalla de detalle del producto (pendiente de validar en iPhone)
+
+Se añadió navegación real con Expo Router: `src/app/(tabs)/` mantiene
+Inicio y Catálogo, y la pila raíz presenta `src/app/products/[id].tsx`.
+Al tocar una tarjeta del Catálogo se abre `/products/<uuid>`; la pantalla
+ofrece Volver al catálogo, carga, error, producto inexistente y reintento.
+Las pestañas nativas se conservan como navegación principal y quedan
+debajo de la pantalla de detalle.
+
+- En modo `EXPO_PUBLIC_CATALOG_MODE=demo` la ficha solicita
+  `GET /demo/products/:id` a Express. Es una ruta de desarrollo, de solo
+  lectura, que toma el producto de `demo.product_previews` en Neon,
+  sin marcas ni existencias verificadas y con `purchasable:false`.
+- En modo normal utiliza la ruta comercial ya existente
+  `GET /products/:id` (solo para productos revisados y publicados).
+  La respuesta incluye una descripción aprobada.
+- Las diez fichas demo no contienen descripción aprobada en
+  `demo.product_previews`; el detalle muestra explícitamente que está
+  pendiente de revisión, sin inventar contenido ni importar datos.
+- No hay botones de compra, carrito, stock o importación SQL.
+  No se cambió la migración 002 ni se hicieron escrituras en Neon.
+
+Se añadieron pruebas de contrato y navegación API. **Todavía falta ejecutar**
+`npm test`, `npm run lint`, `npx tsc --noEmit` en frontend
+y `npm test`, `npm run check` en backend, así como comprobar
+`/demo/products/<uuid>` desde Safari y la navegación en Expo Go.
+
+La integración visual definitiva de Inicio, Catálogo y Detalle se realizará
+después, pantalla por pantalla, con una guía visual compartida y las capturas
+que facilite el responsable.
