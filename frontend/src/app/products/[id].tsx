@@ -68,10 +68,10 @@ export default function ProductDetailScreen() {
   }, [id, requestKey]);
 
   const product = state.status === 'loaded' ? state.product : null;
-  const isDemo = product !== null && 'is_demo' in product && product.is_demo;
+  // An unverified demo description is never manufactured or exposed.
   const description = product && 'description' in product && product.description.trim()
     ? product.description
-    : 'La descripción comercial de este producto está pendiente de revisión. Por ahora mostramos únicamente los datos disponibles en el catálogo.';
+    : null;
   const retry = () => setReload((value) => value + 1);
 
   return (
@@ -114,7 +114,7 @@ export default function ProductDetailScreen() {
           ) : state.status === 'error' ? (
             <ShopStatus
               title="No se pudo cargar el producto"
-              message="Comprueba la conexión con Express y vuelve a intentarlo."
+              message="Revisa tu conexión e inténtalo nuevamente."
               onRetry={retry}
             />
           ) : product ? (
@@ -135,43 +135,12 @@ export default function ProductDetailScreen() {
               <Text style={styles.sku}>SKU · {product.sku}</Text>
               <Text style={styles.price}>${product.price} <Text style={styles.currency}>{product.currency}</Text></Text>
 
-              {isDemo ? (
-                <View style={styles.demoBadge}>
-                  <Text style={styles.demoBadgeText}>ARTÍCULO DE DEMOSTRACIÓN</Text>
-                  <Text style={styles.demoPriceText}>Precio provisional · no disponible para venta</Text>
+              {description && (
+                <View style={styles.descriptionBlock}>
+                  <Text accessibilityRole="header" style={styles.sectionTitle}>Descripción</Text>
+                  <Text style={styles.description}>{description}</Text>
                 </View>
-              ) : (
-                <Text style={styles.noSalesText}>Consulta informativa · compras no disponibles</Text>
               )}
-
-              <View style={styles.descriptionBlock}>
-                <Text accessibilityRole="header" style={styles.sectionTitle}>Descripción</Text>
-                <Text style={styles.description}>{description}</Text>
-              </View>
-
-              <View style={styles.futureVariants}>
-                <View style={styles.futureLabelRow}>
-                  <Text style={styles.sectionTitle}>Variantes</Text>
-                  <Text style={styles.futureTag}>A FUTURO</Text>
-                </View>
-                <Text style={styles.futureText}>Aún no hay variantes verificadas para seleccionar.</Text>
-              </View>
-
-              <View style={[styles.quantityRow, compact && styles.quantityRowCompact]}>
-                <View style={styles.quantityCopy}>
-                  <Text style={styles.sectionTitle}>Cantidad</Text>
-                  <Text style={styles.quantityHint}>Selección no disponible</Text>
-                </View>
-                <View style={styles.quantityControl}>
-                  <Pressable disabled accessibilityRole="button" accessibilityLabel="Disminuir cantidad: no disponible" accessibilityState={{ disabled: true }} style={styles.quantityButton}>
-                    <Text style={styles.quantitySymbol}>−</Text>
-                  </Pressable>
-                  <Text style={styles.quantityValue}>—</Text>
-                  <Pressable disabled accessibilityRole="button" accessibilityLabel="Aumentar cantidad: no disponible" accessibilityState={{ disabled: true }} style={styles.quantityButton}>
-                    <Text style={styles.quantitySymbol}>+</Text>
-                  </Pressable>
-                </View>
-              </View>
 
               <View style={styles.infoGrid}>
                 <View style={[styles.infoCard, styles.infoCategory]}>
@@ -188,36 +157,6 @@ export default function ProductDetailScreen() {
                 </View>
               </View>
 
-              <View style={styles.purchaseNotice}>
-                <Text style={styles.purchaseNoticeTitle}>Las compras llegarán más adelante</Text>
-                <Text style={styles.purchaseNoticeText}>Por ahora puedes conocer el catálogo. No se reservan productos ni se generan pedidos.</Text>
-              </View>
-              <View style={[styles.purchaseButtons, compact && styles.purchaseButtonsCompact]}>
-                <Pressable
-                  disabled
-                  accessibilityRole="button"
-                  accessibilityLabel="Agregar al carrito: próximamente"
-                  accessibilityState={{ disabled: true }}
-                  style={[styles.purchaseButton, styles.cartButton]}>
-                  <HomeIcon name="cart" color="#934968" size={20} />
-                  <View style={styles.purchaseButtonCopy}>
-                    <Text style={styles.cartLabel}>Agregar al carrito</Text>
-                    <Text style={styles.cartPending}>Próximamente</Text>
-                  </View>
-                </Pressable>
-                <Pressable
-                  disabled
-                  accessibilityRole="button"
-                  accessibilityLabel="Comprar ahora: próximamente"
-                  accessibilityState={{ disabled: true }}
-                  style={[styles.purchaseButton, styles.buyButton]}>
-                  <View style={styles.purchaseButtonCopy}>
-                    <Text style={styles.buyLabel}>Comprar ahora</Text>
-                    <Text style={styles.buyPending}>Próximamente</Text>
-                  </View>
-                  <HomeIcon name="arrow" color="#FFFFFF" size={18} />
-                </Pressable>
-              </View>
             </>
           ) : null}
 
@@ -252,25 +191,9 @@ const styles = StyleSheet.create({
   sku: { color: palette.muted, fontSize: 12, lineHeight: 19, marginTop: 6 },
   price: { color: palette.ink, fontSize: 32, lineHeight: 43, fontWeight: '900', marginTop: 9 },
   currency: { fontSize: 18, fontWeight: '800' },
-  demoBadge: { alignSelf: 'flex-start', borderRadius: 12, backgroundColor: '#FFF5D8', paddingHorizontal: 12, paddingVertical: 9, marginTop: 7, gap: 4 },
-  demoBadgeText: { color: '#785519', fontSize: 10, fontWeight: '900', letterSpacing: 0.6 },
-  demoPriceText: { color: '#785519', fontSize: 11, lineHeight: 17 },
-  noSalesText: { color: palette.muted, fontSize: 12, lineHeight: 19, marginTop: 6 },
   descriptionBlock: { marginTop: 24, gap: 9 },
   sectionTitle: { color: palette.ink, fontSize: 15, fontWeight: '800' },
   description: { color: '#665E72', fontSize: 14, lineHeight: 23 },
-  futureVariants: { borderRadius: 16, borderWidth: 1, borderColor: '#F0EAF4', backgroundColor: '#FCFAFD', padding: 14, marginTop: 20, gap: 8 },
-  futureLabelRow: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 12, justifyContent: 'space-between' },
-  futureTag: { fontSize: 9, fontWeight: '800', letterSpacing: 0.8, color: '#866C94' },
-  futureText: { fontSize: 12, lineHeight: 19, color: palette.muted },
-  quantityRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginTop: 20 },
-  quantityRowCompact: { flexWrap: 'wrap' },
-  quantityCopy: { flexShrink: 1, gap: 5 },
-  quantityHint: { color: palette.muted, fontSize: 11, lineHeight: 17 },
-  quantityControl: { flexDirection: 'row', alignItems: 'center', borderRadius: 23, borderWidth: 1, borderColor: '#ECE7EF', backgroundColor: '#FAF8FC' },
-  quantityButton: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
-  quantitySymbol: { color: '#9B94A3', fontSize: 23, fontWeight: '600' },
-  quantityValue: { color: '#8D8597', fontSize: 16, width: 28, textAlign: 'center' },
   infoGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 22 },
   infoCard: { flexGrow: 1, flexBasis: '29%', minWidth: 85, borderRadius: 14, padding: 11, gap: 7 },
   infoCategory: { backgroundColor: '#FFF5D9' },
@@ -278,19 +201,6 @@ const styles = StyleSheet.create({
   infoCurrency: { backgroundColor: '#E8F5FC' },
   infoLabel: { color: '#6F647B', fontSize: 8, fontWeight: '800', letterSpacing: 0.5 },
   infoValue: { color: palette.ink, fontSize: 11, lineHeight: 16, fontWeight: '700', flexShrink: 1 },
-  purchaseNotice: { marginTop: 23, gap: 5 },
-  purchaseNoticeTitle: { color: palette.ink, fontSize: 12, fontWeight: '800' },
-  purchaseNoticeText: { color: palette.muted, fontSize: 11, lineHeight: 18 },
-  purchaseButtons: { flexDirection: 'row', alignItems: 'stretch', gap: 8, marginTop: 14 },
-  purchaseButtonsCompact: { flexDirection: 'column' },
-  purchaseButton: { flex: 1, borderRadius: 16, minHeight: 62, paddingHorizontal: 11, paddingVertical: 11, alignItems: 'center', justifyContent: 'center', flexDirection: 'row', gap: 7 },
-  purchaseButtonCopy: { alignItems: 'center', gap: 4, flexShrink: 1 },
-  cartButton: { backgroundColor: '#FFF0F6', borderWidth: 1, borderColor: '#E1A2BF' },
-  cartLabel: { color: '#934968', fontSize: 11, fontWeight: '800', textAlign: 'center' },
-  cartPending: { color: '#934968', fontSize: 9, textAlign: 'center' },
-  buyButton: { backgroundColor: '#AA5C7C' },
-  buyLabel: { color: '#FFFFFF', fontSize: 11, fontWeight: '800', textAlign: 'center' },
-  buyPending: { color: '#FFFFFF', fontSize: 9, textAlign: 'center' },
   catalogLink: { minHeight: 48, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 7, marginTop: 20 },
   catalogLinkText: { color: palette.blue, fontSize: 12, fontWeight: '700' },
 });
