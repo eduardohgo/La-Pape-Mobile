@@ -5,7 +5,8 @@ export const DEFAULT_REVIEW_PATH = fileURLToPath(new URL('../db/catalog-review.j
 export const SOURCE_SQL_SHA256 = 'b03c2111ad3245c9cfee7f823cd770c6ce14d7e76883fc2e518d345674eb908f';
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 const PRICE = /^(?:0|[1-9][0-9]{0,7})\.[0-9]{2}$/;
-const SYNTHETIC = /SYNTHETIC|SINT[EÉ]TICO|SYN-ECBD|synthetic_batch/i;
+// Recognize audited fixture markers, not legitimate materials such as synthetic paper.
+const SYNTHETIC = /\[SINT[EÉ]TICO_ECBD\]|SYN-ECBD-|synthetic_batch_id/i;
 const SOURCE_SKUS = new Map([
   ['e9096108-10c1-4483-9a3c-f61283d3c24f', 'LAP-CUA-001'],
   ['b22d9345-4fa9-46f0-9f07-039aa2374b7b', 'LAP-MAR-005'],
@@ -32,6 +33,9 @@ const BRAND_IDS = new Set([
   '0e533000-7779-4e5f-8c35-281d45b9c2f5',
 ]);
 const FLAGS = ['price', 'brand', 'image', 'category', 'content'];
+const SKU = /^[A-Z0-9][A-Z0-9._-]{0,59}$/;
+const SYNTHETIC_SKU = /^(?:SYN-|SYNTHETIC|SINTETICO)/;
+const IMAGE_URL = /^https:\/\/[A-Za-z0-9](?:[A-Za-z0-9.-]*[A-Za-z0-9])?(?::[0-9]{1,5})?(?:\/[^\s@?#\\]*)?$/;
 
 function requireCondition(condition, message) {
   if (!condition) throw new Error(message);
@@ -50,12 +54,19 @@ function text(value, maximum, label, { nullable = false } = {}) {
 }
 
 function validImage(value) {
+  if (typeof value !== 'string' || !IMAGE_URL.test(value)) return false;
   try {
     const url = new URL(value);
     return url.protocol === 'https:' && Boolean(url.hostname) && !url.username && !url.password && !url.search && !url.hash && !/\s/.test(value);
   } catch {
     return false;
   }
+}
+
+// General catalog rule. The initial source import additionally requires its exact
+// UUID/SKU allowlist; a valid future SKU must never bypass that source review.
+export function validateSku(value) {
+  return typeof value === 'string' && SKU.test(value) && !SYNTHETIC_SKU.test(value);
 }
 
 function references(items, expectedIds, label, keys) {
@@ -80,7 +91,7 @@ export async function readCatalogReview(path = DEFAULT_REVIEW_PATH) {
 
 export function validateCatalogReview(manifest) {
   exactKeys(manifest, ['formatVersion', 'target', 'source', 'categories', 'brands', 'products'], 'manifest');
-  requireCondition(manifest.formatVersion === 1, 'Unsupported manifest version');
+  requireCondition(manifest.formatVersion === 2, 'Unsupported manifest version');
   exactKeys(manifest.target, ['projectId', 'branch', 'database', 'postgresqlMajor'], 'target');
   requireCondition(manifest.target.projectId === 'twilight-moon-02635569'
     && manifest.target.branch === 'development'
@@ -102,6 +113,7 @@ export function validateCatalogReview(manifest) {
   const approved = [];
   for (const product of manifest.products) {
     exactKeys(product, ['id', 'sku', 'source', 'catalog', 'review', 'notes'], 'product');
+    requireCondition(validateSku(product.sku), 'Product SKU is invalid or synthetic');
     requireCondition(UUID.test(product.id) && SOURCE_SKUS.get(product.id) === product.sku && !productIds.has(product.id), 'Product outside candidate allowlist or duplicate');
     productIds.add(product.id);
     exactKeys(product.source, ['name', 'description', 'categoryId', 'brandId', 'price', 'imageUrl', 'sqlLine'], 'product.source');
@@ -115,17 +127,27 @@ export function validateCatalogReview(manifest) {
     requireCondition(typeof product.source.imageUrl === 'string' && product.source.imageUrl.length <= 2048 && !product.source.imageUrl.includes('\0'), 'Invalid source image reference');
     requireCondition(Number.isSafeInteger(product.source.sqlLine) && product.source.sqlLine > 0, 'Invalid source SQL line');
     requireCondition(product.catalog.currency === 'MXN', 'Only reviewed MXN prices are supported');
-    requireCondition(product.catalog.imageUrl === null || (typeof product.catalog.imageUrl === 'string' && product.catalog.imageUrl.length <= 2048 && validImage(product.catalog.imageUrl)), 'Catalog image must be null while pending, or HTTPS without embedded credentials');
+    requireCondition(product.catalog.imageUrl === null || (typeof product.catalog.imageUrl === 'string' && product.catalog.imageUrl.length <= 2048 && validImage(product.catalog.imageUrl)), 'Catalog image must be null, or HTTPS without credentials, query parameters or fragments');
     requireCondition(Array.isArray(product.notes), 'Review notes must be an array');
     for (const note of product.notes) text(note, 1000, 'product.notes');
-    exactKeys(product.review, ['approved', ...FLAGS, 'reviewedBy', 'reviewedAt'], 'product.review');
-    requireCondition(typeof product.review.approved === 'boolean' && FLAGS.every((flag) => typeof product.review[flag] === 'boolean'), 'Review decisions must be explicit booleans');
+    exactKeys(product.review, ['approved', ...FLAGS, 'imagePendingAccepted', 'reviewedBy', 'reviewedAt'], 'product.review');
+    requireCondition(typeof product.review.approved === 'boolean'
+      && typeof product.review.imagePendingAccepted === 'boolean'
+      && FLAGS.every((flag) => typeof product.review[flag] === 'boolean'), 'Review decisions must be explicit booleans');
+    // image=true resolves the review decision. It does not itself assert that a
+    // photograph exists. Missing photographs require a separate explicit choice.
+    if (product.review.imagePendingAccepted) {
+      requireCondition(product.catalog.imageUrl === null && product.review.image, 'Accepting a pending image requires null imageUrl and an explicit image review');
+    }
+    if (product.catalog.imageUrl === null && product.review.image) {
+      requireCondition(product.review.imagePendingAccepted, 'Missing image requires explicit imagePendingAccepted approval');
+    }
     if (product.review.approved) {
       requireCondition(FLAGS.every((flag) => product.review[flag]), 'Approved product has outstanding review criteria');
       requireCondition(typeof product.review.reviewedBy === 'string' && /^[A-Za-z0-9](?:[A-Za-z0-9-]{0,37}[A-Za-z0-9])?$/.test(product.review.reviewedBy), 'Approved product requires a reviewer handle');
       const date = new Date(product.review.reviewedAt);
       requireCondition(typeof product.review.reviewedAt === 'string' && Number.isFinite(date.getTime()) && date.toISOString() === product.review.reviewedAt, 'Approved product requires an explicit canonical UTC review timestamp');
-      requireCondition(validImage(product.catalog.imageUrl), 'Approved product requires a reviewed HTTPS image');
+      requireCondition(product.catalog.imageUrl !== null || product.review.imagePendingAccepted, 'Approved product without image requires explicit absence acceptance');
       approved.push(product);
     } else {
       requireCondition(product.review.reviewedBy === null && product.review.reviewedAt === null, 'Pending products must not imply final approval metadata');
@@ -135,6 +157,8 @@ export function validateCatalogReview(manifest) {
     candidateCount: manifest.products.length,
     approvedCount: approved.length,
     pendingCount: manifest.products.length - approved.length,
+    pendingPhotoCount: manifest.products.filter((product) => product.catalog.imageUrl === null).length,
+    approvedWithoutPhotoCount: approved.filter((product) => product.catalog.imageUrl === null).length,
     categoryCount: categories.size,
     brandCount: brands.size,
     excludedSyntheticProducts: 200,

@@ -37,7 +37,7 @@ El respaldo contiene 26 tablas; esta preparación conserva solo la proyección n
 |---|---|---|
 | `catalog.categories` | UUID originales referenciados por productos | Solo Cuadernos, Arte y Oficina en el manifiesto; activación mediante importación aprobada |
 | `catalog.brands` | UUID originales referenciados por productos | Solo las seis marcas candidatas; sus asignaciones todavía necesitan revisión |
-| `catalog.products` | UUID y SKU originales; FK obligatorias a categoría y marca, con `ON DELETE/UPDATE RESTRICT` | Omite stock, sucursal, proveedor, descuentos mayoristas y campos duplicados de texto; exige precio positivo, moneda MXN, imagen HTTPS y revisión para publicar |
+| `catalog.products` | UUID y SKU originales; FK obligatorias a categoría y marca, con `ON DELETE/UPDATE RESTRICT` | Omite stock, sucursal, proveedor, descuentos mayoristas y campos duplicados de texto; exige precio positivo, moneda MXN, imagen NULL o HTTPS y revisión para publicar |
 
 Las FK de sucursales y proveedores se excluyen junto con sus columnas. No se insertan registros ficticios para satisfacerlas. Esta proyección no es un reemplazo íntegro del esquema Prisma antiguo; el backend actual utiliza `pg`, por lo que sus futuras consultas nombrarán `catalog` explícitamente. Los demás módulos se diseñarán bajo las Issues correspondientes.
 
@@ -49,9 +49,15 @@ Se excluyen los 200 productos identificados como sintéticos y los dos registros
 
 Los diez productos tienen `review.approved=false`. No se aprobaron sus precios, marcas, imágenes, categorías ni contenido. Sus valores de origen permiten revisar cambios sin perder trazabilidad; `catalog` contiene la propuesta editable y `source` conserva la referencia al respaldo.
 
-Para aprobar un producto deben confirmarse `price`, `brand`, `image`, `category` y `content`, además de registrar el identificador del revisor y una fecha UTC explícita. La imagen propuesta debe ser HTTPS y no incluir credenciales, parámetros de consulta ni fragmentos; así se evita incorporar URLs firmadas o tokens al catálogo. El generador conserva exclusivamente las categorías y marcas necesarias para los productos aprobados. Si una marca se corrige, se elige una marca revisada existente en el manifiesto; ampliar el conjunto de referencias requiere un cambio revisado en el validador.
+El manifiesto usa formato **v2**. Para aprobar un producto deben confirmarse `price`, `brand`, `image`, `category` y `content`, además de registrar el identificador del revisor y una fecha UTC explícita. `review.image` significa que se revisó la decisión sobre fotografía. Si la fotografía está pendiente, `catalog.imageUrl=null` y publicarlo exige aceptar explícitamente su ausencia mediante `review.imagePendingAccepted=true`, además de cumplir los demás criterios. Esto no afirma que exista una foto verificada ni aprueba automáticamente el producto. Con fotografía HTTPS revisada, `imagePendingAccepted` debe ser false. Si existe una URL, no admite credenciales, parámetros de consulta, fragmentos ni barras invertidas. Las diez propuestas actuales son NULL con ambas decisiones de imagen false; sus URLs originales permanecen solo en `source`.
+
+El SKU de la tabla admite códigos reales canónicos ASCII de 1–60 caracteres: inicio con letra mayúscula o número, seguido por letras mayúsculas, números, punto, guion o guion bajo. Ejemplos válidos: `ABC123`, `SKU-2026`, `AB.CD`, `AB_CD` y códigos numéricos conservados como texto. La collation C mantiene la comparación ASCII y UNIQUE; no se exige el patrón LAP. Los prefijos reservados de pruebas y los marcadores auditados se rechazan. La lista de importación de este respaldo continúa limitada a los diez UUID/SKU originales; cambiar un código válido no habilita importar registros adicionales.
+
+El generador conserva exclusivamente las categorías y marcas necesarias para los productos aprobados. Si una marca se corrige, se elige una marca revisada existente en el manifiesto; ampliar el conjunto de referencias requiere un cambio revisado en el validador.
 
 Las fotografías locales presentan dos discrepancias: cuaderno con foto Norma/registro Scribe y marcadores con foto STABILO/registro Maped. Las ocho URLs externas tampoco demuestran disponibilidad ni correspondencia visual. Ninguna se publica por existir en el respaldo.
+
+Listado y detalle devuelven `image_url=NULL` sin excluir el producto ni sustituirla por una URL inventada. La futura validación de respuesta TypeScript admitirá `imageUrl: string | null` y la interfaz mostrará una fotografía pendiente. No se implementó esa pantalla ni el endpoint en esta preparación.
 
 El manifiesto y el validador permiten únicamente los diez UUID/SKU auditados. Rechazan referencias huérfanas, precios fuera de `numeric(10,2)`, aprobación incompleta, marcadores sintéticos y campos no previstos, incluyendo campos de inventario o personales. El generador escapa literales SQL, ordena la salida y rechaza la sustitución silenciosa de archivos revisados.
 
@@ -81,3 +87,5 @@ Actualmente ese comando debe fallar con `No approved products` y no crear el arc
 - Usar conexión directa para migraciones y un rol de aplicación separado con permisos de lectura. La URL agrupada se reserva para el backend; nunca se entrega a Expo.
 - Verificar la base vacía, el comportamiento transaccional y las restricciones en el destino aprobado. La sintaxis y las pruebas offline no sustituyen esta validación en PostgreSQL.
 - Mantener #19 en Testing y PR #121 abierto; esta preparación no valida el iPhone ni completa PB-02, PB-06 o PB-07.
+
+La administración compartida por Mobile y Web, sus permisos y tablas futuras se proponen en [docs/admin-architecture.md](../../docs/admin-architecture.md). Esta decisión no añade tablas de usuarios, autenticación ni rutas administrativas a la migración 001.

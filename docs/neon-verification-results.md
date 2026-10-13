@@ -6,12 +6,12 @@ ni una ejecución SQL en ese proyecto durante estas verificaciones.
 
 | Comprobación local | Resultado | Alcance |
 | --- | --- | --- |
-| `backend: npm test` | 31/31 correctas | 14 de catálogo, 10 de configuración/TLS, 7 HTTP locales |
+| `backend: npm test` | 37/37 correctas | 20 de catálogo, 10 de configuración/TLS, 7 HTTP locales |
 | `backend: npm run check` | Correcto | Sintaxis del punto de entrada |
-| `backend: npm run catalog:validate` | Correcto | 10 pendientes, 0 aprobados, 3 categorías, 6 marcas |
+| `backend: npm run catalog:validate` | Correcto | 10 pendientes, 0 aprobados, 10 fotografías pendientes, 3 categorías, 6 marcas |
 | Generar importación sin aprobados | Bloqueo esperado, exit 1 | No se creó archivo de importación |
 | `python backend/tools/check_sql.py` | 7/7 archivos correctos | Gramática SQL y PL/pgSQL PostgreSQL 18.6, pglast 8.5 |
-| Generación ficticia en memoria + parser | Correcto | 19 INSERT para 10 productos/3 categorías/6 marcas, cero DROP; no escribe archivos |
+| Dos generaciones ficticias en memoria + parser | Correcto | Con fotos HTTPS y con fotos NULL; 19 INSERT por caso, cero DROP; no escribe archivos |
 | `frontend: npm run lint -- --no-cache` | Correcto | ESLint, cero avisos admitidos |
 | `frontend: npx --no-install tsc --noEmit` | Correcto | TypeScript estricto |
 | `frontend: npm test` | 8/8 correctas | Cliente HTTP con respuestas, errores, timeout y cancelación simulados |
@@ -21,6 +21,9 @@ ni una ejecución SQL en ese proyecto durante estas verificaciones.
 
 El parser verificó tres SELECT parametrizados, tres scripts de validación de lectura
 y la migración inicial. También verificó los cuerpos PL/pgSQL de sus guardias.
+Comprobó que 001 crea solo tres tablas, no contiene importación/borrado y permite
+NULL en `image_url`. En el fixture sin fotos, cada valor generado es un NULL SQL real,
+no la cadena `'NULL'`. Las consultas preservan NULL sin filtrar esos productos.
 Una descripción ficticia con `'); DROP TABLE ...` permaneció como literal SQL dentro
 de un INSERT; no produjo una sentencia DROP en el árbol de sintaxis.
 El informe por archivo y sus SHA-256 está en `neon-sql-check.json`.
@@ -30,6 +33,11 @@ precios decimales sin redondeo, rechazo de campos personales/inventario/sintéti
 aprobaciones independientes, imágenes públicas HTTPS sin credenciales/parámetros,
 salida reproducible y escape de literales. Las aprobaciones ficticias de las pruebas
 se crean solo en memoria. El manifiesto real sigue con diez `approved=false`.
+El formato v2 añade aceptación explícita de ausencia de fotografía, actualmente false
+para todos. NULL por sí solo no aprueba ni publica. La tabla admite SKU ASCII reales
+fuera del formato LAP, con UNIQUE y comparación C, mientras el importador conserva
+la lista cerrada de diez UUID/SKU del respaldo. Los marcadores sintéticos se bloquean
+sin confundir materiales reales como papel sintético con registros de prueba.
 
 Las pruebas TLS construyen configuración/clientes sin `connect`. Comprueban el objeto
 TLS efectivo de pg, rechazo de modos débiles y parámetros que podrían reemplazarlo,
@@ -48,3 +56,10 @@ La validación del iPhone también permanece pendiente.
 GitHub leído sin cambios de estado: #19 Testing; #102 Done/completed; PB-01 In Progress;
 PB-02, PB-06 y PB-07 Product Backlog. PR #121 abierto, no fusionado, mergeable, head
 `ce3870705d101eb4f477ad015f6472276f213d40`. Se conservaron los campos de planeación.
+
+La revisión de roles del ZIP original y la arquitectura administrativa futura se
+documentan en `admin-architecture.md`: son propuestas y evidencias de lectura de
+código, no pruebas de autenticación, permisos o inventario implementados. Las
+dependencias se relacionan con las Issues existentes y se identifican explícitamente
+los módulos administrativos sin una Issue de alcance suficiente. No se crean nuevas
+Issues, tablas de identidad ni endpoints en esta intervención.

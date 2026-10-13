@@ -5,6 +5,8 @@
 -- SQL also bounds page size. Fetch one additional row to calculate hasMore;
 -- return at most the requested page size, using the last returned id as cursor.
 -- Price remains decimal text; no conversion through JavaScript floating point.
+-- image_url is nullable. Return NULL verbatim for a pending photograph;
+-- do not filter out that product or substitute an unverified/mock image URL.
 SELECT
     p.id,
     p.sku,

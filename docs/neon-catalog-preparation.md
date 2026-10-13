@@ -17,7 +17,7 @@ Las tablas propuestas en el esquema `catalog` son:
 | --- | --- |
 | `categories` | UUID, nombre único, estado de publicación de la categoría |
 | `brands` | UUID y nombre único; dependencia explícita del producto aprobado |
-| `products` | UUID, SKU único, FK obligatorias a categoría y marca, precio decimal positivo, moneda MXN revisada, imagen HTTPS, publicación tras revisión |
+| `products` | UUID, SKU único general canónico, FK obligatorias a categoría y marca, precio decimal positivo, moneda MXN revisada, imagen NULL o HTTPS, publicación tras revisión |
 
 Las FK usan `ON DELETE RESTRICT` y `ON UPDATE RESTRICT`: una categoría o marca
 referenciada no puede desaparecer silenciosamente. Se evita duplicar los textos
@@ -66,8 +66,27 @@ frente a Scribe en el SQL; `marcadores.webp` muestra STABILO frente a Maped.
 Las ocho URLs remotas de los candidatos tampoco acreditan vigencia, correspondencia
 o derechos de uso. Las rutas relativas del frontend web no funcionarán por sí solas
 como imágenes públicas de Mobile. El responsable debe revisar precio, moneda, nombre,
-descripción, categoría, marca e imagen HTTPS antes de aprobar cada producto.
+descripción, categoría y marca antes de aprobar cada producto. Una fotografía
+proporcionada debe verificarse y usar HTTPS; la ausencia puede quedar explícitamente
+aceptada para publicar sin foto, mediante una decisión independiente de revisión.
 No se inventan fotografías ni existencias. Un stock desconocido no equivale a cero.
+
+Los diez `catalog.imageUrl` se mantienen NULL hasta verificar una fotografía.
+El manifiesto **v2** añade `review.imagePendingAccepted`, actualmente false en todos.
+Una futura aprobación sin foto requiere tanto `review.image=true` como
+`imagePendingAccepted=true`, además de todos los otros criterios, revisor, fecha y
+`approved=true`. Con foto HTTPS, la aceptación de ausencia debe ser false. NULL por
+sí solo nunca aprueba un producto. Las URLs de origen siguen disponibles solo como
+referencia en `source`.
+
+La tabla admite SKU ASCII canónicos de 1–60 caracteres, inicio alfanumérico, resto
+alfanumérico/punto/guion/guion bajo, en mayúsculas y con UNIQUE y collation C.
+Ejemplos: `ABC123`, `SKU-2026`, `AB.CD`, `AB_CD` y códigos numéricos como texto.
+Los marcadores auditados y prefijos reservados sintéticos se rechazan; no se bloquea
+una descripción legítima de materiales como papel sintético. El importador de este
+respaldo conserva la lista cerrada de diez UUID/SKU; los futuros productos reales se
+registrarán mediante una funcionalidad administrativa autorizada, no ampliando
+silenciosamente este importador.
 
 ## Archivos y ejecución posterior
 
@@ -151,6 +170,10 @@ y detalle exclusivamente por una barra final. Los futuros controladores rechazar
 UUID o límites inválidos con 400; el SQL usa parámetros `$1`, `$2`, `$3`, campos
 explícitos y precios como texto decimal. No interpolar valores en SQL.
 
+Listado y detalle preservan `image_url=NULL` sin eliminar esos productos. El contrato
+TypeScript futuro será `imageUrl: string | null`; un marcador visual de foto pendiente
+corresponde a la interfaz y no a una imagen ficticia guardada en la base.
+
 Las operaciones futuras usarán el mismo cliente de `pg` dentro de una transacción
 `READ ONLY` con timeout local, liberándolo en `finally` y haciendo rollback al fallar.
 No se dependerá de `SET search_path` de sesión con PgBouncer. Un error interno
@@ -174,6 +197,11 @@ PR #121 conserva su head `ce38707`, permanece abierto y no fusionado. #102 perma
 Done/completed; PB-01 In Progress. Los demás PB y actividades conservan sus estados,
 Sprints, prioridades, áreas, responsables y automatizaciones. Esta preparación se
 versiona en una rama independiente, dependiente de la base de PR #121.
+
+La arquitectura administrativa decidida utiliza el mismo Express y Neon para Expo
+y el futuro panel Next.js. La matriz de cuatro roles, creación segura del primer
+DUENO, tablas futuras y vacíos de planeación están en [admin-architecture.md](admin-architecture.md).
+No se crean esos módulos ni nuevas migraciones de autenticación en esta intervención.
 
 ## Comprobaciones locales y límites
 

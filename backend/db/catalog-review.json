@@ -1,5 +1,5 @@
 {
-  "formatVersion": 1,
+  "formatVersion": 2,
   "target": {
     "projectId": "twilight-moon-02635569",
     "branch": "development",
@@ -79,7 +79,7 @@
         "brandId": "1a91f9f3-7c48-43dc-8f05-bed503985c0d",
         "price": "18.50",
         "currency": "MXN",
-        "imageUrl": "https://res.cloudinary.com/obnm5gkp/image/upload/v1784818060/la-pape/productos/8eab1681-b5c6-46d2-9850-60847744982f-cartulina-iris-surtida.png"
+        "imageUrl": null
       },
       "review": {
         "approved": false,
@@ -89,11 +89,13 @@
         "category": false,
         "content": false,
         "reviewedBy": null,
-        "reviewedAt": null
+        "reviewedAt": null,
+        "imagePendingAccepted": false
       },
       "notes": [
         "Precio, marca, contenido e imagen requieren confirmación del responsable antes de aprobar la importación.",
-        "La URL externa no demuestra disponibilidad, correspondencia visual ni permiso de uso; falta revisión."
+        "La URL externa no demuestra disponibilidad, correspondencia visual ni permiso de uso; falta revisión.",
+        "Fotografía pendiente: catalog.imageUrl permanece NULL y no existe aceptación para publicar sin fotografía. Las referencias originales se conservan solamente en source.imageUrl."
       ]
     },
     {
@@ -115,7 +117,7 @@
         "brandId": "0e533000-7779-4e5f-8c35-281d45b9c2f5",
         "price": "94.00",
         "currency": "MXN",
-        "imageUrl": "https://res.cloudinary.com/obnm5gkp/image/upload/v1784817880/la-pape/productos/709f77eb-bcc7-47ac-8206-e5073c4a8c3d-colores-de-madera-24-piezas.png"
+        "imageUrl": null
       },
       "review": {
         "approved": false,
@@ -125,11 +127,13 @@
         "category": false,
         "content": false,
         "reviewedBy": null,
-        "reviewedAt": null
+        "reviewedAt": null,
+        "imagePendingAccepted": false
       },
       "notes": [
         "Precio, marca, contenido e imagen requieren confirmación del responsable antes de aprobar la importación.",
-        "La URL externa no demuestra disponibilidad, correspondencia visual ni permiso de uso; falta revisión."
+        "La URL externa no demuestra disponibilidad, correspondencia visual ni permiso de uso; falta revisión.",
+        "Fotografía pendiente: catalog.imageUrl permanece NULL y no existe aceptación para publicar sin fotografía. Las referencias originales se conservan solamente en source.imageUrl."
       ]
     },
     {
@@ -161,11 +165,13 @@
         "category": false,
         "content": false,
         "reviewedBy": null,
-        "reviewedAt": null
+        "reviewedAt": null,
+        "imagePendingAccepted": false
       },
       "notes": [
         "Precio, marca, contenido e imagen requieren confirmación del responsable antes de aprobar la importación.",
-        "La foto local muestra Norma y el registro indica Scribe; resolver la discrepancia y publicar una URL HTTPS aprobada."
+        "La foto local muestra Norma y el registro indica Scribe; resolver la discrepancia y publicar una URL HTTPS aprobada.",
+        "Fotografía pendiente: catalog.imageUrl permanece NULL y no existe aceptación para publicar sin fotografía. Las referencias originales se conservan solamente en source.imageUrl."
       ]
     },
     {
@@ -187,7 +193,7 @@
         "brandId": "d4725249-798a-4a36-ae55-6620f3071d0a",
         "price": "119.00",
         "currency": "MXN",
-        "imageUrl": "https://res.cloudinary.com/obnm5gkp/image/upload/v1784782530/la-pape/productos/1f909359-adf7-4d93-878e-62427f6179a3-engrapadora-met-lica-mediana.png"
+        "imageUrl": null
       },
       "review": {
         "approved": false,
@@ -197,11 +203,13 @@
         "category": false,
         "content": false,
         "reviewedBy": null,
-        "reviewedAt": null
+        "reviewedAt": null,
+        "imagePendingAccepted": false
       },
       "notes": [
         "Precio, marca, contenido e imagen requieren confirmación del responsable antes de aprobar la importación.",
-        "La URL externa no demuestra disponibilidad, correspondencia visual ni permiso de uso; falta revisión."
+        "La URL externa no demuestra disponibilidad, correspondencia visual ni permiso de uso; falta revisión.",
+        "Fotografía pendiente: catalog.imageUrl permanece NULL y no existe aceptación para publicar sin fotografía. Las referencias originales se conservan solamente en source.imageUrl."
       ]
     },
     {
@@ -223,7 +231,7 @@
         "brandId": "55f050f2-f0a2-4e0b-b1cf-7ae5fc72797b",
         "price": "42.50",
         "currency": "MXN",
-        "imageUrl": "https://res.cloudinary.com/obnm5gkp/image/upload/v1784817979/la-pape/productos/cd53aaff-60e8-439f-a36a-50abea1ec3d9-foami-carta-colores-surtidos.png"
+        "imageUrl": null
       },
       "review": {
         "approved": false,
@@ -233,11 +241,13 @@
         "category": false,
         "content": false,
         "reviewedBy": null,
-        "reviewedAt": null
+        "reviewedAt": null,
+        "imagePendingAccepted": false
       },
       "notes": [
         "Precio, marca, contenido e imagen requieren confirmación del responsable antes de aprobar la importación.",
-        "La URL externa no demuestra disponibilidad, correspondencia visual ni permiso de uso; falta revisión."
+        "La URL externa no demuestra disponibilidad, correspondencia visual ni permiso de uso; falta revisión.",
+        "Fotografía pendiente: catalog.imageUrl permanece NULL y no existe aceptación para publicar sin fotografía. Las referencias originales se conservan solamente en source.imageUrl."
       ]
     },
     {
@@ -259,7 +269,7 @@
         "brandId": "0a22b840-80cc-4f7c-8615-36d6a7de15ef",
         "price": "129.00",
         "currency": "MXN",
-        "imageUrl": "https://res.cloudinary.com/obnm5gkp/image/upload/v1784818278/la-pape/productos/231bf429-8ac9-4500-aff9-80145d1895c6-paquete-hojas-blancas-carta-500.png"
+        "imageUrl": null
       },
       "review": {
         "approved": false,
@@ -269,11 +279,13 @@
         "category": false,
         "content": false,
         "reviewedBy": null,
-        "reviewedAt": null
+        "reviewedAt": null,
+        "imagePendingAccepted": false
       },
       "notes": [
         "Precio, marca, contenido e imagen requieren confirmación del responsable antes de aprobar la importación.",
-        "La URL externa no demuestra disponibilidad, correspondencia visual ni permiso de uso; falta revisión."
+        "La URL externa no demuestra disponibilidad, correspondencia visual ni permiso de uso; falta revisión.",
+        "Fotografía pendiente: catalog.imageUrl permanece NULL y no existe aceptación para publicar sin fotografía. Las referencias originales se conservan solamente en source.imageUrl."
       ]
     },
     {
@@ -305,11 +317,13 @@
         "category": false,
         "content": false,
         "reviewedBy": null,
-        "reviewedAt": null
+        "reviewedAt": null,
+        "imagePendingAccepted": false
       },
       "notes": [
         "Precio, marca, contenido e imagen requieren confirmación del responsable antes de aprobar la importación.",
-        "La foto local muestra STABILO y el registro indica Maped; resolver la discrepancia y publicar una URL HTTPS aprobada."
+        "La foto local muestra STABILO y el registro indica Maped; resolver la discrepancia y publicar una URL HTTPS aprobada.",
+        "Fotografía pendiente: catalog.imageUrl permanece NULL y no existe aceptación para publicar sin fotografía. Las referencias originales se conservan solamente en source.imageUrl."
       ]
     },
     {
@@ -331,7 +345,7 @@
         "brandId": "55f050f2-f0a2-4e0b-b1cf-7ae5fc72797b",
         "price": "24.90",
         "currency": "MXN",
-        "imageUrl": "https://res.cloudinary.com/obnm5gkp/image/upload/v1784818147/la-pape/productos/e6644bc8-9525-4689-8c64-2fa9af0d5bc1-pegamento-escolar-125-g.png"
+        "imageUrl": null
       },
       "review": {
         "approved": false,
@@ -341,11 +355,13 @@
         "category": false,
         "content": false,
         "reviewedBy": null,
-        "reviewedAt": null
+        "reviewedAt": null,
+        "imagePendingAccepted": false
       },
       "notes": [
         "Precio, marca, contenido e imagen requieren confirmación del responsable antes de aprobar la importación.",
-        "La URL externa no demuestra disponibilidad, correspondencia visual ni permiso de uso; falta revisión."
+        "La URL externa no demuestra disponibilidad, correspondencia visual ni permiso de uso; falta revisión.",
+        "Fotografía pendiente: catalog.imageUrl permanece NULL y no existe aceptación para publicar sin fotografía. Las referencias originales se conservan solamente en source.imageUrl."
       ]
     },
     {
@@ -367,7 +383,7 @@
         "brandId": "d4725249-798a-4a36-ae55-6620f3071d0a",
         "price": "68.50",
         "currency": "MXN",
-        "imageUrl": "https://res.cloudinary.com/obnm5gkp/image/upload/v1784818332/la-pape/productos/2f2942bf-c6fa-40a0-8c61-f542691af02e-plumas-gel-azules-10-piezas.jpg"
+        "imageUrl": null
       },
       "review": {
         "approved": false,
@@ -377,11 +393,13 @@
         "category": false,
         "content": false,
         "reviewedBy": null,
-        "reviewedAt": null
+        "reviewedAt": null,
+        "imagePendingAccepted": false
       },
       "notes": [
         "Precio, marca, contenido e imagen requieren confirmación del responsable antes de aprobar la importación.",
-        "La URL externa no demuestra disponibilidad, correspondencia visual ni permiso de uso; falta revisión."
+        "La URL externa no demuestra disponibilidad, correspondencia visual ni permiso de uso; falta revisión.",
+        "Fotografía pendiente: catalog.imageUrl permanece NULL y no existe aceptación para publicar sin fotografía. Las referencias originales se conservan solamente en source.imageUrl."
       ]
     },
     {
@@ -403,7 +421,7 @@
         "brandId": "0e533000-7779-4e5f-8c35-281d45b9c2f5",
         "price": "54.00",
         "currency": "MXN",
-        "imageUrl": "https://res.cloudinary.com/obnm5gkp/image/upload/v1784817924/la-pape/productos/82d42caf-646e-4db5-a3f0-071bcf55564a-tinta-para-sellos-azul-30-ml.png"
+        "imageUrl": null
       },
       "review": {
         "approved": false,
@@ -413,11 +431,13 @@
         "category": false,
         "content": false,
         "reviewedBy": null,
-        "reviewedAt": null
+        "reviewedAt": null,
+        "imagePendingAccepted": false
       },
       "notes": [
         "Precio, marca, contenido e imagen requieren confirmación del responsable antes de aprobar la importación.",
-        "La URL externa no demuestra disponibilidad, correspondencia visual ni permiso de uso; falta revisión."
+        "La URL externa no demuestra disponibilidad, correspondencia visual ni permiso de uso; falta revisión.",
+        "Fotografía pendiente: catalog.imageUrl permanece NULL y no existe aceptación para publicar sin fotografía. Las referencias originales se conservan solamente en source.imageUrl."
       ]
     }
   ]

@@ -56,14 +56,14 @@ CREATE TABLE catalog.brands (
 
 CREATE TABLE catalog.products (
   id uuid PRIMARY KEY,
-  sku varchar(60) NOT NULL UNIQUE,
+  sku varchar(60) COLLATE "C" NOT NULL UNIQUE,
   name varchar(160) NOT NULL,
   description text NOT NULL,
   category_id uuid NOT NULL,
   brand_id uuid NOT NULL,
   price numeric(10, 2) NOT NULL,
   currency char(3) NOT NULL DEFAULT 'MXN',
-  image_url text NOT NULL,
+  image_url text,
   is_published boolean NOT NULL DEFAULT false,
   reviewed_at timestamptz,
   created_at timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -72,14 +72,29 @@ CREATE TABLE catalog.products (
     REFERENCES catalog.categories(id) ON UPDATE RESTRICT ON DELETE RESTRICT,
   CONSTRAINT products_brand_fk FOREIGN KEY (brand_id)
     REFERENCES catalog.brands(id) ON UPDATE RESTRICT ON DELETE RESTRICT,
-  CONSTRAINT products_sku_catalog_only CHECK (sku ~ '^LAP-[A-Z]{3}-[0-9]{3}$'),
+  CONSTRAINT products_sku_canonical CHECK (sku ~ '^[A-Z0-9][A-Z0-9._-]{0,59}$'),
+  CONSTRAINT products_sku_not_synthetic CHECK (sku !~ '^(SYN-|SYNTHETIC|SINTETICO)'),
   CONSTRAINT products_name_nonempty CHECK (btrim(name) <> ''),
   CONSTRAINT products_description_nonempty CHECK (btrim(description) <> ''),
+  CONSTRAINT products_no_synthetic_content CHECK (
+    name !~* '\[SINT[EÉ]TICO_ECBD\]|SYN-ECBD-|synthetic_batch_id'
+    AND description !~* '\[SINT[EÉ]TICO_ECBD\]|SYN-ECBD-|synthetic_batch_id'
+  ),
   CONSTRAINT products_price_positive CHECK (price > 0 AND price < 100000000.00),
   CONSTRAINT products_currency_mxn CHECK (currency = 'MXN'),
-  CONSTRAINT products_image_https CHECK (image_url ~ '^https://[^[:space:]@?#]+$'),
+  CONSTRAINT products_image_https CHECK (
+    image_url IS NULL OR (
+      length(image_url) <= 2048
+      AND image_url ~ '^https://[A-Za-z0-9]([A-Za-z0-9.-]*[A-Za-z0-9])?(:[0-9]{1,5})?(/[^[:space:]@?#\\]*)?$'
+    )
+  ),
   CONSTRAINT products_review_required CHECK (NOT is_published OR reviewed_at IS NOT NULL)
 );
+
+COMMENT ON COLUMN catalog.products.sku IS
+  'Canonical uppercase ASCII code, 1-60 characters; letters, digits, period, underscore and hyphen. Source candidate allowlisting belongs to the import review, not this general catalog table.';
+COMMENT ON COLUMN catalog.products.image_url IS
+  'NULL means no verified photograph is available. A supplied URL must use HTTPS without embedded credentials, query parameters or fragments; publication still requires a complete explicit review.';
 
 CREATE INDEX products_category_published_idx
   ON catalog.products(category_id, id) WHERE is_published;

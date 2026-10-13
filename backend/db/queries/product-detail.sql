@@ -2,6 +2,8 @@
 -- $1: product UUID, validated by the future controller.
 -- No row means 404. An unpublished product must not be exposed as a preview.
 -- Inventory is deliberately absent: the source stock was not approved.
+-- image_url may be NULL; absence of a photograph does not imply missing stock
+-- or a missing product. The future response validator must accept this NULL.
 SELECT
     p.id,
     p.sku,

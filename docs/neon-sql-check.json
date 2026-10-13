@@ -8,8 +8,8 @@
   "files": [
     {
       "file": "db/migrations/001_catalog_schema.sql",
-      "statements": 15,
-      "sha256": "642f3f0a97b7e7596c9d3b37dd427a8656e2c7392946189e2fc1c0029d745ae9"
+      "statements": 17,
+      "sha256": "729a815a9fb79afcb9283663579c1112ff2a8a8871f650c7ff2efffaf87cabea"
     },
     {
       "file": "db/queries/categories.sql",
@@ -19,12 +19,12 @@
     {
       "file": "db/queries/product-detail.sql",
       "statements": 1,
-      "sha256": "da107539db0474c88a5d43890c7d29ff73a5f81f335641ea2db8a59b4ce22b22"
+      "sha256": "b53d91619dca756860a194543c57574be974eeac2b0467a22549cc34bb54dd24"
     },
     {
       "file": "db/queries/products-list.sql",
       "statements": 1,
-      "sha256": "db81e53a11bb97375f5e2f72c1e8b47f51c51b98417967f5955e5377566bdb5e"
+      "sha256": "a1e3d7d86691dd5b1426192b2d2348ea9a15e7967caca9f8267acd9a5f5314e2"
     },
     {
       "file": "db/validation/001-preflight.sql",
@@ -39,14 +39,24 @@
     {
       "file": "db/validation/003-catalog-integrity.sql",
       "statements": 5,
-      "sha256": "76304013acf6516138ac0c964e54cfdaefd348d477690e3f1f86b1168b6880d9"
+      "sha256": "51c213c90387cd36b966e3639e4a7e6836f036119bed70199734d91191d5b27a"
     }
   ],
-  "generated_fixture": {
-    "approved_only_in_memory": 10,
-    "insert_statements": 19,
-    "drop_statements": 0,
-    "written_import_files": 0
-  },
+  "generated_fixtures": [
+    {
+      "mode": "with-images",
+      "approved_only_in_memory": 10,
+      "insert_statements": 19,
+      "drop_statements": 0,
+      "written_import_files": 0
+    },
+    {
+      "mode": "pending-images",
+      "approved_only_in_memory": 10,
+      "insert_statements": 19,
+      "drop_statements": 0,
+      "written_import_files": 0
+    }
+  ],
   "limit": "Syntax and read-only statement structure only; no execution, type resolution or live constraint validation."
 }
