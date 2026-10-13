@@ -30,8 +30,8 @@ test('prepared demonstration migration contains the exact ten legacy ZIP identit
 
 test('demo migration is isolated, gated and does not publish commercial catalog products', () => {
   // The DO blocks must be valid PL/pgSQL with a statement terminator before the closing dollar quote.
-  assert.match(sql, /DO \\$demo_guard\\$[\\s\\S]*?END;\\s*\\$demo_guard\\$;/);
-  assert.match(sql, /DO \\$demo_validate\\$[\\s\\S]*?END;\\s*\\$demo_validate\\$;/);
+  assert.match(sql, /DO \$demo_guard\$[\s\S]*?END;\s*\$demo_guard\$;/);
+  assert.match(sql, /DO \$demo_validate\$[\s\S]*?END;\s*\$demo_validate\$;/);
   assert.match(sql, /CREATE SCHEMA demo;/);
   assert.match(sql, /CREATE TABLE demo\.product_previews/);
   assert.match(sql, /is_demo boolean NOT NULL DEFAULT true CHECK \(is_demo = true\)/);
