@@ -79,11 +79,16 @@ export function createCatalogService(config: ApiConfig, request: FetchFunction =
       const cursors = new Set<string>();
       let after: string | null = null;
       for (let pageNumber = 0; pageNumber < MAX_PAGES; pageNumber++) {
-        const query = { limit: String(PAGE_LIMIT), ...(after ? { after } : {}) };
-        const response = await client.get('/products', isProductResponse, { ...options, query });
+        const query: Record<string, string> = { limit: String(PAGE_LIMIT) };
+        if (after !== null) query.after = after;
+        const response: CatalogPage = await client.get<CatalogPage>(
+          '/products',
+          isProductResponse,
+          { ...options, query },
+        );
         result.push(...response.data);
         if (!response.page.hasMore) return result;
-        const cursor = response.page.nextCursor;
+        const cursor: string | null = response.page.nextCursor;
         if (!cursor || cursors.has(cursor) || response.data.length === 0) {
           throw new ApiError('invalid-response');
         }
