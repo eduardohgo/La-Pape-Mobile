@@ -145,10 +145,11 @@ además de separación explícita entre datos de demostración y mercancía real
 
 ### Demostración separada de los diez productos del ZIP
 
-Los 10 artículos de `10 (1).zip` NO están aprobados comercialmente. Una vez que
-se revise y autorice `backend/db/migrations/002_demo_previews.sql`, existirán
-exclusivamente en `demo.product_previews`, nunca en `catalog.products`.
-La migración 002 aún NO ha sido aplicada.
+Los diez artículos de `10 (1).zip` **no están aprobados comercialmente**.
+La migración `backend/db/migrations/002_demo_previews.sql` fue **autorizada y aplicada**
+el 13 de octubre de 2026 exclusivamente en Neon `development` / `lapape_mobile_dev`.
+La tabla `demo.product_previews` contiene exactamente diez filas verificadas,
+separadas de `catalog.products` (que continúa vacía). **No volver a ejecutar 002.**
 
 La ruta `GET /demo/products` devuelve `{mode:'demo',purchasable:false,data:[]}`
 con productos `is_demo=true` y `is_for_sale=false`, sin marcas, fotos ni
