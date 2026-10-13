@@ -113,6 +113,8 @@ export function loadConfig(env = process.env) {
     rateLimitWindowMs: integer(env.RATE_LIMIT_WINDOW_MS, 900000, 'RATE_LIMIT_WINDOW_MS', 1000, 3600000),
     jsonBodyLimitBytes: integer(env.JSON_BODY_LIMIT_BYTES, 65536, 'JSON_BODY_LIMIT_BYTES', 1, 1048576),
     catalogApiEnabled: String(env.CATALOG_API_ENABLED ?? 'false').trim() === 'true',
+    // Never enable demo routes in test/staging/production, even if the flag leaks.
+    catalogDemoApiEnabled: nodeEnv === 'development' && String(env.CATALOG_DEMO_API_ENABLED ?? 'false').trim() === 'true',
     database: database(env, nodeEnv),
   });
 }
