@@ -1,6 +1,7 @@
 const assert = require('node:assert/strict');
 const { readFileSync } = require('node:fs');
 const { join } = require('node:path');
+const { cwd } = require('node:process');
 const test = require('node:test');
 
 const files = [
@@ -12,7 +13,7 @@ const files = [
 
 const content = Object.fromEntries(files.map((file) => [
   file,
-  readFileSync(join(__dirname, '..', file), 'utf8'),
+  readFileSync(join(cwd(), file), 'utf8'),
 ]));
 
 test('all storefront screens exclude provisional-price and photo-review labels', () => {
@@ -31,7 +32,7 @@ test('internal demo protections and real product lookup stay in place', () => {
   const home = content['src/app/(tabs)/index.tsx'];
   const catalog = content['src/app/(tabs)/explore.tsx'];
   const detail = content['src/app/products/[id].tsx'];
-  const service = readFileSync(join(__dirname, '..', 'src/services/catalog.service.ts'), 'utf8');
+  const service = readFileSync(join(cwd(), 'src/services/catalog.service.ts'), 'utf8');
 
   assert.match(home, /useHomeProducts\(\)/);
   assert.match(catalog, /__DEV__ && process\.env\.EXPO_PUBLIC_CATALOG_MODE === 'demo'/);
