@@ -1,43 +1,45 @@
-import { useMemo, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Image } from 'expo-image';
+import { useEffect, useMemo, useState } from 'react';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { BottomTabInset } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
-import { DEMO_PRODUCTS, type DemoCategory, type DemoProduct } from '@/features/catalog/demo-products';
+import { type CatalogCategory, type CatalogProduct, getCatalogService } from '@/services/catalog.service';
 
-type Filter = 'Todos' | DemoCategory;
-
-const filters: readonly Filter[] = ['Todos', 'Cuadernos', 'Arte', 'Oficina'];
-
-const categoryStyle: Record<DemoCategory, { background: string; icon: string; foreground: string }> = {
-  Cuadernos: { background: '#E6EEFF', icon: '📓', foreground: '#244A93' },
-  Arte: { background: '#FFF0E3', icon: '🎨', foreground: '#94501C' },
-  Oficina: { background: '#E9F5EE', icon: '✏️', foreground: '#1A694D' },
+const categoryIllustrations: Record<string, string> = {
+  Cuadernos: '📓',
+  Arte: '🎨',
+  Oficina: '✏️',
 };
 
-function PreviewProductCard({ product }: { product: DemoProduct }) {
+function ProductCard({ product }: { product: CatalogProduct }) {
   const theme = useTheme();
-  const color = categoryStyle[product.category];
-
+  const icon = categoryIllustrations[product.category_name] ?? '📦';
   return (
     <View
       style={[styles.card, { backgroundColor: theme.background, borderColor: theme.backgroundSelected }]}
       accessible
-      accessibilityLabel={`${product.name}. ${product.category}. ${product.price} pesos, precio de demostración. Fotografía pendiente. No disponible para compra.`}>
-      <View style={[styles.photo, { backgroundColor: color.background }]}>
-        <Text style={styles.photoIcon} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
-          {color.icon}
-        </Text>
-        <Text style={[styles.missingPhoto, { color: color.foreground }]}>Sin fotografía</Text>
+      accessibilityLabel={`${product.name}. ${product.category_name}. ${product.price} pesos mexicanos. ${__DEV__ ? 'Precio de demostración. ' : ''}Compras no disponibles.`}>
+      <View style={[styles.photo, { backgroundColor: theme.backgroundElement }]}>
+        {product.image_url ? (
+          <Image source={{ uri: product.image_url }} style={styles.productImage} contentFit="contain" />
+        ) : (
+          <>
+            <Text style={styles.photoIcon} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
+              {icon}
+            </Text>
+            <Text style={[styles.missingPhoto, { color: theme.textSecondary }]}>Sin fotografía</Text>
+          </>
+        )}
       </View>
       <View style={styles.cardContent}>
-        <Text style={[styles.categoryText, { color: theme.textSecondary }]}>{product.category}</Text>
+        <Text style={[styles.categoryText, { color: theme.textSecondary }]}>{product.category_name}</Text>
         <Text style={[styles.productName, { color: theme.text }]} numberOfLines={3}>
           {product.name}
         </Text>
         <Text style={[styles.price, { color: theme.text }]}>${product.price}</Text>
-        <Text style={styles.demoPriceLabel}>PRECIO DE DEMOSTRACIÓN</Text>
+        <Text style={styles.demoPriceLabel}>{__DEV__ ? 'PRECIO DE DEMOSTRACIÓN' : 'MXN'}</Text>
       </View>
     </View>
   );
@@ -46,12 +48,45 @@ function PreviewProductCard({ product }: { product: DemoProduct }) {
 export default function CatalogScreen() {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
-  const [filter, setFilter] = useState<Filter>('Todos');
-  const products = useMemo(
-    () => (filter === 'Todos' ? DEMO_PRODUCTS : DEMO_PRODUCTS.filter((product) => product.category === filter)),
-    [filter],
+  const [categories, setCategories] = useState<CatalogCategory[]>([]);
+  const [products, setProducts] = useState<CatalogProduct[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+  const [reload, setReload] = useState(0);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    async function load() {
+      setLoading(true);
+      setError(false);
+      try {
+        const service = getCatalogService();
+        const [loadedCategories, loadedProducts] = await Promise.all([
+          service.categories({ signal: controller.signal }),
+          service.products({ signal: controller.signal }),
+        ]);
+        if (controller.signal.aborted) return;
+        setCategories(loadedCategories);
+        setProducts(loadedProducts);
+      } catch {
+        if (!controller.signal.aborted) setError(true);
+      } finally {
+        if (!controller.signal.aborted) setLoading(false);
+      }
+    }
+    void load();
+    return () => controller.abort();
+  }, [reload]);
+
+  const filtered = useMemo(
+    () => selectedCategory === 'all'
+      ? products
+      : products.filter((product) => product.category_id === selectedCategory),
+    [products, selectedCategory],
   );
-  const productRows = Array.from({ length: Math.ceil(products.length / 2) }, (_, i) => products.slice(i * 2, i * 2 + 2));
+  const rows = Array.from({ length: Math.ceil(filtered.length / 2) }, (_, index) =>
+    filtered.slice(index * 2, index * 2 + 2));
 
   return (
     <ScrollView
@@ -64,69 +99,93 @@ export default function CatalogScreen() {
         <Text style={styles.brand}>LA PAPE</Text>
         <Text style={[styles.heading, { color: theme.text }]}>Catálogo</Text>
         <Text style={[styles.subtitle, { color: theme.textSecondary }]}>
-          Todo para tus ideas, tus clases y tu oficina.
+          Productos consultados desde nuestra API de La Pape.
         </Text>
       </View>
 
-      {__DEV__ ? (
-        <>
-          <View style={styles.notice}>
-            <Text style={styles.noticeTitle}>VISTA PREVIA · SOLO DESARROLLO</Text>
-            <Text style={styles.noticeText}>
-              Estos 10 artículos y sus precios son datos locales de demostración. No están cargados en Neon y las compras están deshabilitadas.
-            </Text>
-          </View>
+      {__DEV__ && (
+        <View style={styles.notice}>
+          <Text style={styles.noticeTitle}>DESARROLLO · SIN COMPRAS</Text>
+          <Text style={styles.noticeText}>
+            Los artículos se consultan en Express y Neon. Los precios se muestran solo para demostración;
+            las marcas e inventarios aún no se verifican.
+          </Text>
+        </View>
+      )}
 
+      {loading ? (
+        <View style={styles.status}>
+          <ActivityIndicator size="large" color="#1F5489" />
+          <Text style={[styles.statusText, { color: theme.textSecondary }]}>Consultando catálogo…</Text>
+        </View>
+      ) : error ? (
+        <View style={[styles.status, { backgroundColor: theme.backgroundElement, borderRadius: 16 }]}>
+          <Text style={[styles.statusTitle, { color: theme.text }]}>No se pudo consultar el catálogo</Text>
+          <Text style={[styles.statusText, { color: theme.textSecondary }]}>
+            Comprueba que Express esté encendido y que la URL de la API sea accesible desde este teléfono.
+          </Text>
+          <Pressable accessibilityRole="button" style={styles.retry} onPress={() => setReload((value) => value + 1)}>
+            <Text style={styles.retryText}>Volver a intentar</Text>
+          </Pressable>
+        </View>
+      ) : products.length === 0 ? (
+        <View style={[styles.status, { backgroundColor: theme.backgroundElement, borderRadius: 16 }]}>
+          <Text style={styles.emptyIcon}>📦</Text>
+          <Text style={[styles.statusTitle, { color: theme.text }]}>Todavía no hay productos publicados</Text>
+          <Text style={[styles.statusText, { color: theme.textSecondary }]}>
+            La conexión funciona, pero Neon aún no tiene artículos aprobados para mostrar.
+          </Text>
+          {__DEV__ && (
+            <Text style={[styles.statusText, { color: theme.textSecondary }]}>
+              Los diez productos de demostración todavía no se han importado.
+            </Text>
+          )}
+          <Pressable accessibilityRole="button" style={styles.retry} onPress={() => setReload((value) => value + 1)}>
+            <Text style={styles.retryText}>Actualizar catálogo</Text>
+          </Pressable>
+        </View>
+      ) : (
+        <>
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.filters}
             accessibilityLabel="Filtrar productos por categoría">
-            {filters.map((item) => {
-              const selected = item === filter;
+            {[{ id: 'all', name: 'Todos' }, ...categories].map((item) => {
+              const selected = item.id === selectedCategory;
               return (
                 <Pressable
-                  key={item}
+                  key={item.id}
                   accessibilityRole="button"
                   accessibilityState={{ selected }}
-                  onPress={() => setFilter(item)}
-                  style={[
-                    styles.filterChip,
-                    { backgroundColor: selected ? '#1F5489' : theme.backgroundElement },
-                  ]}>
-                  <Text style={[styles.filterLabel, { color: selected ? '#FFFFFF' : theme.text }]}>
-                    {item}
-                  </Text>
+                  onPress={() => setSelectedCategory(item.id)}
+                  style={[styles.filterChip, { backgroundColor: selected ? '#1F5489' : theme.backgroundElement }]}>
+                  <Text style={[styles.filterLabel, { color: selected ? '#FFFFFF' : theme.text }]}>{item.name}</Text>
                 </Pressable>
               );
             })}
           </ScrollView>
 
           <View style={styles.sectionTitle}>
-            <Text style={[styles.sectionHeading, { color: theme.text }]}>Productos de ejemplo</Text>
-            <Text style={[styles.counter, { color: theme.textSecondary }]}>{products.length} artículos</Text>
+            <Text style={[styles.sectionHeading, { color: theme.text }]}>Productos</Text>
+            <Text style={[styles.counter, { color: theme.textSecondary }]}>{filtered.length} artículos</Text>
           </View>
-
-          <View style={styles.grid}>
-            {productRows.map((pair) => (
-              <View key={pair[0].sku} style={styles.row}>
-                <PreviewProductCard product={pair[0]} />
-                {pair[1] ? <PreviewProductCard product={pair[1]} /> : <View style={styles.emptyCell} />}
-              </View>
-            ))}
-          </View>
-
+          {filtered.length === 0 ? (
+            <Text style={[styles.statusText, { color: theme.textSecondary }]}>No hay productos en esta categoría.</Text>
+          ) : (
+            <View style={styles.grid}>
+              {rows.map((pair) => (
+                <View key={pair[0].id} style={styles.row}>
+                  <ProductCard product={pair[0]} />
+                  {pair[1] ? <ProductCard product={pair[1]} /> : <View style={styles.emptyCell} />}
+                </View>
+              ))}
+            </View>
+          )}
           <Text style={[styles.footer, { color: theme.textSecondary }]}>
-            Fotografías y marcas pendientes de verificar. No se muestran existencias ni opciones de compra.
+            Marcas no verificadas ocultas. No se muestran existencias ni opciones de compra.
           </Text>
         </>
-      ) : (
-        <View style={[styles.productionEmpty, { backgroundColor: theme.backgroundElement }]}>
-          <Text style={[styles.productionTitle, { color: theme.text }]}>Catálogo en preparación</Text>
-          <Text style={[styles.productionText, { color: theme.textSecondary }]}>
-            Los productos se mostrarán cuando sus datos estén verificados y publicados en la API.
-          </Text>
-        </View>
       )}
     </ScrollView>
   );
@@ -151,7 +210,8 @@ const styles = StyleSheet.create({
   grid: { gap: 12 },
   row: { flexDirection: 'row', alignItems: 'stretch', gap: 12 },
   card: { flex: 1, minWidth: 0, borderRadius: 17, borderWidth: 1, padding: 9, overflow: 'hidden' },
-  photo: { height: 110, borderRadius: 12, alignItems: 'center', justifyContent: 'center', gap: 4 },
+  photo: { height: 110, borderRadius: 12, alignItems: 'center', justifyContent: 'center', overflow: 'hidden' },
+  productImage: { width: '100%', height: '100%' },
   photoIcon: { fontSize: 36 },
   missingPhoto: { fontSize: 10, fontWeight: '700' },
   cardContent: { flexGrow: 1, paddingHorizontal: 3, paddingTop: 11, paddingBottom: 7 },
@@ -161,7 +221,10 @@ const styles = StyleSheet.create({
   demoPriceLabel: { marginTop: 4, fontSize: 9, color: '#AD642A', fontWeight: '800', letterSpacing: 0.2 },
   emptyCell: { flex: 1 },
   footer: { fontSize: 12, lineHeight: 19, marginTop: 22, textAlign: 'center' },
-  productionEmpty: { marginTop: 16, padding: 24, gap: 12, borderRadius: 16 },
-  productionTitle: { fontSize: 18, fontWeight: '700' },
-  productionText: { fontSize: 14, lineHeight: 21 },
+  status: { marginTop: 24, alignItems: 'center', padding: 26, gap: 14 },
+  statusTitle: { fontSize: 18, fontWeight: '800', textAlign: 'center' },
+  statusText: { fontSize: 13, textAlign: 'center', lineHeight: 20 },
+  emptyIcon: { fontSize: 40 },
+  retry: { backgroundColor: '#1F5489', paddingHorizontal: 21, paddingVertical: 12, borderRadius: 12 },
+  retryText: { color: '#FFFFFF', fontWeight: '700', fontSize: 14 },
 });
