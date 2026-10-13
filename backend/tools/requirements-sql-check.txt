@@ -1,0 +1,2 @@
+# Optional offline reviewer tool; not an Express runtime dependency.
+pglast==8.5

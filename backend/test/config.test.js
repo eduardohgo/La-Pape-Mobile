@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
+import { Client } from 'pg';
 import { loadConfig } from '../src/config/env.js';
 import { createDatabasePool } from '../src/db/pool.js';
 
@@ -32,10 +33,70 @@ test('database TLS is verified for every remote host and production localhost', 
   assert.deepEqual(loadConfig({ DATABASE_URL: 'postgresql://localhost/lapape', PG_SSL: 'true' }).database.ssl, { rejectUnauthorized: true });
 });
 
-test('URL parameters cannot override database TLS configuration', () => {
-  for (const query of ['sslmode=disable', 'sslmode=require', 'sslrootcert=example', 'application_name=example']) {
-    assert.throws(() => loadConfig({ DATABASE_URL: `postgresql://example.invalid/lapape?${query}` }), /sin parámetros/);
+test('Neon URL SSL options are translated before pg parses the connection string', () => {
+  for (const mode of ['require', 'verify-full']) {
+    const config = loadConfig({ DATABASE_URL: `postgresql://api_reader:fake%40password@ep-example-pooler.example.invalid/lapape_mobile_dev?sslmode=${mode}&channel_binding=prefer` }).database;
+    assert.equal(new URL(config.connectionString).search, '');
+    assert.deepEqual(config.ssl, { rejectUnauthorized: true });
+    assert.equal(config.enableChannelBinding, true);
+
+    // Constructing a Client parses pg's actual configuration without connecting.
+    const client = new Client(config);
+    assert.equal(client.host, 'ep-example-pooler.example.invalid');
+    assert.equal(client.database, 'lapape_mobile_dev');
+    assert.equal(client.password, 'fake@password');
+    assert.equal(client.enableChannelBinding, true);
+    assert.deepEqual(client.ssl, { rejectUnauthorized: true });
+    assert.equal(client._connecting, false);
+    assert.equal(client._connected, false);
   }
+});
+
+test('weak, unsupported, duplicated and override URL parameters are rejected', () => {
+  for (const query of [
+    'sslmode=disable', 'sslmode=allow', 'sslmode=prefer', 'sslmode=no-verify', 'sslmode=verify-ca',
+    'sslmode=', 'sslrootcert=example', 'sslkey=example', 'sslcert=example', 'ssl=false',
+    'uselibpqcompat=true', 'application_name=example', 'host=localhost', 'channel_binding=disable',
+    'channel_binding=', 'sslmode=require&sslmode=verify-full', 'sslmode=require&sslmode=disable',
+    'channel_binding=prefer&channel_binding=prefer', 'SSLMODE=require',
+  ]) {
+    assert.throws(() => loadConfig({ DATABASE_URL: `postgresql://example.invalid/lapape?${query}` }));
+  }
+});
+
+test('channel binding require fails explicitly instead of silently downgrading', () => {
+  assert.throws(() => loadConfig({ DATABASE_URL: 'postgresql://example.invalid/lapape?sslmode=require&channel_binding=require' }), /no garantiza channel_binding=require/);
+});
+
+test('explicit URL TLS and channel binding cannot be disabled even for local development', () => {
+  for (const query of ['sslmode=require', 'sslmode=verify-full', 'channel_binding=prefer']) {
+    const env = { DATABASE_URL: `postgresql://localhost/lapape?${query}` };
+    assert.deepEqual(loadConfig(env).database.ssl, { rejectUnauthorized: true });
+    assert.throws(() => loadConfig({ ...env, PG_SSL: 'false' }), /no puede desactivar TLS/);
+  }
+  assert.equal(loadConfig({ DATABASE_URL: 'postgresql://localhost/lapape' }).database.enableChannelBinding, false);
+});
+
+test('database configuration errors redact malformed credentials and URLs', () => {
+  const values = [
+    ...['?sslmode=disable', '?channel_binding=require', '?sslrootcert=secret-ca', '#fragment']
+      .map((suffix) => `postgresql://sensitive-user:sensitive-password@example.invalid/lapape${suffix}`),
+    'postgresql://sensitive-user:sensitive-password%ZZ@example.invalid/lapape',
+  ];
+  for (const value of values) {
+    assert.throws(() => loadConfig({ DATABASE_URL: value }), (error) => {
+      for (const secret of ['sensitive-user', 'sensitive-password', 'example.invalid', value]) {
+        assert.ok(!error.message.includes(secret));
+      }
+      return true;
+    });
+  }
+});
+
+test('the migration owner URL is never used by runtime configuration', () => {
+  assert.equal(loadConfig({ DATABASE_URL_UNPOOLED: 'not-a-runtime-url' }).database, null);
+  const runtime = 'postgresql://api_reader@example.invalid/lapape';
+  assert.equal(loadConfig({ DATABASE_URL: runtime, DATABASE_URL_UNPOOLED: 'not-a-runtime-url' }).database.connectionString, runtime);
 });
 
 test('PostgreSQL pool preparation creates no client and performs no query', async () => {

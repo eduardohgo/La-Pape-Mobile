@@ -44,18 +44,50 @@ function database(env, nodeEnv) {
   } catch {
     throw new Error('Configuración inválida: DATABASE_URL');
   }
-  if (!['postgres:', 'postgresql:'].includes(url.protocol) || !url.hostname || url.pathname.length < 2 || url.search || url.hash) {
-    throw new Error('DATABASE_URL debe identificar PostgreSQL sin parámetros de URL');
+  if (!['postgres:', 'postgresql:'].includes(url.protocol) || !url.hostname || url.pathname.length < 2 || url.hash) {
+    throw new Error('DATABASE_URL debe identificar una base PostgreSQL sin fragmentos');
+  }
+
+  // Validate percent escapes before pg parses credentials, so errors never contain the URL.
+  try {
+    decodeURIComponent(url.username);
+    decodeURIComponent(url.password);
+    decodeURIComponent(url.pathname);
+  } catch {
+    throw new Error('Configuración inválida: DATABASE_URL');
+  }
+
+  const allowedParameters = new Set(['sslmode', 'channel_binding']);
+  for (const [name] of url.searchParams) {
+    if (!allowedParameters.has(name) || url.searchParams.getAll(name).length !== 1) {
+      throw new Error('DATABASE_URL contiene parámetros no admitidos o repetidos');
+    }
+  }
+  const sslMode = url.searchParams.get('sslmode');
+  if (sslMode !== null && !['require', 'verify-full'].includes(sslMode)) {
+    throw new Error('DATABASE_URL requiere sslmode=require o verify-full');
+  }
+  const channelBinding = url.searchParams.get('channel_binding');
+  if (channelBinding === 'require') {
+    // pg 8.20 enables PLUS when offered, but cannot enforce libpq's require semantics.
+    throw new Error('pg 8.20 no garantiza channel_binding=require; use prefer con TLS verificado');
+  }
+  if (channelBinding !== null && channelBinding !== 'prefer') {
+    throw new Error('DATABASE_URL solo admite channel_binding=prefer');
   }
 
   const local = ['localhost', '127.0.0.1', '[::1]', '::1'].includes(url.hostname.toLowerCase());
-  const tlsRequired = nodeEnv === 'production' || !local;
+  const tlsRequired = nodeEnv === 'production' || !local || sslMode !== null || channelBinding !== null;
   if (tlsRequired && sslSetting === 'false') {
-    throw new Error('PG_SSL no puede desactivar TLS para una base remota o de producción');
+    throw new Error('PG_SSL no puede desactivar TLS requerido por la base o su URL');
   }
+  const ssl = tlsRequired || sslSetting === 'true' ? Object.freeze({ rejectUnauthorized: true }) : false;
+  // pg lets URL SSL parameters replace the explicit ssl object. Translate first, strip them.
+  url.search = '';
   return Object.freeze({
-    connectionString,
-    ssl: tlsRequired || sslSetting === 'true' ? Object.freeze({ rejectUnauthorized: true }) : false,
+    connectionString: url.href,
+    ssl,
+    enableChannelBinding: Boolean(ssl),
     connectionTimeoutMillis: 5000,
     idleTimeoutMillis: 10000,
     max: 5,

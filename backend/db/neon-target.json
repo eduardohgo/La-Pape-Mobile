@@ -1,0 +1,10 @@
+{
+  "projectName": "La Pape Mobile",
+  "projectId": "twilight-moon-02635569",
+  "branchName": "development",
+  "databaseName": "lapape_mobile_dev",
+  "postgresMajor": 18,
+  "reportedInitialTableCount": 0,
+  "verificationSource": "Confirmado por el responsable mediante ChatGPT; no consultado por estos scripts",
+  "executionAuthorized": false
+}

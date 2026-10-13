@@ -96,3 +96,13 @@ y [docs/issue-19.md](docs/issue-19.md) para configuración, límites y evidencia
 No hay despliegue, migración, sincronización automática, autenticación ni compras
 habilitadas en esta base. La Issue #19 permanece en Testing hasta la validación
 manual del responsable; PB-01 permanece abierto.
+
+## Preparación de Neon y catálogo
+
+El destino de desarrollo confirmado es Neon PostgreSQL 18, proyecto
+`twilight-moon-02635569`, rama `development`, base `lapape_mobile_dev`.
+Los scripts de esquema, consultas de lectura y revisión de candidatos están en
+`backend/db/`. No se ejecutan al iniciar Express ni desde Expo.
+Los diez candidatos siguen pendientes de aprobación; se excluyen productos e
+inventarios sintéticos y datos personales. Ver el
+[plan revisable y sus límites](docs/neon-catalog-preparation.md).
