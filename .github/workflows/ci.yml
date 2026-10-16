@@ -1,0 +1,66 @@
+
+name: CI - Pruebas La Pape Mobile
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+
+  pull_request:
+    branches:
+      - main
+      - develop
+
+permissions:
+  contents: read
+
+jobs:
+  pruebas:
+    name: Validacion de frontend y backend
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Descargar repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: |
+            frontend/package-lock.json
+            backend/package-lock.json
+
+      - name: Instalar dependencias del backend
+        working-directory: backend
+        run: npm ci
+
+      - name: Instalar dependencias del frontend
+        working-directory: frontend
+        run: npm ci
+
+      - name: Verificar sintaxis del backend
+        working-directory: backend
+        run: npm run check
+
+      - name: Ejecutar pruebas del backend
+        working-directory: backend
+        run: npm test
+
+      - name: Analizar codigo del frontend con ESLint
+        working-directory: frontend
+        run: npm run lint
+
+      - name: Verificar TypeScript
+        working-directory: frontend
+        run: npx tsc --noEmit
+
+      - name: Ejecutar pruebas del frontend
+        working-directory: frontend
+        run: npm test
+
+      - name: Ejecutar prueba de integracion
+        working-directory: frontend
+        run: npm run test:integration

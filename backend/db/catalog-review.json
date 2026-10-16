@@ -1,0 +1,444 @@
+{
+  "formatVersion": 2,
+  "target": {
+    "projectId": "twilight-moon-02635569",
+    "branch": "development",
+    "database": "lapape_mobile_dev",
+    "postgresqlMajor": 18
+  },
+  "source": {
+    "archive": "10 (1).zip",
+    "sqlEntry": "10/02_Base_Datos/Respaldo_BD_LaPape_Sin_Datos_Sensibles.sql",
+    "sqlSha256": "b03c2111ad3245c9cfee7f823cd770c6ce14d7e76883fc2e518d345674eb908f",
+    "candidateCount": 10,
+    "excludedSyntheticProducts": 200,
+    "excludedOtherProducts": 2,
+    "inventoryImported": false,
+    "personalDataImported": false
+  },
+  "categories": [
+    {
+      "id": "155b7072-240d-459e-a843-fc2ca3502169",
+      "name": "Cuadernos",
+      "description": "Libretas, blocks y cuadernos para uso escolar y profesional."
+    },
+    {
+      "id": "45c6147f-f513-42f9-bc39-cd54c45095c4",
+      "name": "Arte",
+      "description": "Material creativo, dibujo, color y expresion visual."
+    },
+    {
+      "id": "7aa5a281-18cf-4401-a705-f764c892fa3a",
+      "name": "Oficina",
+      "description": "Accesorios y suministros para escritorio y productividad."
+    }
+  ],
+  "brands": [
+    {
+      "id": "0a22b840-80cc-4f7c-8615-36d6a7de15ef",
+      "name": "Norma"
+    },
+    {
+      "id": "0e533000-7779-4e5f-8c35-281d45b9c2f5",
+      "name": "Pelikan"
+    },
+    {
+      "id": "1a91f9f3-7c48-43dc-8f05-bed503985c0d",
+      "name": "Maped"
+    },
+    {
+      "id": "55f050f2-f0a2-4e0b-b1cf-7ae5fc72797b",
+      "name": "Barrilito"
+    },
+    {
+      "id": "d4725249-798a-4a36-ae55-6620f3071d0a",
+      "name": "BIC"
+    },
+    {
+      "id": "de3f0474-45fa-4bf8-bb53-7c47227eeb9d",
+      "name": "Scribe"
+    }
+  ],
+  "products": [
+    {
+      "id": "8eab1681-b5c6-46d2-9850-60847744982f",
+      "sku": "LAP-CAR-030",
+      "source": {
+        "name": "Cartulina iris surtida",
+        "description": "Piezas de cartulina para proyectos escolares con variación de demanda.",
+        "categoryId": "45c6147f-f513-42f9-bc39-cd54c45095c4",
+        "brandId": "1a91f9f3-7c48-43dc-8f05-bed503985c0d",
+        "price": "18.50",
+        "imageUrl": "https://res.cloudinary.com/obnm5gkp/image/upload/v1784818060/la-pape/productos/8eab1681-b5c6-46d2-9850-60847744982f-cartulina-iris-surtida.png",
+        "sqlLine": 1178196
+      },
+      "catalog": {
+        "name": "Cartulina iris surtida",
+        "description": "Piezas de cartulina para proyectos escolares con variación de demanda.",
+        "categoryId": "45c6147f-f513-42f9-bc39-cd54c45095c4",
+        "brandId": "1a91f9f3-7c48-43dc-8f05-bed503985c0d",
+        "price": "18.50",
+        "currency": "MXN",
+        "imageUrl": null
+      },
+      "review": {
+        "approved": false,
+        "price": false,
+        "brand": false,
+        "image": false,
+        "category": false,
+        "content": false,
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "imagePendingAccepted": false
+      },
+      "notes": [
+        "Precio, marca, contenido e imagen requieren confirmación del responsable antes de aprobar la importación.",
+        "La URL externa no demuestra disponibilidad, correspondencia visual ni permiso de uso; falta revisión.",
+        "Fotografía pendiente: catalog.imageUrl permanece NULL y no existe aceptación para publicar sin fotografía. Las referencias originales se conservan solamente en source.imageUrl."
+      ]
+    },
+    {
+      "id": "709f77eb-bcc7-47ac-8206-e5073c4a8c3d",
+      "sku": "LAP-COL-011",
+      "source": {
+        "name": "Colores de madera 24 piezas",
+        "description": "Estuche de colores de madera con demanda distinta por sucursal.",
+        "categoryId": "45c6147f-f513-42f9-bc39-cd54c45095c4",
+        "brandId": "0e533000-7779-4e5f-8c35-281d45b9c2f5",
+        "price": "94.00",
+        "imageUrl": "https://res.cloudinary.com/obnm5gkp/image/upload/v1784817880/la-pape/productos/709f77eb-bcc7-47ac-8206-e5073c4a8c3d-colores-de-madera-24-piezas.png",
+        "sqlLine": 1178192
+      },
+      "catalog": {
+        "name": "Colores de madera 24 piezas",
+        "description": "Estuche de colores de madera con demanda distinta por sucursal.",
+        "categoryId": "45c6147f-f513-42f9-bc39-cd54c45095c4",
+        "brandId": "0e533000-7779-4e5f-8c35-281d45b9c2f5",
+        "price": "94.00",
+        "currency": "MXN",
+        "imageUrl": null
+      },
+      "review": {
+        "approved": false,
+        "price": false,
+        "brand": false,
+        "image": false,
+        "category": false,
+        "content": false,
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "imagePendingAccepted": false
+      },
+      "notes": [
+        "Precio, marca, contenido e imagen requieren confirmación del responsable antes de aprobar la importación.",
+        "La URL externa no demuestra disponibilidad, correspondencia visual ni permiso de uso; falta revisión.",
+        "Fotografía pendiente: catalog.imageUrl permanece NULL y no existe aceptación para publicar sin fotografía. Las referencias originales se conservan solamente en source.imageUrl."
+      ]
+    },
+    {
+      "id": "e9096108-10c1-4483-9a3c-f61283d3c24f",
+      "sku": "LAP-CUA-001",
+      "source": {
+        "name": "Cuaderno profesional cuadriculado",
+        "description": "Cuaderno profesional de 100 hojas para uso escolar y oficina.",
+        "categoryId": "155b7072-240d-459e-a843-fc2ca3502169",
+        "brandId": "de3f0474-45fa-4bf8-bb53-7c47227eeb9d",
+        "price": "89.90",
+        "imageUrl": "/products/cuaderno.jpg",
+        "sqlLine": 1178181
+      },
+      "catalog": {
+        "name": "Cuaderno profesional cuadriculado",
+        "description": "Cuaderno profesional de 100 hojas para uso escolar y oficina.",
+        "categoryId": "155b7072-240d-459e-a843-fc2ca3502169",
+        "brandId": "de3f0474-45fa-4bf8-bb53-7c47227eeb9d",
+        "price": "89.90",
+        "currency": "MXN",
+        "imageUrl": null
+      },
+      "review": {
+        "approved": false,
+        "price": false,
+        "brand": false,
+        "image": false,
+        "category": false,
+        "content": false,
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "imagePendingAccepted": false
+      },
+      "notes": [
+        "Precio, marca, contenido e imagen requieren confirmación del responsable antes de aprobar la importación.",
+        "La foto local muestra Norma y el registro indica Scribe; resolver la discrepancia y publicar una URL HTTPS aprobada.",
+        "Fotografía pendiente: catalog.imageUrl permanece NULL y no existe aceptación para publicar sin fotografía. Las referencias originales se conservan solamente en source.imageUrl."
+      ]
+    },
+    {
+      "id": "1f909359-adf7-4d93-878e-62427f6179a3",
+      "sku": "LAP-ENG-040",
+      "source": {
+        "name": "Engrapadora metálica mediana",
+        "description": "Artículo de oficina con rotación baja y stock sobrante.",
+        "categoryId": "7aa5a281-18cf-4401-a705-f764c892fa3a",
+        "brandId": "d4725249-798a-4a36-ae55-6620f3071d0a",
+        "price": "119.00",
+        "imageUrl": "https://res.cloudinary.com/obnm5gkp/image/upload/v1784782530/la-pape/productos/1f909359-adf7-4d93-878e-62427f6179a3-engrapadora-met-lica-mediana.png",
+        "sqlLine": 1178212
+      },
+      "catalog": {
+        "name": "Engrapadora metálica mediana",
+        "description": "Artículo de oficina con rotación baja y stock sobrante.",
+        "categoryId": "7aa5a281-18cf-4401-a705-f764c892fa3a",
+        "brandId": "d4725249-798a-4a36-ae55-6620f3071d0a",
+        "price": "119.00",
+        "currency": "MXN",
+        "imageUrl": null
+      },
+      "review": {
+        "approved": false,
+        "price": false,
+        "brand": false,
+        "image": false,
+        "category": false,
+        "content": false,
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "imagePendingAccepted": false
+      },
+      "notes": [
+        "Precio, marca, contenido e imagen requieren confirmación del responsable antes de aprobar la importación.",
+        "La URL externa no demuestra disponibilidad, correspondencia visual ni permiso de uso; falta revisión.",
+        "Fotografía pendiente: catalog.imageUrl permanece NULL y no existe aceptación para publicar sin fotografía. Las referencias originales se conservan solamente en source.imageUrl."
+      ]
+    },
+    {
+      "id": "cd53aaff-60e8-439f-a36a-50abea1ec3d9",
+      "sku": "LAP-FOM-050",
+      "source": {
+        "name": "Foami carta colores surtidos",
+        "description": "Material de manualidades con demanda irregular y por proyectos.",
+        "categoryId": "45c6147f-f513-42f9-bc39-cd54c45095c4",
+        "brandId": "55f050f2-f0a2-4e0b-b1cf-7ae5fc72797b",
+        "price": "42.50",
+        "imageUrl": "https://res.cloudinary.com/obnm5gkp/image/upload/v1784817979/la-pape/productos/cd53aaff-60e8-439f-a36a-50abea1ec3d9-foami-carta-colores-surtidos.png",
+        "sqlLine": 1178213
+      },
+      "catalog": {
+        "name": "Foami carta colores surtidos",
+        "description": "Material de manualidades con demanda irregular y por proyectos.",
+        "categoryId": "45c6147f-f513-42f9-bc39-cd54c45095c4",
+        "brandId": "55f050f2-f0a2-4e0b-b1cf-7ae5fc72797b",
+        "price": "42.50",
+        "currency": "MXN",
+        "imageUrl": null
+      },
+      "review": {
+        "approved": false,
+        "price": false,
+        "brand": false,
+        "image": false,
+        "category": false,
+        "content": false,
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "imagePendingAccepted": false
+      },
+      "notes": [
+        "Precio, marca, contenido e imagen requieren confirmación del responsable antes de aprobar la importación.",
+        "La URL externa no demuestra disponibilidad, correspondencia visual ni permiso de uso; falta revisión.",
+        "Fotografía pendiente: catalog.imageUrl permanece NULL y no existe aceptación para publicar sin fotografía. Las referencias originales se conservan solamente en source.imageUrl."
+      ]
+    },
+    {
+      "id": "231bf429-8ac9-4500-aff9-80145d1895c6",
+      "sku": "LAP-HOJ-020",
+      "source": {
+        "name": "Paquete hojas blancas carta 500",
+        "description": "Resma de hojas blancas de alta rotación para impresión y copiado.",
+        "categoryId": "7aa5a281-18cf-4401-a705-f764c892fa3a",
+        "brandId": "0a22b840-80cc-4f7c-8615-36d6a7de15ef",
+        "price": "129.00",
+        "imageUrl": "https://res.cloudinary.com/obnm5gkp/image/upload/v1784818278/la-pape/productos/231bf429-8ac9-4500-aff9-80145d1895c6-paquete-hojas-blancas-carta-500.png",
+        "sqlLine": 1178189
+      },
+      "catalog": {
+        "name": "Paquete hojas blancas carta 500",
+        "description": "Resma de hojas blancas de alta rotación para impresión y copiado.",
+        "categoryId": "7aa5a281-18cf-4401-a705-f764c892fa3a",
+        "brandId": "0a22b840-80cc-4f7c-8615-36d6a7de15ef",
+        "price": "129.00",
+        "currency": "MXN",
+        "imageUrl": null
+      },
+      "review": {
+        "approved": false,
+        "price": false,
+        "brand": false,
+        "image": false,
+        "category": false,
+        "content": false,
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "imagePendingAccepted": false
+      },
+      "notes": [
+        "Precio, marca, contenido e imagen requieren confirmación del responsable antes de aprobar la importación.",
+        "La URL externa no demuestra disponibilidad, correspondencia visual ni permiso de uso; falta revisión.",
+        "Fotografía pendiente: catalog.imageUrl permanece NULL y no existe aceptación para publicar sin fotografía. Las referencias originales se conservan solamente en source.imageUrl."
+      ]
+    },
+    {
+      "id": "b22d9345-4fa9-46f0-9f07-039aa2374b7b",
+      "sku": "LAP-MAR-005",
+      "source": {
+        "name": "Marcadores permanentes 5 piezas",
+        "description": "Set de marcadores para cartulina, cartón y papel.",
+        "categoryId": "45c6147f-f513-42f9-bc39-cd54c45095c4",
+        "brandId": "1a91f9f3-7c48-43dc-8f05-bed503985c0d",
+        "price": "75.00",
+        "imageUrl": "/products/marcadores.webp",
+        "sqlLine": 1178182
+      },
+      "catalog": {
+        "name": "Marcadores permanentes 5 piezas",
+        "description": "Set de marcadores para cartulina, cartón y papel.",
+        "categoryId": "45c6147f-f513-42f9-bc39-cd54c45095c4",
+        "brandId": "1a91f9f3-7c48-43dc-8f05-bed503985c0d",
+        "price": "75.00",
+        "currency": "MXN",
+        "imageUrl": null
+      },
+      "review": {
+        "approved": false,
+        "price": false,
+        "brand": false,
+        "image": false,
+        "category": false,
+        "content": false,
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "imagePendingAccepted": false
+      },
+      "notes": [
+        "Precio, marca, contenido e imagen requieren confirmación del responsable antes de aprobar la importación.",
+        "La foto local muestra STABILO y el registro indica Maped; resolver la discrepancia y publicar una URL HTTPS aprobada.",
+        "Fotografía pendiente: catalog.imageUrl permanece NULL y no existe aceptación para publicar sin fotografía. Las referencias originales se conservan solamente en source.imageUrl."
+      ]
+    },
+    {
+      "id": "e6644bc8-9525-4689-8c64-2fa9af0d5bc1",
+      "sku": "LAP-PEG-015",
+      "source": {
+        "name": "Pegamento escolar 125 g",
+        "description": "Pegamento liquido para manualidades y trabajos escolares.",
+        "categoryId": "45c6147f-f513-42f9-bc39-cd54c45095c4",
+        "brandId": "55f050f2-f0a2-4e0b-b1cf-7ae5fc72797b",
+        "price": "24.90",
+        "imageUrl": "https://res.cloudinary.com/obnm5gkp/image/upload/v1784818147/la-pape/productos/e6644bc8-9525-4689-8c64-2fa9af0d5bc1-pegamento-escolar-125-g.png",
+        "sqlLine": 1178190
+      },
+      "catalog": {
+        "name": "Pegamento escolar 125 g",
+        "description": "Pegamento liquido para manualidades y trabajos escolares.",
+        "categoryId": "45c6147f-f513-42f9-bc39-cd54c45095c4",
+        "brandId": "55f050f2-f0a2-4e0b-b1cf-7ae5fc72797b",
+        "price": "24.90",
+        "currency": "MXN",
+        "imageUrl": null
+      },
+      "review": {
+        "approved": false,
+        "price": false,
+        "brand": false,
+        "image": false,
+        "category": false,
+        "content": false,
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "imagePendingAccepted": false
+      },
+      "notes": [
+        "Precio, marca, contenido e imagen requieren confirmación del responsable antes de aprobar la importación.",
+        "La URL externa no demuestra disponibilidad, correspondencia visual ni permiso de uso; falta revisión.",
+        "Fotografía pendiente: catalog.imageUrl permanece NULL y no existe aceptación para publicar sin fotografía. Las referencias originales se conservan solamente en source.imageUrl."
+      ]
+    },
+    {
+      "id": "2f2942bf-c6fa-40a0-8c61-f542691af02e",
+      "sku": "LAP-PLU-010",
+      "source": {
+        "name": "Plumas gel azules 10 piezas",
+        "description": "Caja con plumas de tinta gel para uso escolar y oficina.",
+        "categoryId": "7aa5a281-18cf-4401-a705-f764c892fa3a",
+        "brandId": "d4725249-798a-4a36-ae55-6620f3071d0a",
+        "price": "68.50",
+        "imageUrl": "https://res.cloudinary.com/obnm5gkp/image/upload/v1784818332/la-pape/productos/2f2942bf-c6fa-40a0-8c61-f542691af02e-plumas-gel-azules-10-piezas.jpg",
+        "sqlLine": 1178191
+      },
+      "catalog": {
+        "name": "Plumas gel azules 10 piezas",
+        "description": "Caja con plumas de tinta gel para uso escolar y oficina.",
+        "categoryId": "7aa5a281-18cf-4401-a705-f764c892fa3a",
+        "brandId": "d4725249-798a-4a36-ae55-6620f3071d0a",
+        "price": "68.50",
+        "currency": "MXN",
+        "imageUrl": null
+      },
+      "review": {
+        "approved": false,
+        "price": false,
+        "brand": false,
+        "image": false,
+        "category": false,
+        "content": false,
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "imagePendingAccepted": false
+      },
+      "notes": [
+        "Precio, marca, contenido e imagen requieren confirmación del responsable antes de aprobar la importación.",
+        "La URL externa no demuestra disponibilidad, correspondencia visual ni permiso de uso; falta revisión.",
+        "Fotografía pendiente: catalog.imageUrl permanece NULL y no existe aceptación para publicar sin fotografía. Las referencias originales se conservan solamente en source.imageUrl."
+      ]
+    },
+    {
+      "id": "82d42caf-646e-4db5-a3f0-071bcf55564a",
+      "sku": "LAP-TIN-060",
+      "source": {
+        "name": "Tinta para sellos azul 30 ml",
+        "description": "Consumible de oficina con demanda baja y estable.",
+        "categoryId": "7aa5a281-18cf-4401-a705-f764c892fa3a",
+        "brandId": "0e533000-7779-4e5f-8c35-281d45b9c2f5",
+        "price": "54.00",
+        "imageUrl": "https://res.cloudinary.com/obnm5gkp/image/upload/v1784817924/la-pape/productos/82d42caf-646e-4db5-a3f0-071bcf55564a-tinta-para-sellos-azul-30-ml.png",
+        "sqlLine": 1178180
+      },
+      "catalog": {
+        "name": "Tinta para sellos azul 30 ml",
+        "description": "Consumible de oficina con demanda baja y estable.",
+        "categoryId": "7aa5a281-18cf-4401-a705-f764c892fa3a",
+        "brandId": "0e533000-7779-4e5f-8c35-281d45b9c2f5",
+        "price": "54.00",
+        "currency": "MXN",
+        "imageUrl": null
+      },
+      "review": {
+        "approved": false,
+        "price": false,
+        "brand": false,
+        "image": false,
+        "category": false,
+        "content": false,
+        "reviewedBy": null,
+        "reviewedAt": null,
+        "imagePendingAccepted": false
+      },
+      "notes": [
+        "Precio, marca, contenido e imagen requieren confirmación del responsable antes de aprobar la importación.",
+        "La URL externa no demuestra disponibilidad, correspondencia visual ni permiso de uso; falta revisión.",
+        "Fotografía pendiente: catalog.imageUrl permanece NULL y no existe aceptación para publicar sin fotografía. Las referencias originales se conservan solamente en source.imageUrl."
+      ]
+    }
+  ]
+}

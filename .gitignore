@@ -31,7 +31,9 @@ yarn-error.*
 *.pem
 
 # local env files
-.env*.local
+.env
+.env.*
+!.env.example
 
 # typescript
 *.tsbuildinfo
@@ -41,3 +43,18 @@ example
 # generated native folders
 /ios
 /android
+/frontend/ios
+/frontend/android
+
+# Test output and database artifacts
+.test-build/
+coverage/
+*.sql
+# Reviewed SQL sources; database dumps remain excluded.
+!backend/db/migrations/*.sql
+!backend/db/queries/*.sql
+!backend/db/validation/*.sql
+backend/db/generated/
+*.dump
+*.backup
+backups/
