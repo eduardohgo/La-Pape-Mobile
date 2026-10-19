@@ -11,6 +11,7 @@
     "dev": "node --env-file-if-exists=.env --watch src/server.js",
     "test": "node --test",
     "check": "node --check src/server.js",
+    "test:ci": "node -e \"const fs = require('node:fs'); fs.mkdirSync('../reportes/ci', { recursive: true }); fs.rmSync('../reportes/ci/backend.xml', { force: true })\" && node --test --test-reporter=spec --test-reporter-destination=stdout --test-reporter=junit --test-reporter-destination=../reportes/ci/backend.xml",
     "catalog:validate": "node scripts/catalog-validate.js",
     "catalog:generate": "node scripts/catalog-generate.js"
   },

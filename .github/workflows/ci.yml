@@ -1,6 +1,8 @@
 
 name: CI - Pruebas La Pape Mobile
 
+run-name: ${{ github.event_name == 'workflow_dispatch' && inputs.simular_fallo && 'SIMULACION DE FALLO - CI La Pape Mobile' || 'CI - Pruebas La Pape Mobile' }}
+
 on:
   push:
     branches:
@@ -12,6 +14,14 @@ on:
       - main
       - develop
 
+  workflow_dispatch:
+    inputs:
+      simular_fallo:
+        description: 'SIMULACION: generar un fallo intencional separado de las pruebas reales'
+        type: boolean
+        required: false
+        default: false
+
 permissions:
   contents: read
 
@@ -21,10 +31,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # 1. Preparacion del entorno
       - name: Descargar repositorio
+        id: repositorio
         uses: actions/checkout@v4
 
       - name: Configurar Node.js
+        id: node
         uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -33,34 +46,100 @@ jobs:
             frontend/package-lock.json
             backend/package-lock.json
 
+      # 2. Instalacion de dependencias
       - name: Instalar dependencias del backend
+        id: dependencias_backend
+        if: ${{ !cancelled() && steps.node.outcome == 'success' }}
         working-directory: backend
         run: npm ci
 
       - name: Instalar dependencias del frontend
+        id: dependencias_frontend
+        if: ${{ !cancelled() && steps.node.outcome == 'success' }}
         working-directory: frontend
         run: npm ci
 
+      # 3. Validacion del backend
       - name: Verificar sintaxis del backend
+        id: sintaxis_backend
+        if: ${{ !cancelled() && steps.dependencias_backend.outcome == 'success' }}
         working-directory: backend
         run: npm run check
 
       - name: Ejecutar pruebas del backend
+        id: pruebas_backend
+        if: ${{ !cancelled() && steps.dependencias_backend.outcome == 'success' }}
         working-directory: backend
-        run: npm test
+        run: npm run test:ci
 
+      # 4. Analisis estatico del frontend
       - name: Analizar codigo del frontend con ESLint
+        id: eslint
+        if: ${{ !cancelled() && steps.dependencias_frontend.outcome == 'success' }}
         working-directory: frontend
         run: npm run lint
 
       - name: Verificar TypeScript
+        id: typescript
+        if: ${{ !cancelled() && steps.dependencias_frontend.outcome == 'success' }}
         working-directory: frontend
-        run: npx tsc --noEmit
+        run: npx --no-install tsc --noEmit
 
+      # 5. Pruebas del frontend e integracion
       - name: Ejecutar pruebas del frontend
+        id: pruebas_frontend
+        if: ${{ !cancelled() && steps.dependencias_frontend.outcome == 'success' }}
         working-directory: frontend
-        run: npm test
+        run: npm run test:ci
 
       - name: Ejecutar prueba de integracion
+        id: pruebas_integracion
+        if: ${{ !cancelled() && steps.dependencias_frontend.outcome == 'success' && steps.dependencias_backend.outcome == 'success' }}
         working-directory: frontend
-        run: npm run test:integration
+        run: npm run test:integration:ci
+
+      # 6. Validacion del generador de reportes
+      - name: Probar generador de reportes CI
+        id: herramientas_ci
+        if: ${{ !cancelled() && steps.node.outcome == 'success' }}
+        run: |
+          mkdir -p reportes/ci
+          node --test --test-reporter=spec --test-reporter-destination=stdout --test-reporter=junit --test-reporter-destination=reportes/ci/herramientas-ci.xml scripts/ci/test/reportes.test.mjs
+
+      # 7. Simulacion de error
+      # No modifica las pruebas reales y solo se ejecuta manualmente.
+      - name: 'SIMULACION - fallo intencional del reporte'
+        id: simulacion
+        if: ${{ !cancelled() && steps.node.outcome == 'success' && github.event_name == 'workflow_dispatch' && inputs.simular_fallo }}
+        run: |
+          mkdir -p reportes/ci
+          node --test --test-reporter=spec --test-reporter-destination=stdout --test-reporter=junit --test-reporter-destination=reportes/ci/simulacion-fallo.xml scripts/ci/fixtures/fallo-simulado.cjs
+
+      # 8. Generacion del resumen de resultados
+      - name: Generar resumen de verificaciones
+        id: resumen
+        if: always()
+        env:
+          CI_STEP_RESULTS: ${{ toJSON(steps) }}
+          CI_SIMULATED: ${{ github.event_name == 'workflow_dispatch' && inputs.simular_fallo }}
+        run: |
+          if [ -f scripts/ci/generar-resumen.mjs ]; then
+            node scripts/ci/generar-resumen.mjs
+          else
+            mkdir -p reportes/ci
+            echo 'FAILED: no se pudo cargar el generador de reportes. Consultar checkout y configuracion de Node; las verificaciones no se acreditan como exitosas.' > reportes/ci/resumen.md
+            cat reportes/ci/resumen.md >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
+
+      # 9. Publicacion de reportes descargables
+      - name: Publicar reportes descargables
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reportes-ci-${{ github.run_id }}-${{ github.run_attempt }}${{ github.event_name == 'workflow_dispatch' && inputs.simular_fallo && '-SIMULACION' || '' }}
+          path: |
+            reportes/ci/*.xml
+            reportes/ci/resumen.md
+          if-no-files-found: error
+          retention-days: 14

@@ -103,6 +103,70 @@ compras habilitadas en esta base. Esta revisión local no modifica las Issues
 ni los estados del Project. Los resultados de sus etapas anteriores se conservan
 en sus respectivos informes.
 
+## Reportes de pruebas en GitHub Actions
+
+El workflow `.github/workflows/ci.yml` usa Node.js 22. Los comandos `test:ci`
+ejecutan las mismas pruebas existentes una sola vez con dos reporteros nativos
+de Node Test Runner: `spec` conserva los logs legibles y `junit` genera XML.
+`npm test` y `npm run test:integration` mantienen su comportamiento anterior.
+No se necesitan paquetes nuevos ni credenciales de Neon.
+
+Después de publicar estos cambios mediante el flujo de revisión autorizado:
+
+1. Abrir **Actions → CI - Pruebas La Pape Mobile** y seleccionar la ejecución
+   del commit que contiene estos archivos. Los eventos push/PR conservan sus
+   ramas de destino actuales; este cambio local no publica ni integra nada.
+2. Leer el **Summary**: muestra SUCCESS, FAILED, NO EJECUTADO o CANCELADO por
+   comando, incluida sintaxis del backend, ESLint y TypeScript. Si falta un XML,
+   indica `NO GENERADO`; un comando exitoso sin su XML también falla el resumen.
+3. Abrir el job y sus pasos para consultar casos y errores en los logs.
+4. En **Artifacts**, descargar `reportes-ci-<ejecucion>-<intento>`; contiene
+   `backend.xml`, `frontend.xml`, `integracion.xml`, `herramientas-ci.xml`
+   y `resumen.md`, según los pasos que pudieron ejecutarse. Se conservan 14 días.
+
+El resumen se escribe en `$GITHUB_STEP_SUMMARY`. El resumen y la publicación
+usan `if: always()` para intentarse después de un fallo; no utilizan
+`continue-on-error`. Las verificaciones independientes continúan si sus
+dependencias se instalaron correctamente. El estado definitivo de Actions
+también incluye posibles errores al publicar los artefactos. Una interrupción
+del runner puede impedir generar o subir archivos.
+
+Actualmente la aplicación tiene 82 casos (52 backend, 29 frontend y 1 HTTP).
+Las pruebas del generador de reportes se identifican por separado. SUCCESS
+describe el resultado del comando: los casos individuales omitidos o pendientes
+se consultan en el XML y en los logs y no se consideran aprobados. La integración
+HTTP usa Express local y `/health`; no consulta Neon ni valida la interfaz nativa.
+
+Para comprobar el resultado exitoso, ejecutar manualmente el workflow con
+**simular_fallo desmarcado**. Para comprobar el reporte de error, repetir con
+**simular_fallo marcado**: la ejecución y el artefacto se identifican como
+**SIMULACION**, se ejecuta un caso intencional separado y el workflow debe quedar
+**Failed**. Las pruebas reales no se alteran; se añade `simulacion-fallo.xml`.
+GitHub exige que `workflow_dispatch` esté publicado en la **rama predeterminada**
+para habilitar **Run workflow**; subirlo solo a otra rama puede no mostrar el
+botón. Esa publicación/integración queda a cargo del responsable y requiere su
+flujo de revisión habitual; no se realiza automáticamente.
+
+Para reproducir los XML localmente con Node.js 22, desde la raíz:
+
+```powershell
+cd backend
+npm run test:ci
+cd ../frontend
+npm run test:ci
+npm run test:integration:ci
+cd ..
+node --test scripts/ci/test/reportes.test.mjs
+```
+
+Los XML quedan en `reportes/ci/`, excluido de los archivos fuente mediante
+`.gitignore`. Cada comando elimina solo su XML anterior antes de empezar, para
+no reutilizar reportes viejos si falla la compilación. `resumen.md` se genera
+en Actions con los estados reales de sus pasos; no se inventan resultados locales.
+Referencias: [reporteros de Node.js 22](https://nodejs.org/download/release/latest-v22.x/docs/api/test.html#multiple-reporters),
+[Step Summary](https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-commands#adding-a-job-summary)
+y [upload-artifact v4](https://github.com/actions/upload-artifact/tree/v4).
+
 ## Preparación de Neon y catálogo
 
 El destino de desarrollo confirmado es Neon PostgreSQL 18, proyecto

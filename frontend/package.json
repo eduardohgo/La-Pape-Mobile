@@ -41,7 +41,9 @@
     "web": "expo start --web",
     "lint": "expo lint . --max-warnings=0",
     "test": "tsc --project tsconfig.test.json && node --test test/http.test.cjs test/catalog-search.test.cjs test/storefront-ux.test.cjs",
-    "test:integration": "tsc --project tsconfig.test.json && node --test test/health.integration.cjs"
+    "test:integration": "tsc --project tsconfig.test.json && node --test test/health.integration.cjs",
+    "test:ci": "node -e \"const fs = require('node:fs'); fs.mkdirSync('../reportes/ci', { recursive: true }); fs.rmSync('../reportes/ci/frontend.xml', { force: true })\" && tsc --project tsconfig.test.json && node --test --test-reporter=spec --test-reporter-destination=stdout --test-reporter=junit --test-reporter-destination=../reportes/ci/frontend.xml test/http.test.cjs test/catalog-search.test.cjs test/storefront-ux.test.cjs",
+    "test:integration:ci": "node -e \"const fs = require('node:fs'); fs.mkdirSync('../reportes/ci', { recursive: true }); fs.rmSync('../reportes/ci/integracion.xml', { force: true })\" && tsc --project tsconfig.test.json && node --test --test-reporter=spec --test-reporter-destination=stdout --test-reporter=junit --test-reporter-destination=../reportes/ci/integracion.xml test/health.integration.cjs"
   },
   "private": true
 }
