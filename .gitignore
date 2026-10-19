@@ -49,6 +49,7 @@ example
 # Test output and database artifacts
 .test-build/
 coverage/
+/reportes/ci/
 *.sql
 # Reviewed SQL sources; database dumps remain excluded.
 !backend/db/migrations/*.sql
