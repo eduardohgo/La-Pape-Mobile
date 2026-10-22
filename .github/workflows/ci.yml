@@ -1,7 +1,7 @@
 
 name: CI - Pruebas La Pape Mobile
 
-run-name: ${{ github.event_name == 'workflow_dispatch' && inputs.simular_fallo && 'SIMULACION DE FALLO - CI La Pape Mobile' || 'CI - Pruebas La Pape Mobile' }}
+run-name: ${{ ((github.event_name == 'workflow_dispatch' && inputs.simular_fallo) || (github.event_name == 'pull_request' && github.head_ref == 'test/simulacion-fallo-ci' && github.base_ref == 'develop')) && 'SIMULACION DE FALLO - CI La Pape Mobile' || 'CI - Pruebas La Pape Mobile' }}
 
 on:
   push:
@@ -107,10 +107,10 @@ jobs:
           node --test --test-reporter=spec --test-reporter-destination=stdout --test-reporter=junit --test-reporter-destination=reportes/ci/herramientas-ci.xml scripts/ci/test/reportes.test.mjs
 
       # 7. Simulacion de error
-      # No modifica las pruebas reales y solo se ejecuta manualmente.
+      # No modifica las pruebas reales: manual con simular_fallo o PR de test/simulacion-fallo-ci hacia develop.
       - name: 'SIMULACION - fallo intencional del reporte'
         id: simulacion
-        if: ${{ !cancelled() && steps.node.outcome == 'success' && github.event_name == 'workflow_dispatch' && inputs.simular_fallo }}
+        if: ${{ !cancelled() && steps.node.outcome == 'success' && ((github.event_name == 'workflow_dispatch' && inputs.simular_fallo) || (github.event_name == 'pull_request' && github.head_ref == 'test/simulacion-fallo-ci' && github.base_ref == 'develop')) }}
         run: |
           mkdir -p reportes/ci
           node --test --test-reporter=spec --test-reporter-destination=stdout --test-reporter=junit --test-reporter-destination=reportes/ci/simulacion-fallo.xml scripts/ci/fixtures/fallo-simulado.cjs
@@ -121,7 +121,7 @@ jobs:
         if: always()
         env:
           CI_STEP_RESULTS: ${{ toJSON(steps) }}
-          CI_SIMULATED: ${{ github.event_name == 'workflow_dispatch' && inputs.simular_fallo }}
+          CI_SIMULATED: ${{ (github.event_name == 'workflow_dispatch' && inputs.simular_fallo) || (github.event_name == 'pull_request' && github.head_ref == 'test/simulacion-fallo-ci' && github.base_ref == 'develop') }}
         run: |
           if [ -f scripts/ci/generar-resumen.mjs ]; then
             node scripts/ci/generar-resumen.mjs
@@ -137,7 +137,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: reportes-ci-${{ github.run_id }}-${{ github.run_attempt }}${{ github.event_name == 'workflow_dispatch' && inputs.simular_fallo && '-SIMULACION' || '' }}
+          name: reportes-ci-${{ github.run_id }}-${{ github.run_attempt }}${{ ((github.event_name == 'workflow_dispatch' && inputs.simular_fallo) || (github.event_name == 'pull_request' && github.head_ref == 'test/simulacion-fallo-ci' && github.base_ref == 'develop')) && '-SIMULACION' || '' }}
           path: |
             reportes/ci/*.xml
             reportes/ci/resumen.md
