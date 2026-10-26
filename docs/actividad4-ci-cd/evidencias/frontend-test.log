@@ -1,0 +1,37 @@
+✔ empty or whitespace-only search returns the selected category in API order (2.8766ms)
+✔ search matches name, category and SKU independently without case or accent sensitivity (0.9695ms)
+✔ search normalizes decomposed accents and repeated whitespace (0.3651ms)
+✔ every query term must match, allowing terms across different searchable fields (1.5058ms)
+✔ category selection and search combine with AND instead of expanding results (0.3814ms)
+✔ user punctuation is literal and never interpreted as a regular expression (0.4149ms)
+✔ filtering never alters API rows, preserves references and returns a separate array (0.4917ms)
+✔ empty data and unmatched queries produce empty results without fabricated products (0.2913ms)
+✔ the all-category key only affects selection and is not a magic search query (0.3517ms)
+✔ configuration permits LAN HTTP only in a development build/environment (3.6838ms)
+✔ the actual health contract is validated at runtime (0.3642ms)
+✔ GET health uses the root route, no credentials, and validates the response (36.3108ms)
+✔ HTTP errors retain status, do not reflect server secrets, and do not retry (1.7583ms)
+✔ unexpected body types, malformed JSON and invalid shape are rejected (2.2583ms)
+✔ network errors are sanitized (0.43ms)
+✔ timeout aborts a request and also bounds a stalled JSON body (61.2247ms)
+✔ external cancellation is distinct and pre-cancelled requests never fetch (1.222ms)
+✔ catalog contract validates remote data and nullable photos (1.2062ms)
+✔ catalog gets products and categories from HTTP; never substitutes local demo items (1.1993ms)
+✔ catalog follows server cursors and avoids duplicate page fetches (0.8115ms)
+✔ catalog does not confuse API failures with an empty catalog (0.3098ms)
+✔ demo preview from Neon is explicitly non-purchasable and has no brand field (0.6208ms)
+✔ demo preview rejects server errors instead of using the ten static fixtures (0.278ms)
+✔ demo detail validates identity and reads only the requested item from the API (0.622ms)
+✔ commercial detail validates description but does not mark merchandise as demo (0.6203ms)
+✔ missing demo details return 404 and invalid remote contracts do not produce fake products (0.5857ms)
+✔ all storefront screens exclude provisional-price and photo-review labels (1.8626ms)
+✔ internal demo protections and real product lookup stay in place (1.6134ms)
+✔ product cards navigate to actual details without purchase actions (0.3283ms)
+ℹ tests 29
+ℹ suites 0
+ℹ pass 29
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 270.2799

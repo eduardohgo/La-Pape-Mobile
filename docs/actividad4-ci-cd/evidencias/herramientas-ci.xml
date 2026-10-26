@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<testsuites>
+	<testcase name="SUCCESS conserva los XML y publica el mismo resumen en archivo y GITHUB_STEP_SUMMARY" time="0.018412" classname="test" file="scripts/ci/test/reportes.test.mjs"/>
+	<testcase name="un fallo real se muestra FAILED aunque el XML se haya generado correctamente" time="0.006371" classname="test" file="scripts/ci/test/reportes.test.mjs"/>
+	<testcase name="un comando omitido y su XML ausente quedan NO EJECUTADO y no se acreditan como exitosos" time="0.005328" classname="test" file="scripts/ci/test/reportes.test.mjs"/>
+	<testcase name="fallar antes del runner por compilacion no inventa un XML ni resultados aprobados" time="0.005552" classname="test" file="scripts/ci/test/reportes.test.mjs"/>
+	<testcase name="exit cero sin XML o con XML vacio produce un error de reportes y conserva el resumen" time="0.007421" classname="test" file="scripts/ci/test/reportes.test.mjs"/>
+	<testcase name="una cancelacion se distingue de SUCCESS y de fallo de una prueba" time="0.004678" classname="test" file="scripts/ci/test/reportes.test.mjs"/>
+	<testcase name="la simulacion muestra su fallo por separado mientras conserva SUCCESS para las verificaciones reales" time="0.007327" classname="test" file="scripts/ci/test/reportes.test.mjs"/>
+	<testcase name="una simulacion solicitada sin fallo acreditado o sin XML tambien se denuncia como error" time="0.006049" classname="test" file="scripts/ci/test/reportes.test.mjs"/>
+	<testcase name="CLI exitoso termina con codigo cero y genera resumen descargable y Step Summary" time="0.095053" classname="test" file="scripts/ci/test/reportes.test.mjs"/>
+	<testcase name="CLI termina con codigo uno si un comando exitoso no produjo su XML" time="0.082863" classname="test" file="scripts/ci/test/reportes.test.mjs"/>
+	<testcase name="CLI con JSON invalido deja un resumen FAILED y termina con codigo uno" time="0.093094" classname="test" file="scripts/ci/test/reportes.test.mjs"/>
+	<!-- tests 11 -->
+	<!-- suites 0 -->
+	<!-- pass 11 -->
+	<!-- fail 0 -->
+	<!-- cancelled 0 -->
+	<!-- skipped 0 -->
+	<!-- todo 0 -->
+	<!-- duration_ms 469.747 -->
+</testsuites>

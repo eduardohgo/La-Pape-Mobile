@@ -1,0 +1,167 @@
+{
+  "consultedUTC": "2026-10-26T02:26:12.707Z",
+  "repository": "eduardohgo/La-Pape-Mobile",
+  "baseSHA": "14a33cd5a508c263f77c15a5237ae4033dddd072",
+  "queriedPRHead": "a0f02a8724bbe841c97f51a5d35f3921fa2a7438",
+  "runURL": "https://github.com/eduardohgo/La-Pape-Mobile/actions/runs/39842793140",
+  "runs": {
+    "workflow_runs": [
+      {
+        "id": 39842793140,
+        "name": "CI - Pruebas La Pape Mobile",
+        "status": "completed",
+        "conclusion": "success",
+        "run_number": 7,
+        "jobs_url": "https://api.github.com/repos/eduardohgo/La-Pape-Mobile/actions/runs/39842793140/jobs",
+        "logs_url": "https://api.github.com/repos/eduardohgo/La-Pape-Mobile/actions/runs/39842793140/logs",
+        "workflow_id": 386215875
+      }
+    ]
+  },
+  "jobs": {
+    "jobs": [
+      {
+        "id": 120048062682,
+        "name": "Validacion de frontend y backend",
+        "status": "completed",
+        "conclusion": "success",
+        "run_id": 39842793140,
+        "logs_url": null,
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1
+          },
+          {
+            "name": "Descargar repositorio",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2
+          },
+          {
+            "name": "Configurar Node.js",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3
+          },
+          {
+            "name": "Instalar dependencias del backend",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4
+          },
+          {
+            "name": "Instalar dependencias del frontend",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5
+          },
+          {
+            "name": "Verificar sintaxis del backend",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6
+          },
+          {
+            "name": "Ejecutar pruebas del backend",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7
+          },
+          {
+            "name": "Analizar codigo del frontend con ESLint",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8
+          },
+          {
+            "name": "Verificar TypeScript",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9
+          },
+          {
+            "name": "Ejecutar pruebas del frontend",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 10
+          },
+          {
+            "name": "Ejecutar prueba de integracion",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 11
+          },
+          {
+            "name": "Probar generador de reportes CI",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 12
+          },
+          {
+            "name": "SIMULACION - fallo intencional del reporte",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 13
+          },
+          {
+            "name": "Generar resumen de verificaciones",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 14
+          },
+          {
+            "name": "Publicar reportes descargables",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 15
+          },
+          {
+            "name": "Post Configurar Node.js",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 29
+          },
+          {
+            "name": "Post Descargar repositorio",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 30
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 31
+          }
+        ]
+      }
+    ]
+  },
+  "artifacts": {
+    "artifacts": [
+      {
+        "id": 12454505430,
+        "name": "reportes-ci-39842793140-1",
+        "size_in_bytes": 6354,
+        "url": "https://api.github.com/repos/eduardohgo/La-Pape-Mobile/actions/artifacts/12454505430",
+        "archive_download_url": "https://api.github.com/repos/eduardohgo/La-Pape-Mobile/actions/artifacts/12454505430/zip",
+        "expired": false,
+        "created_at": "2026-10-22T19:45:40Z",
+        "expires_at": "2026-11-05T19:45:39Z",
+        "updated_at": "2026-10-22T19:45:40Z",
+        "digest": "sha256:409a12c2781d582ea8b7a15a1344785df215f37e6f8590f571b76dd558ffa03f",
+        "workflow_run": {
+          "id": 39842793140,
+          "repository_id": 1372226027,
+          "head_repository_id": 1372226027,
+          "head_branch": "feature/validacion-registro",
+          "head_sha": "a0f02a8724bbe841c97f51a5d35f3921fa2a7438"
+        }
+      }
+    ]
+  },
+  "limitations": "Consulta de metadatos y pasos; no descarga de ZIP ni logs remotos. fetch_commit_workflow_runs filtra eventos pull_request; respuesta vacía del merge SHA no prueba ausencia de push runs."
+}

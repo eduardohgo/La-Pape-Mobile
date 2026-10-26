@@ -1,0 +1,13 @@
+flowchart TD
+  A["Código C"] --> B["Build L bundles móviles"]
+  B --> C["Análisis estático C L"]
+  C --> D["Unitarias C L"]
+  D --> E["Integración C L HTTP sin BD"]
+  E --> F["Aceptación L contrato y lógica E2E P"]
+  F --> G["Regresión L"]
+  G --> H["Rendimiento L loopback"]
+  H --> I["Preparación de artefacto L manifiesto"]
+  I --> J["Staging P"]
+  J --> K["Aprobación P"]
+  K --> L["Producción P"]
+  L --> M["Monitoreo P servicio real"]

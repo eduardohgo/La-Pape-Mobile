@@ -1,0 +1,3 @@
+
+> la-pape-mobile@1.0.0 lint
+> expo lint . --max-warnings=0 --no-cache

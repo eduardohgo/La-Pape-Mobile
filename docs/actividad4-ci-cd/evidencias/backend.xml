@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<testsuites>
+	<testcase name="demo API is off by default even while commercial read routes are on" time="0.094546" classname="test" file="backend/test/catalog-demo.test.js"/>
+	<testcase name="demo API returns hard-coded non-purchasable envelope without modifying published catalog" time="0.037088" classname="test" file="backend/test/catalog-demo.test.js"/>
+	<testcase name="demo API stays off in production and test even if its flag is supplied" time="0.016639" classname="test" file="backend/test/catalog-demo.test.js"/>
+	<testcase name="demo API still rejects production config objects manually requesting it" time="0.010950" classname="test" file="backend/test/catalog-demo.test.js"/>
+	<testcase name="demo errors are sanitized and do not reveal internal Postgres secrets" time="0.011272" classname="test" file="backend/test/catalog-demo.test.js"/>
+	<testcase name="demo product detail reads one id, stays non-purchasable and omits unverified brands" time="0.018955" classname="test" file="backend/test/catalog-demo.test.js"/>
+	<testcase name="demo detail is unavailable without feature flag or outside development" time="0.013907" classname="test" file="backend/test/catalog-demo.test.js"/>
+	<testcase name="demo detail sanitizes data store failures" time="0.007232" classname="test" file="backend/test/catalog-demo.test.js"/>
+	<testcase name="catalog routes are disabled until explicitly enabled" time="0.089480" classname="test" file="backend/test/catalog-http.test.js"/>
+	<testcase name="public catalog reads preserve nullable photograph and decimal price text" time="0.041371" classname="test" file="backend/test/catalog-http.test.js"/>
+	<testcase name="invalid query never reaches repository" time="0.029353" classname="test" file="backend/test/catalog-http.test.js"/>
+	<testcase name="database failures do not expose secrets in API response" time="0.012855" classname="test" file="backend/test/catalog-http.test.js"/>
+	<testcase name="actual manifest preserves ten pending UUIDs, three categories and six brands without approval" time="0.005659" classname="test" file="backend/test/catalog-review.test.js"/>
+	<testcase name="pending catalog cannot generate any import SQL" time="0.001437" classname="test" file="backend/test/catalog-review.test.js"/>
+	<testcase name="an approved record still requires all independent review criteria" time="0.000964" classname="test" file="backend/test/catalog-review.test.js"/>
+	<testcase name="approved records require both reviewer identity and canonical UTC review timestamp" time="0.004778" classname="test" file="backend/test/catalog-review.test.js"/>
+	<testcase name="local images and credential-bearing URLs cannot be approved" time="0.003119" classname="test" file="backend/test/catalog-review.test.js"/>
+	<testcase name="a reviewed missing photograph requires a separate explicit absence acceptance" time="0.001693" classname="test" file="backend/test/catalog-review.test.js"/>
+	<testcase name="missing-photo acceptance cannot masquerade as a verified HTTPS photograph or skip image review" time="0.001312" classname="test" file="backend/test/catalog-review.test.js"/>
+	<testcase name="NULL photograph alone neither approves a pending candidate nor supplies a publication decision" time="0.000650" classname="test" file="backend/test/catalog-review.test.js"/>
+	<testcase name="general catalog SKU accepts real canonical codes without requiring the LAP pattern" time="0.000283" classname="test" file="backend/test/catalog-review.test.js"/>
+	<testcase name="a valid future SKU still cannot replace an allowlisted source import identity" time="0.000557" classname="test" file="backend/test/catalog-review.test.js"/>
+	<testcase name="candidate allowlist excludes synthetic SKU, arbitrary UUID, duplicates and missing candidates" time="0.001147" classname="test" file="backend/test/catalog-review.test.js"/>
+	<testcase name="relationships reject both orphaned foreign keys and unexpected reference records" time="0.001683" classname="test" file="backend/test/catalog-review.test.js"/>
+	<testcase name="inventory, personal fields and unknown manifest fields are rejected rather than silently discarded" time="0.000994" classname="test" file="backend/test/catalog-review.test.js"/>
+	<testcase name="source provenance and explicit inventory exclusion cannot drift silently" time="0.000320" classname="test" file="backend/test/catalog-review.test.js"/>
+	<testcase name="decimal prices reject rounding, floating values, negatives, zero, overflow and NaN" time="0.002172" classname="test" file="backend/test/catalog-review.test.js"/>
+	<testcase name="source and proposed descriptions reject synthetic markers" time="0.000412" classname="test" file="backend/test/catalog-review.test.js"/>
+	<testcase name="a legitimate synthetic-material description is not confused with a fixture marker" time="0.000477" classname="test" file="backend/test/catalog-review.test.js"/>
+	<testcase name="generated SQL contains only approved products and their exact dependent categories and brands" time="0.001250" classname="test" file="backend/test/catalog-review.test.js"/>
+	<testcase name="generation is deterministic across array reordering and preserves decimal strings" time="0.016919" classname="test" file="backend/test/catalog-review.test.js"/>
+	<testcase name="SQL escaping preserves apostrophes, backslashes and newline inside string literals" time="0.000970" classname="test" file="backend/test/catalog-review.test.js"/>
+	<testcase name="defaults support a local HTTP base without database credentials" time="0.003012" classname="test" file="backend/test/config.test.js"/>
+	<testcase name="invalid configuration fails without reflecting supplied values" time="0.006796" classname="test" file="backend/test/config.test.js"/>
+	<testcase name="database TLS is verified for every remote host and production localhost" time="0.000923" classname="test" file="backend/test/config.test.js"/>
+	<testcase name="Neon URL SSL options are translated before pg parses the connection string" time="0.002422" classname="test" file="backend/test/config.test.js"/>
+	<testcase name="weak, unsupported, duplicated and override URL parameters are rejected" time="0.001270" classname="test" file="backend/test/config.test.js"/>
+	<testcase name="channel binding require fails explicitly instead of silently downgrading" time="0.000305" classname="test" file="backend/test/config.test.js"/>
+	<testcase name="explicit URL TLS and channel binding cannot be disabled even for local development" time="0.000803" classname="test" file="backend/test/config.test.js"/>
+	<testcase name="database configuration errors redact malformed credentials and URLs" time="0.000889" classname="test" file="backend/test/config.test.js"/>
+	<testcase name="the migration owner URL is never used by runtime configuration" time="0.000393" classname="test" file="backend/test/config.test.js"/>
+	<testcase name="PostgreSQL pool preparation creates no client and performs no query" time="0.001325" classname="test" file="backend/test/config.test.js"/>
+	<testcase name="prepared demonstration migration contains the exact ten legacy ZIP identities and decimal prices" time="0.003353" classname="test" file="backend/test/demo-previews.test.js"/>
+	<testcase name="demo migration is isolated, gated and does not publish commercial catalog products" time="0.000927" classname="test" file="backend/test/demo-previews.test.js"/>
+	<testcase name="demo detail SQL selects only one safe read-only demo product by UUID" time="0.000349" classname="test" file="backend/test/demo-previews.test.js"/>
+	<testcase name="health reports HTTP liveness without consuming database services" time="0.064554" classname="test" file="backend/test/http.test.js"/>
+	<testcase name="CORS supports explicit Expo web origins and native clients, rejecting unknown origins" time="0.037029" classname="test" file="backend/test/http.test.js"/>
+	<testcase name="unknown routes do not reflect URL contents and no business API is mounted" time="0.024637" classname="test" file="backend/test/http.test.js"/>
+	<testcase name="malformed JSON and oversized bodies have bounded sanitized responses" time="0.043312" classname="test" file="backend/test/http.test.js"/>
+	<testcase name="rate limit rejects repeated requests with JSON and security headers" time="0.014064" classname="test" file="backend/test/http.test.js"/>
+	<testcase name="unexpected exceptions never disclose their messages" time="0.007896" classname="test" file="backend/test/http.test.js"/>
+	<testcase name="the HTTP server can close without leaving a listener running" time="0.003694" classname="test" file="backend/test/http.test.js"/>
+	<testcase name="valid registration returns only allowed fields and conservative normalized data" time="0.004096" classname="test" file="backend/test/registration-validation.test.js"/>
+	<testcase name="local email case, dots and plus suffixes are preserved rather than merged" time="0.000692" classname="test" file="backend/test/registration-validation.test.js"/>
+	<testcase name="case-only email variants share a canonical key while keeping a contact representation" time="0.000617" classname="test" file="backend/test/registration-validation.test.js"/>
+	<testcase name="non-object bodies and class instances are rejected without coercion" time="0.000292" classname="test" file="backend/test/registration-validation.test.js"/>
+	<testcase name="every required field must be an own enumerable string data property" time="0.000747" classname="test" file="backend/test/registration-validation.test.js"/>
+	<testcase name="privileged fields are rejected even for CLIENTE, false, null or undefined" time="0.000350" classname="test" file="backend/test/registration-validation.test.js"/>
+	<testcase name="unknown fields, aliases and prototype-pollution payloads are rejected" time="0.000394" classname="test" file="backend/test/registration-validation.test.js"/>
+	<testcase name="hidden, symbol and accessor extra fields cannot bypass the allowlist" time="0.000381" classname="test" file="backend/test/registration-validation.test.js"/>
+	<testcase name="name accepts Unicode and punctuation but rejects controls and malformed text" time="0.000745" classname="test" file="backend/test/registration-validation.test.js"/>
+	<testcase name="name limit counts raw Unicode code points and does not truncate" time="0.000481" classname="test" file="backend/test/registration-validation.test.js"/>
+	<testcase name="email rejects malformed, unsupported and non-ASCII formats" time="0.000480" classname="test" file="backend/test/registration-validation.test.js"/>
+	<testcase name="email enforces local-part and total raw length boundaries" time="0.000250" classname="test" file="backend/test/registration-validation.test.js"/>
+	<testcase name="password has a byte ceiling, preserves exact text and rejects malformed Unicode" time="0.000720" classname="test" file="backend/test/registration-validation.test.js"/>
+	<testcase name="approved length policy still explicitly reports registration as not production ready" time="0.000392" classname="test" file="backend/test/registration-validation.test.js"/>
+	<testcase name="password minimum counts Unicode code points rather than UTF-16 units or UTF-8 bytes" time="0.000629" classname="test" file="backend/test/registration-validation.test.js"/>
+	<testcase name="password is never trimmed, case-folded or Unicode-normalized" time="0.000394" classname="test" file="backend/test/registration-validation.test.js"/>
+	<testcase name="empty, whitespace-only and malformed Unicode passwords remain invalid under the approved policy" time="0.000361" classname="test" file="backend/test/registration-validation.test.js"/>
+	<testcase name="validation errors accumulate field failures but never reflect secrets or input keys" time="0.000826" classname="test" file="backend/test/registration-validation.test.js"/>
+	<!-- tests 70 -->
+	<!-- suites 0 -->
+	<!-- pass 70 -->
+	<!-- fail 0 -->
+	<!-- cancelled 0 -->
+	<!-- skipped 0 -->
+	<!-- todo 0 -->
+	<!-- duration_ms 936.1492 -->
+</testsuites>

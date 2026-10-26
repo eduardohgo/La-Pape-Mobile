@@ -1,0 +1,6 @@
+{
+  "reason": "Corrección del criterio: regresion-posterior debe esperar 200, no 429. Se conserva intento 1.",
+  "command": "node docs/actividad4-ci-cd/scripts/carga-local.mjs",
+  "exitCode": 0,
+  "timestampUTC": "2026-10-26T02:25:07.8287724Z"
+}

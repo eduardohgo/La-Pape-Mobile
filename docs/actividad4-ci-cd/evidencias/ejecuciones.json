@@ -1,0 +1,203 @@
+{
+  "startedUTC": "2026-10-26T02:23:34.453Z",
+  "node": "v24.21.0",
+  "platform": "win32",
+  "scope": "Ejecuciones locales aisladas; no GitHub Actions",
+  "results": [
+    {
+      "id": "backend-check",
+      "cwd": "backend",
+      "executable": "node",
+      "args": [
+        "--check",
+        "src/server.js"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 76,
+      "error": null
+    },
+    {
+      "id": "backend-test",
+      "cwd": "backend",
+      "executable": "node",
+      "args": [
+        "--test",
+        "--test-reporter=spec",
+        "--test-reporter-destination=stdout",
+        "--test-reporter=junit",
+        "--test-reporter-destination=${WORKTREE}\\docs\\actividad4-ci-cd\\evidencias/backend.xml"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 1035,
+      "error": null
+    },
+    {
+      "id": "frontend-lint",
+      "cwd": "frontend",
+      "executable": "node",
+      "args": [
+        "node_modules/expo/bin/cli",
+        "lint",
+        ".",
+        "--max-warnings=0",
+        "--no-cache"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 13586,
+      "error": null
+    },
+    {
+      "id": "frontend-typecheck",
+      "cwd": "frontend",
+      "executable": "node",
+      "args": [
+        "node_modules/typescript/bin/tsc",
+        "--noEmit"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 4069,
+      "error": null
+    },
+    {
+      "id": "frontend-test-build",
+      "cwd": "frontend",
+      "executable": "node",
+      "args": [
+        "node_modules/typescript/bin/tsc",
+        "--project",
+        "tsconfig.test.json"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 1741,
+      "error": null
+    },
+    {
+      "id": "frontend-test",
+      "cwd": "frontend",
+      "executable": "node",
+      "args": [
+        "--test",
+        "--test-reporter=spec",
+        "--test-reporter-destination=stdout",
+        "--test-reporter=junit",
+        "--test-reporter-destination=${WORKTREE}\\docs\\actividad4-ci-cd\\evidencias/frontend.xml",
+        "test/http.test.cjs",
+        "test/catalog-search.test.cjs",
+        "test/storefront-ux.test.cjs"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 362,
+      "error": null
+    },
+    {
+      "id": "integration",
+      "cwd": "frontend",
+      "executable": "node",
+      "args": [
+        "--test",
+        "--test-reporter=spec",
+        "--test-reporter-destination=stdout",
+        "--test-reporter=junit",
+        "--test-reporter-destination=${WORKTREE}\\docs\\actividad4-ci-cd\\evidencias/integracion.xml",
+        "test/health.integration.cjs"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 643,
+      "error": null
+    },
+    {
+      "id": "report-tools",
+      "cwd": ".",
+      "executable": "node",
+      "args": [
+        "--test",
+        "--test-reporter=spec",
+        "--test-reporter-destination=stdout",
+        "--test-reporter=junit",
+        "--test-reporter-destination=${WORKTREE}\\docs\\actividad4-ci-cd\\evidencias/herramientas-ci.xml",
+        "scripts/ci/test/reportes.test.mjs"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 558,
+      "error": null
+    },
+    {
+      "id": "acceptance-regression",
+      "cwd": ".",
+      "executable": "node",
+      "args": [
+        "--test",
+        "--test-reporter=spec",
+        "--test-reporter-destination=stdout",
+        "--test-reporter=junit",
+        "--test-reporter-destination=${WORKTREE}\\docs\\actividad4-ci-cd\\evidencias/aceptacion-regresion.xml",
+        "docs/actividad4-ci-cd/scripts/aceptacion-regresion.test.mjs"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 662,
+      "error": null
+    },
+    {
+      "id": "load-local",
+      "cwd": ".",
+      "executable": "node",
+      "args": [
+        "docs/actividad4-ci-cd/scripts/carga-local.mjs"
+      ],
+      "exitCode": 1,
+      "signal": null,
+      "durationMs": 1712,
+      "error": null
+    },
+    {
+      "id": "build-android",
+      "cwd": "frontend",
+      "executable": "node",
+      "args": [
+        "node_modules/expo/bin/cli",
+        "export",
+        "--platform",
+        "android",
+        "--max-workers",
+        "2",
+        "--output-dir",
+        "../docs/actividad4-ci-cd/artefactos/android"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 37822,
+      "error": null
+    },
+    {
+      "id": "build-ios",
+      "cwd": "frontend",
+      "executable": "node",
+      "args": [
+        "node_modules/expo/bin/cli",
+        "export",
+        "--platform",
+        "ios",
+        "--max-workers",
+        "2",
+        "--output-dir",
+        "../docs/actividad4-ci-cd/artefactos/ios"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "durationMs": 37354,
+      "error": null
+    }
+  ],
+  "finishedUTC": "2026-10-26T02:25:14.087Z",
+  "passed": false,
+  "publicNormalization": "Se normalizaron únicamente el ejecutable y las rutas absolutas del worktree; fechas, duraciones, argumentos restantes y resultados se conservan. Ver normalizacion-publica.json."
+}

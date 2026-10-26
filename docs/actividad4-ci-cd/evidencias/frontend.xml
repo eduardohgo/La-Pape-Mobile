@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<testsuites>
+	<testcase name="empty or whitespace-only search returns the selected category in API order" time="0.002877" classname="test" file="frontend/test/catalog-search.test.cjs"/>
+	<testcase name="search matches name, category and SKU independently without case or accent sensitivity" time="0.000969" classname="test" file="frontend/test/catalog-search.test.cjs"/>
+	<testcase name="search normalizes decomposed accents and repeated whitespace" time="0.000365" classname="test" file="frontend/test/catalog-search.test.cjs"/>
+	<testcase name="every query term must match, allowing terms across different searchable fields" time="0.001506" classname="test" file="frontend/test/catalog-search.test.cjs"/>
+	<testcase name="category selection and search combine with AND instead of expanding results" time="0.000381" classname="test" file="frontend/test/catalog-search.test.cjs"/>
+	<testcase name="user punctuation is literal and never interpreted as a regular expression" time="0.000415" classname="test" file="frontend/test/catalog-search.test.cjs"/>
+	<testcase name="filtering never alters API rows, preserves references and returns a separate array" time="0.000492" classname="test" file="frontend/test/catalog-search.test.cjs"/>
+	<testcase name="empty data and unmatched queries produce empty results without fabricated products" time="0.000291" classname="test" file="frontend/test/catalog-search.test.cjs"/>
+	<testcase name="the all-category key only affects selection and is not a magic search query" time="0.000352" classname="test" file="frontend/test/catalog-search.test.cjs"/>
+	<testcase name="configuration permits LAN HTTP only in a development build/environment" time="0.003684" classname="test" file="frontend/test/http.test.cjs"/>
+	<testcase name="the actual health contract is validated at runtime" time="0.000364" classname="test" file="frontend/test/http.test.cjs"/>
+	<testcase name="GET health uses the root route, no credentials, and validates the response" time="0.036311" classname="test" file="frontend/test/http.test.cjs"/>
+	<testcase name="HTTP errors retain status, do not reflect server secrets, and do not retry" time="0.001758" classname="test" file="frontend/test/http.test.cjs"/>
+	<testcase name="unexpected body types, malformed JSON and invalid shape are rejected" time="0.002258" classname="test" file="frontend/test/http.test.cjs"/>
+	<testcase name="network errors are sanitized" time="0.000430" classname="test" file="frontend/test/http.test.cjs"/>
+	<testcase name="timeout aborts a request and also bounds a stalled JSON body" time="0.061225" classname="test" file="frontend/test/http.test.cjs"/>
+	<testcase name="external cancellation is distinct and pre-cancelled requests never fetch" time="0.001222" classname="test" file="frontend/test/http.test.cjs"/>
+	<testcase name="catalog contract validates remote data and nullable photos" time="0.001206" classname="test" file="frontend/test/http.test.cjs"/>
+	<testcase name="catalog gets products and categories from HTTP; never substitutes local demo items" time="0.001199" classname="test" file="frontend/test/http.test.cjs"/>
+	<testcase name="catalog follows server cursors and avoids duplicate page fetches" time="0.000812" classname="test" file="frontend/test/http.test.cjs"/>
+	<testcase name="catalog does not confuse API failures with an empty catalog" time="0.000310" classname="test" file="frontend/test/http.test.cjs"/>
+	<testcase name="demo preview from Neon is explicitly non-purchasable and has no brand field" time="0.000621" classname="test" file="frontend/test/http.test.cjs"/>
+	<testcase name="demo preview rejects server errors instead of using the ten static fixtures" time="0.000278" classname="test" file="frontend/test/http.test.cjs"/>
+	<testcase name="demo detail validates identity and reads only the requested item from the API" time="0.000622" classname="test" file="frontend/test/http.test.cjs"/>
+	<testcase name="commercial detail validates description but does not mark merchandise as demo" time="0.000620" classname="test" file="frontend/test/http.test.cjs"/>
+	<testcase name="missing demo details return 404 and invalid remote contracts do not produce fake products" time="0.000586" classname="test" file="frontend/test/http.test.cjs"/>
+	<testcase name="all storefront screens exclude provisional-price and photo-review labels" time="0.001863" classname="test" file="frontend/test/storefront-ux.test.cjs"/>
+	<testcase name="internal demo protections and real product lookup stay in place" time="0.001613" classname="test" file="frontend/test/storefront-ux.test.cjs"/>
+	<testcase name="product cards navigate to actual details without purchase actions" time="0.000328" classname="test" file="frontend/test/storefront-ux.test.cjs"/>
+	<!-- tests 29 -->
+	<!-- suites 0 -->
+	<!-- pass 29 -->
+	<!-- fail 0 -->
+	<!-- cancelled 0 -->
+	<!-- skipped 0 -->
+	<!-- todo 0 -->
+	<!-- duration_ms 270.2799 -->
+</testsuites>

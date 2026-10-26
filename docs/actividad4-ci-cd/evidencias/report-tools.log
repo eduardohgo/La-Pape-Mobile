@@ -1,0 +1,19 @@
+✔ SUCCESS conserva los XML y publica el mismo resumen en archivo y GITHUB_STEP_SUMMARY (18.4121ms)
+✔ un fallo real se muestra FAILED aunque el XML se haya generado correctamente (6.3708ms)
+✔ un comando omitido y su XML ausente quedan NO EJECUTADO y no se acreditan como exitosos (5.3282ms)
+✔ fallar antes del runner por compilacion no inventa un XML ni resultados aprobados (5.552ms)
+✔ exit cero sin XML o con XML vacio produce un error de reportes y conserva el resumen (7.4213ms)
+✔ una cancelacion se distingue de SUCCESS y de fallo de una prueba (4.6782ms)
+✔ la simulacion muestra su fallo por separado mientras conserva SUCCESS para las verificaciones reales (7.327ms)
+✔ una simulacion solicitada sin fallo acreditado o sin XML tambien se denuncia como error (6.0488ms)
+✔ CLI exitoso termina con codigo cero y genera resumen descargable y Step Summary (95.0529ms)
+✔ CLI termina con codigo uno si un comando exitoso no produjo su XML (82.8632ms)
+✔ CLI con JSON invalido deja un resumen FAILED y termina con codigo uno (93.0944ms)
+ℹ tests 11
+ℹ suites 0
+ℹ pass 11
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 469.747

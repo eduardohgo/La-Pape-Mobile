@@ -1,0 +1,12 @@
+✔ A1 aceptación técnica: cliente Mobile confirma salud HTTP local sin BD (85.2229ms)
+✔ A2 aceptación lógica: buscar, filtrar y vaciar búsqueda conserva datos (1.877ms)
+✔ R1 regresión: contrato, caché y rutas deshabilitadas permanecen (35.4051ms)
+✔ R2 regresión: después de un origen rechazado salud sigue disponible (11.1448ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 568.1584

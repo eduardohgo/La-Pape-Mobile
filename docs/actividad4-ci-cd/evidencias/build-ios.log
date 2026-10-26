@@ -1,0 +1,38 @@
+Using src/app as the root directory for Expo Router.
+React Compiler enabled
+Starting Metro Bundler
+
+iOS Bundled 34213ms node_modules\expo-router\entry.js (1522 modules)
+
+› Assets (38):
+assets\images\expo-logo.png (3.3KB)
+assets\images\home\glue.svg (1.5KB)
+assets\images\home\hero-stationery.svg (5.6KB)
+assets\images\home\markers.svg (2.1KB)
+assets\images\home\notebook.svg (1.3KB)
+assets\images\home\paper.svg (897B)
+assets\images\home\pencils.svg (1.5KB)
+assets\images\home\scissors.svg (1.2KB)
+assets\images\logo-glow.png (332KB)
+assets\images\tabIcons\explore.png (3 variations | 343B)
+assets\images\tabIcons\home.png (3 variations | 358B)
+node_modules\expo-router\assets\arrow_down.png (9.5KB)
+node_modules\expo-router\assets\error.png (469B)
+node_modules\expo-router\assets\file.png (138B)
+node_modules\expo-router\assets\forward.png (188B)
+node_modules\expo-router\assets\pkg.png (364B)
+node_modules\expo-router\assets\react-navigation\elements\back-icon-mask.png (653B)
+node_modules\expo-router\assets\react-navigation\elements\back-icon.png (4 variations | 566B)
+node_modules\expo-router\assets\react-navigation\elements\clear-icon.png (4 variations | 425B)
+node_modules\expo-router\assets\react-navigation\elements\close-icon.png (4 variations | 235B)
+node_modules\expo-router\assets\react-navigation\elements\search-icon.png (3 variations | 582B)
+node_modules\expo-router\assets\sitemap.png (465B)
+node_modules\expo-router\assets\unmatched.png (4.8KB)
+
+› ios bundles (1):
+_expo/static/js/ios/entry-919e3cdeaf89b40fd25f20be6b1d5eee.hbc (3.5MB)
+
+› Files (1):
+metadata.json (2.6KB)
+
+Exported: ../docs/actividad4-ci-cd/artefactos/ios

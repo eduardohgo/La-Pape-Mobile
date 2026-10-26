@@ -1,0 +1,9 @@
+{
+  "run": 39842793140,
+  "job": 120048062682,
+  "url": "https://github.com/eduardohgo/La-Pape-Mobile/actions/runs/39842793140",
+  "checkoutSHA": "b82d20cef64e5fdc52c5c65ee640ee93ece1cf05",
+  "prHeadSHA": "a0f02a8724bbe841c97f51a5d35f3921fa2a7438",
+  "localBaseSHA": "14a33cd5a508c263f77c15a5237ae4033dddd072",
+  "note": "Log descargado en lectura mediante conector GitHub. El runner prueba el merge sintético de PR, no el SHA del worktree."
+}

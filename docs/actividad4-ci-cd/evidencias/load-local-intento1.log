@@ -1,0 +1,80 @@
+[
+  {
+    "name": "rendimiento",
+    "requests": 40,
+    "concurrency": 2,
+    "rateLimitMax": 100,
+    "windowMs": 900000,
+    "elapsedMs": 135.8019,
+    "p50Ms": 2.1585999999999785,
+    "p95Ms": 4.001900000000035,
+    "maxMs": 7.934199999999976,
+    "measuredRps": 294.54668896385107,
+    "statuses": {
+      "200": 40
+    },
+    "recovery": null,
+    "cpuMicros": {
+      "user": 203000,
+      "system": 47000
+    },
+    "rssBeforeBytes": 58146816,
+    "rssAfterBytes": 70234112,
+    "eventLoopP95Ms": 20.676607,
+    "passed": true
+  },
+  {
+    "name": "esfuerzo-limitador",
+    "requests": 30,
+    "concurrency": 2,
+    "rateLimitMax": 10,
+    "windowMs": 1000,
+    "elapsedMs": 1155.32,
+    "p50Ms": 1.7327000000000226,
+    "p95Ms": 9.794399999999996,
+    "maxMs": 11.028099999999995,
+    "measuredRps": 25.96683170030814,
+    "statuses": {
+      "200": 10,
+      "429": 20
+    },
+    "recovery": {
+      "label": "recovery",
+      "status": 200,
+      "valid": true,
+      "ms": 1.8286000000000513
+    },
+    "cpuMicros": {
+      "user": 47000,
+      "system": 0
+    },
+    "rssBeforeBytes": 70311936,
+    "rssAfterBytes": 72794112,
+    "eventLoopP95Ms": 16.293887,
+    "passed": true
+  },
+  {
+    "name": "regresion-posterior",
+    "requests": 2,
+    "concurrency": 1,
+    "rateLimitMax": 100,
+    "windowMs": 900000,
+    "elapsedMs": 6.591200000000072,
+    "p50Ms": 1.7860000000000582,
+    "p95Ms": 4.406299999999874,
+    "maxMs": 4.406299999999874,
+    "measuredRps": 303.4348828741319,
+    "statuses": {
+      "200": 2
+    },
+    "recovery": null,
+    "cpuMicros": {
+      "user": 0,
+      "system": 0
+    },
+    "rssBeforeBytes": 73162752,
+    "rssAfterBytes": 73302016,
+    "eventLoopP95Ms": 0.000511,
+    "passed": false
+  }
+]

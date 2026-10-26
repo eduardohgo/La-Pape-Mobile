@@ -1,0 +1,36 @@
+{
+  "node": "v24.21.0",
+  "scope": "Comprobaciones locales para preparar la publicación; sin nueva carga ni build",
+  "timestampUTC": "2026-10-26T17:01:53.5177714Z",
+  "checks": {
+    "typecheck": {
+      "timestampUTC": "2026-10-26T17:04:11.0665533Z",
+      "cwd": "frontend",
+      "command": "npx --no-install tsc --noEmit",
+      "exitCode": 0
+    },
+    "junitCountsPreserved": {
+      "integration": 1,
+      "ciTools": 11,
+      "frontend": 29,
+      "backend": 70,
+      "acceptanceRegression": 4
+    },
+    "secretAndPersonalPatterns": "passed",
+    "lint": {
+      "timestampUTC": "2026-10-26T17:04:59.9904179Z",
+      "cwd": "frontend",
+      "command": "npm run lint -- --no-cache",
+      "exitCode": 0
+    },
+    "scriptSyntax": "passed: siete scripts .mjs",
+    "environmentCheck": "passed",
+    "artifactManifest": "passed: artefactos locales existentes",
+    "yamlJSON": "passed",
+    "normalizationIdempotent": true,
+    "principalAndProtectedRefsUnchanged": true,
+    "cachedWhitespace": "passed",
+    "exactSelection": "48 archivos comprobados contra el índice"
+  },
+  "noNewLoadOrBuild": true
+}

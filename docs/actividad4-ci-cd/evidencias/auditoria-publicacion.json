@@ -1,0 +1,260 @@
+{
+  "checkedUTC": "2026-10-26T17:07:10.178Z",
+  "scope": "Selección pública de Actividad 4; resultados locales, no ejecución de Actions",
+  "files": 48,
+  "patternsChecked": [
+    "privateKey",
+    "token",
+    "email",
+    "personalPath",
+    "credentialURI",
+    "jwt"
+  ],
+  "findings": 0,
+  "localLinksValid": true,
+  "loadTargetFixedLoopback": true,
+  "loadLimits": {
+    "requests": 77,
+    "concurrency": 2,
+    "deadlineMs": 15000
+  },
+  "inactiveExamples": true,
+  "excluded": "PDFs, capturas, rúbrica, originales privados, bundles, node_modules, .env y archivos ajenos a esta actividad",
+  "records": [
+    {
+      "file": ".gitignore",
+      "bytes": 1677,
+      "sha256": "1ae7b090b379ca180594b0ff288fe53b57e26940ccc7c55ead556c0c8d7c85f0"
+    },
+    {
+      "file": "ARCHIVOS-PUBLICADOS.md",
+      "bytes": 3408,
+      "sha256": "105f3c3568e1e22d72cf32c9909946014e12cea5c31f50233c81ab802dea30ae"
+    },
+    {
+      "file": "README.md",
+      "bytes": 7283,
+      "sha256": "5f3e400c47ff8b45590f6103f65f087dc125d1d8fc68073000995a8e7f023708"
+    },
+    {
+      "file": "config/archivos-publicables.json",
+      "bytes": 1921,
+      "sha256": "b2243b826fbb0210d4ea3475bbae4f0b8f93500fc061abfde3bb277190aa8966"
+    },
+    {
+      "file": "config/eas.ejemplo.json",
+      "bytes": 200,
+      "sha256": "f3b80e4476cb42253754d71363e472f19bd3dcfb65b1a064b4789c3e57dc3c8f"
+    },
+    {
+      "file": "config/liberacion-local.ejemplo.yml",
+      "bytes": 1044,
+      "sha256": "ecfc7671490278266e87289d8af7533533008ab26f9a49eb357c433d1ee19706"
+    },
+    {
+      "file": "evidencias/acceptance-regression.log",
+      "bytes": 458,
+      "sha256": "e34808f6af22eba99d9ef1cff970d2edb0508d98be8eb1c68ace2b6786e0a62f"
+    },
+    {
+      "file": "evidencias/aceptacion-regresion.xml",
+      "bytes": 990,
+      "sha256": "9bbd8540a7d83058aecdada7764f1ef9e9ed10e29b040f752f67fe6a461e3e17"
+    },
+    {
+      "file": "evidencias/backend-test.log",
+      "bytes": 6335,
+      "sha256": "b49158d1fd02f0f513f1376f713313eef5087c56ff695dd3ca510c19e9c8adfa"
+    },
+    {
+      "file": "evidencias/backend.xml",
+      "bytes": 12091,
+      "sha256": "9d3777858e56177b4c1d9de717efaabb2672613447dfb8367a60e1d349664196"
+    },
+    {
+      "file": "evidencias/build-android.log",
+      "bytes": 1871,
+      "sha256": "a164ba8c916ac846624cd2ffd9551eb909324f47adf1746a0aeacda7c0eb71b8"
+    },
+    {
+      "file": "evidencias/build-ios.log",
+      "bytes": 1648,
+      "sha256": "4b9729eaca0c6e822b3588ab7e745d4600a9052af951f30b8ba2cf4c31e0ceb5"
+    },
+    {
+      "file": "evidencias/carga-local-intento1.json",
+      "bytes": 13017,
+      "sha256": "38cdc73b5b9bc6dc109c35a04e55676398ae4da01e883b4c0a276704b420dcb7"
+    },
+    {
+      "file": "evidencias/carga-local.json",
+      "bytes": 12969,
+      "sha256": "0709616e1b51d530838d352d0509b7eb5916701c4ddb505b30564be8cf2c8661"
+    },
+    {
+      "file": "evidencias/ejecuciones.json",
+      "bytes": 5143,
+      "sha256": "4e6bebbac5546b728283c6e7251eebaa5ee844da7fc3f1ddd569dfb2747f4504"
+    },
+    {
+      "file": "evidencias/frontend-test.log",
+      "bytes": 2613,
+      "sha256": "9ebd27126984f78dacc799a77fe3419ba117b32f6d80c75e98674564e3095772"
+    },
+    {
+      "file": "evidencias/frontend.xml",
+      "bytes": 4964,
+      "sha256": "914db07a6f2e94cd551d5ec10127dcd81fbabc9084413156903b81c59f05fc2a"
+    },
+    {
+      "file": "evidencias/github-actions-extracto.log",
+      "bytes": 1341,
+      "sha256": "05cee40db1b105a4dd734f4de260dad9e5adb4dfba218918fdbb9402ff82e9aa"
+    },
+    {
+      "file": "evidencias/github-actions-procedencia.json",
+      "bytes": 654,
+      "sha256": "420eb6ec69d48f4f00e48334527f1d6fc622d6c9164b131992a44b6dd49c588b"
+    },
+    {
+      "file": "evidencias/github-actions.json",
+      "bytes": 5289,
+      "sha256": "def0055597068be2570bee6e935608ea2bf17c84216f9ded6c4e0cadd9190096"
+    },
+    {
+      "file": "evidencias/herramientas-ci.xml",
+      "bytes": 2150,
+      "sha256": "306c43b70e455887e872221ed19224f77a7d5fbf3a9eff5ecaef20884c34a0d6"
+    },
+    {
+      "file": "evidencias/integracion.xml",
+      "bytes": 396,
+      "sha256": "5f7ec7520291808277e7e1e91222b942a5969108d62cc0c086817c01f02bef8f"
+    },
+    {
+      "file": "evidencias/integration.log",
+      "bytes": 202,
+      "sha256": "e4cb8f80d620be2b57fdfaa18bb14108558bd04abb92e7878dc096633f06136f"
+    },
+    {
+      "file": "evidencias/liberacion-local.json",
+      "bytes": 17260,
+      "sha256": "c43418450183f0131a767acc7d049301a7ba6713848d3708fb54ac8b06bd68e9"
+    },
+    {
+      "file": "evidencias/liberacion-local.log",
+      "bytes": 93,
+      "sha256": "1a1d736369f8f59e0fd077cc79e213f5abf1d30611b177d552773801ef613169"
+    },
+    {
+      "file": "evidencias/load-local-intento1.log",
+      "bytes": 1740,
+      "sha256": "8b1a9ff4451e6d98d986ef1555c7f353c3ed611eeb10f6a2d0a64434c17fd6e8"
+    },
+    {
+      "file": "evidencias/load-local-reintento.log",
+      "bytes": 1763,
+      "sha256": "533bd7f9fe3a1f661d7650954605d40bb3740c980484aa7c9a0552873ddaa3af"
+    },
+    {
+      "file": "evidencias/normalizacion-publica.json",
+      "bytes": 17747,
+      "sha256": "1082b56f5b394a71605d108893240a2f16a205f99ef3a1609a616635c11302d1"
+    },
+    {
+      "file": "evidencias/reintento-carga.json",
+      "bytes": 247,
+      "sha256": "0a0963071791940f80eae7cc38e1d8fa58f3256e315b141355fcd5ed54e82fd1"
+    },
+    {
+      "file": "evidencias/report-tools.log",
+      "bytes": 1169,
+      "sha256": "7efc75fe334ac04c2d1dc64879acd775b72edf974478dde519841ee5d8eb47c5"
+    },
+    {
+      "file": "evidencias/revision-final/analisis-estatico.json",
+      "bytes": 324,
+      "sha256": "3d6fc7ddfd7d948e8769528d4eaaf2a490877344e8715299b1b1368920d31c6d"
+    },
+    {
+      "file": "evidencias/revision-final/deepwiki-estado.json",
+      "bytes": 1195,
+      "sha256": "b9524109d220564ceffcf2a25494eabfe2857348a0a0655741076da605835170"
+    },
+    {
+      "file": "evidencias/revision-final/github-procedencia.json",
+      "bytes": 445,
+      "sha256": "b2ac87a9f6adcf4ce5e5a7947e2fe750321f3930d542a8a4ddf0bc434705f645"
+    },
+    {
+      "file": "evidencias/revision-final/lint.log",
+      "bytes": 71,
+      "sha256": "d8802e092ba768da56770c4847c151f733268d95e6ede0d6e62be2363aefe1dc"
+    },
+    {
+      "file": "evidencias/revision-final/rendimiento-comparacion.json",
+      "bytes": 546,
+      "sha256": "3f6fc523d18366692f5484392c0fb345fa3f954df16dacb92421c40dd0a999f6"
+    },
+    {
+      "file": "evidencias/revision-final/typecheck.log",
+      "bytes": 1,
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+    },
+    {
+      "file": "evidencias/verificacion-entrega.json",
+      "bytes": 1117,
+      "sha256": "d77eb9b365ae4cb6b4c0601b6da3a51f0fc5851e06b6f0a1a221ecb77bcda767"
+    },
+    {
+      "file": "informe.md",
+      "bytes": 26809,
+      "sha256": "e00bfd338d8be724148464ae7fc4b1684b4644d50e26a4d988cf27c71a636ea4"
+    },
+    {
+      "file": "matriz-14-criterios.md",
+      "bytes": 4566,
+      "sha256": "f709d5b8ce49636a89da851d2e05c1a0c806c0c8fb0861141979c7d08dfd631b"
+    },
+    {
+      "file": "pipeline.mmd",
+      "bytes": 452,
+      "sha256": "0fec07a0c1079a50f007e8e156e26d0e87024c178ad33147c03966a7be0334a3"
+    },
+    {
+      "file": "scripts/aceptacion-regresion.test.mjs",
+      "bytes": 3238,
+      "sha256": "fd9b21f2a5de9cb99ac503607c8c4161e0ae7ff294b51dcda0d8a7cb7f49e844"
+    },
+    {
+      "file": "scripts/auditar-entrega.mjs",
+      "bytes": 5627,
+      "sha256": "64253a80d3594a3a9df444b39c2fffcd30156f37eae8f09378939bf7e96077ba"
+    },
+    {
+      "file": "scripts/carga-local.mjs",
+      "bytes": 4243,
+      "sha256": "b39db8ba6e0a37dd8a01fad58725d4dc9d0e605e5c813c9648993634507dc47e"
+    },
+    {
+      "file": "scripts/normalizar-evidencias.mjs",
+      "bytes": 2779,
+      "sha256": "d2238527a2c2a15ae14ce4febef2301fa3e1fd711d27b0007760130207aa4c17"
+    },
+    {
+      "file": "scripts/preparar-entorno.mjs",
+      "bytes": 1742,
+      "sha256": "90e49fcb0dec50cbc096acca8b3ced8dffcfa560d98a8d777b04fa39ebd2ea6a"
+    },
+    {
+      "file": "scripts/preparar-liberacion.mjs",
+      "bytes": 2765,
+      "sha256": "e93b8057ea1bb2c2d96fc99c9a0291a1edbad0fb177de914da7e210ebeb4a2b4"
+    },
+    {
+      "file": "scripts/verificar-local.mjs",
+      "bytes": 3701,
+      "sha256": "3237af7e51835cb467154179f53d13d2a332fdedde8887b087cc90cb6b8ea15e"
+    }
+  ]
+}

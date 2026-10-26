@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<testsuites>
+	<testcase name="A1 aceptación técnica: cliente Mobile confirma salud HTTP local sin BD" time="0.085223" classname="test" file="docs/actividad4-ci-cd/scripts/aceptacion-regresion.test.mjs"/>
+	<testcase name="A2 aceptación lógica: buscar, filtrar y vaciar búsqueda conserva datos" time="0.001877" classname="test" file="docs/actividad4-ci-cd/scripts/aceptacion-regresion.test.mjs"/>
+	<testcase name="R1 regresión: contrato, caché y rutas deshabilitadas permanecen" time="0.035405" classname="test" file="docs/actividad4-ci-cd/scripts/aceptacion-regresion.test.mjs"/>
+	<testcase name="R2 regresión: después de un origen rechazado salud sigue disponible" time="0.011145" classname="test" file="docs/actividad4-ci-cd/scripts/aceptacion-regresion.test.mjs"/>
+	<!-- tests 4 -->
+	<!-- suites 0 -->
+	<!-- pass 4 -->
+	<!-- fail 0 -->
+	<!-- cancelled 0 -->
+	<!-- skipped 0 -->
+	<!-- todo 0 -->
+	<!-- duration_ms 568.1584 -->
+</testsuites>

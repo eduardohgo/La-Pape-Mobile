@@ -1,0 +1,308 @@
+{
+  "purpose": "Eliminar identificadores del equipo de la versión pública sin modificar resultados. Los originales se conservan solo localmente y no se publican.",
+  "files": [
+    {
+      "path": "evidencias/backend.xml",
+      "originalSHA256": "6a9b33e751b85d1fe8277194466dab65952b16633b480a525b061029102bea3c",
+      "publicSHA256": "9d3777858e56177b4c1d9de717efaabb2672613447dfb8367a60e1d349664196",
+      "edit": "Rutas locales normalizadas. Resultados y mediciones sin cambios."
+    },
+    {
+      "path": "evidencias/frontend.xml",
+      "originalSHA256": "670fa78dd1794ced35608392452e21a941a8d400bd595af50772c19a1161480c",
+      "publicSHA256": "914db07a6f2e94cd551d5ec10127dcd81fbabc9084413156903b81c59f05fc2a",
+      "edit": "Rutas locales normalizadas. Resultados y mediciones sin cambios."
+    },
+    {
+      "path": "evidencias/integracion.xml",
+      "originalSHA256": "8c47e189974794f8689d1c5c649c73b4b32196defb6f50c8b0c024ce9170f321",
+      "publicSHA256": "5f7ec7520291808277e7e1e91222b942a5969108d62cc0c086817c01f02bef8f",
+      "edit": "Rutas locales normalizadas. Resultados y mediciones sin cambios."
+    },
+    {
+      "path": "evidencias/herramientas-ci.xml",
+      "originalSHA256": "575474aef88236ebbc3fb712ae21ebe681701dd0a9c3fd0ab140d1447008fc46",
+      "publicSHA256": "306c43b70e455887e872221ed19224f77a7d5fbf3a9eff5ecaef20884c34a0d6",
+      "edit": "Rutas locales normalizadas. Resultados y mediciones sin cambios."
+    },
+    {
+      "path": "evidencias/aceptacion-regresion.xml",
+      "originalSHA256": "fadfade2048ed0afe9d86a81c24aaf2fc431ddf43d0927463f67b3832a0e754b",
+      "publicSHA256": "9bbd8540a7d83058aecdada7764f1ef9e9ed10e29b040f752f67fe6a461e3e17",
+      "edit": "Rutas locales normalizadas. Resultados y mediciones sin cambios."
+    },
+    {
+      "path": "evidencias/ejecuciones.json",
+      "originalSHA256": "8550e0250d23f8a072fa9f2328c2c5f4f15db3db3f4e9f409d33c7598a7a9d73",
+      "publicSHA256": "4e6bebbac5546b728283c6e7251eebaa5ee844da7fc3f1ddd569dfb2747f4504",
+      "edit": "Rutas locales normalizadas. Resultados y mediciones sin cambios."
+    }
+  ],
+  "textFormat": "UTF-8 y LF en la selección pública; blancos al final de línea y líneas finales superfluas eliminados.",
+  "formatOnlyFiles": [
+    {
+      "path": ".gitignore",
+      "originalSHA256": "6adbc50233ec274e5c5372a31d72297a1f73a5afa1f8f7924b944d6108676182",
+      "publicSHA256": "1ae7b090b379ca180594b0ff288fe53b57e26940ccc7c55ead556c0c8d7c85f0",
+      "edit": "Formato textual UTF-8 y LF; eliminación de blancos finales, sin cambiar datos o resultados."
+    },
+    {
+      "path": "ARCHIVOS-PUBLICADOS.md",
+      "originalSHA256": "e240094ffb018625be19bde85d72d3e2146068e4abbc4e008693a5d343a9f760",
+      "publicSHA256": "105f3c3568e1e22d72cf32c9909946014e12cea5c31f50233c81ab802dea30ae",
+      "edit": "Formato textual UTF-8 y LF; eliminación de blancos finales, sin cambiar datos o resultados."
+    },
+    {
+      "path": "README.md",
+      "originalSHA256": "31f627bacaaaa69311dd7d569fa0fa159dc6a9a0e426bf11f84c60b502dfdd3d",
+      "publicSHA256": "5f3e400c47ff8b45590f6103f65f087dc125d1d8fc68073000995a8e7f023708",
+      "edit": "Formato textual UTF-8 y LF; eliminación de blancos finales, sin cambiar datos o resultados."
+    },
+    {
+      "path": "config/archivos-publicables.json",
+      "originalSHA256": "2f7dfee351e94268db6e45c52ae90ece47d35ec90e843b314cc9af760a7c351c",
+      "publicSHA256": "b2243b826fbb0210d4ea3475bbae4f0b8f93500fc061abfde3bb277190aa8966",
+      "edit": "Formato textual UTF-8 y LF; eliminación de blancos finales, sin cambiar datos o resultados."
+    },
+    {
+      "path": "config/eas.ejemplo.json",
+      "originalSHA256": "c6d04c989493674ef29ada2dec34589960bffad86429f7140b0f9b3b9add7445",
+      "publicSHA256": "f3b80e4476cb42253754d71363e472f19bd3dcfb65b1a064b4789c3e57dc3c8f",
+      "edit": "Formato textual UTF-8 y LF; eliminación de blancos finales, sin cambiar datos o resultados."
+    },
+    {
+      "path": "config/liberacion-local.ejemplo.yml",
+      "originalSHA256": "c887f9461bc5842a17880d40abf7f9fd34c615854fd83222f7a4907f424ce698",
+      "publicSHA256": "ecfc7671490278266e87289d8af7533533008ab26f9a49eb357c433d1ee19706",
+      "edit": "Formato textual UTF-8 y LF; eliminación de blancos finales, sin cambiar datos o resultados."
+    },
+    {
+      "path": "evidencias/acceptance-regression.log",
+      "originalSHA256": "fba0beca6435ccd48edf05d786fd71b1b0711f1fabc4d691d763709fe45e062a",
+      "publicSHA256": "e34808f6af22eba99d9ef1cff970d2edb0508d98be8eb1c68ace2b6786e0a62f",
+      "edit": "Formato textual UTF-8 y LF; eliminación de blancos finales, sin cambiar datos o resultados."
+    },
+    {
+      "path": "evidencias/aceptacion-regresion.xml",
+      "originalSHA256": "1860fbf74423a75f16809fb4d9a5023adeb3d4fa4d78fdbe9401345b58ca3683",
+      "publicSHA256": "9bbd8540a7d83058aecdada7764f1ef9e9ed10e29b040f752f67fe6a461e3e17",
+      "edit": "Formato textual UTF-8 y LF; eliminación de blancos finales, sin cambiar datos o resultados."
+    },
+    {
+      "path": "evidencias/backend-test.log",
+      "originalSHA256": "77b15ab8f858c29a42a4771e4f263a93cec0463b356c3575605cddb53d9ced2a",
+      "publicSHA256": "b49158d1fd02f0f513f1376f713313eef5087c56ff695dd3ca510c19e9c8adfa",
+      "edit": "Formato textual UTF-8 y LF; eliminación de blancos finales, sin cambiar datos o resultados."
+    },
+    {
+      "path": "evidencias/backend.xml",
+      "originalSHA256": "f4fa3feb8e40c72168d44f83770986c4e81bf871ec459f94e0fbf510a3f5bb5b",
+      "publicSHA256": "9d3777858e56177b4c1d9de717efaabb2672613447dfb8367a60e1d349664196",
+      "edit": "Formato textual UTF-8 y LF; eliminación de blancos finales, sin cambiar datos o resultados."
+    },
+    {
+      "path": "evidencias/build-android.log",
+      "originalSHA256": "3cbba539f9259e63de86f4d183ef53a06f6bd04559344120c92a69c09ec80235",
+      "publicSHA256": "a164ba8c916ac846624cd2ffd9551eb909324f47adf1746a0aeacda7c0eb71b8",
+      "edit": "Formato textual UTF-8 y LF; eliminación de blancos finales, sin cambiar datos o resultados."
+    },
+    {
+      "path": "evidencias/build-ios.log",
+      "originalSHA256": "fc98c69e82849a077d7b71f066028662f055168408cbb2f39e0b7fa202b34475",
+      "publicSHA256": "4b9729eaca0c6e822b3588ab7e745d4600a9052af951f30b8ba2cf4c31e0ceb5",
+      "edit": "Formato textual UTF-8 y LF; eliminación de blancos finales, sin cambiar datos o resultados."
+    },
+    {
+      "path": "evidencias/carga-local-intento1.json",
+      "originalSHA256": "73c8423caf7ef5206072bb6f275c9660939baf717dfd021aa6b7c73bc92d4e15",
+      "publicSHA256": "38cdc73b5b9bc6dc109c35a04e55676398ae4da01e883b4c0a276704b420dcb7",
+      "edit": "Formato textual UTF-8 y LF; eliminación de blancos finales, sin cambiar datos o resultados."
+    },
+    {
+      "path": "evidencias/carga-local.json",
+      "originalSHA256": "5c806d89d7f754e5d1f59503a0e33a2623425c0059d86a9af360b5a3e3933fc6",
+      "publicSHA256": "0709616e1b51d530838d352d0509b7eb5916701c4ddb505b30564be8cf2c8661",
+      "edit": "Formato textual UTF-8 y LF; eliminación de blancos finales, sin cambiar datos o resultados."
+    },
+    {
+      "path": "evidencias/ejecuciones.json",
+      "originalSHA256": "6d9f7494b6d2e7002469923af7af219cd3f5daccb9534decb48294b859d78ac5",
+      "publicSHA256": "4e6bebbac5546b728283c6e7251eebaa5ee844da7fc3f1ddd569dfb2747f4504",
+      "edit": "Formato textual UTF-8 y LF; eliminación de blancos finales, sin cambiar datos o resultados."
+    },
+    {
+      "path": "evidencias/frontend-test.log",
+      "originalSHA256": "284367d3bc70604936e0f85268923ac865bb4634f893921a431735865d4606b2",
+      "publicSHA256": "9ebd27126984f78dacc799a77fe3419ba117b32f6d80c75e98674564e3095772",
+      "edit": "Formato textual UTF-8 y LF; eliminación de blancos finales, sin cambiar datos o resultados."
+    },
+    {
+      "path": "evidencias/frontend.xml",
+      "originalSHA256": "e66a4537ec9d5b730b08f13ebff3030190ba3a406a284ec61fc946e9b3fb27e0",
+      "publicSHA256": "914db07a6f2e94cd551d5ec10127dcd81fbabc9084413156903b81c59f05fc2a",
+      "edit": "Formato textual UTF-8 y LF; eliminación de blancos finales, sin cambiar datos o resultados."
+    },
+    {
+      "path": "evidencias/github-actions-extracto.log",
+      "originalSHA256": "e2e088cac447a28987806e79372eb872dcfe03bb5b7ecc6d7e4fc53cdf5b67e9",
+      "publicSHA256": "05cee40db1b105a4dd734f4de260dad9e5adb4dfba218918fdbb9402ff82e9aa",
+      "edit": "Formato textual UTF-8 y LF; eliminación de blancos finales, sin cambiar datos o resultados."
+    },
+    {
+      "path": "evidencias/github-actions-procedencia.json",
+      "originalSHA256": "be9d5f0f03cadc59e756e217953fd1e3f33a8a6810222de94eb2225c615a9a48",
+      "publicSHA256": "420eb6ec69d48f4f00e48334527f1d6fc622d6c9164b131992a44b6dd49c588b",
+      "edit": "Formato textual UTF-8 y LF; eliminación de blancos finales, sin cambiar datos o resultados."
+    },
+    {
+      "path": "evidencias/github-actions.json",
+      "originalSHA256": "ff58ecf48e1a9f020c621c5ee1e94bb79e5fa768d3f67ebd332b35e90d489358",
+      "publicSHA256": "def0055597068be2570bee6e935608ea2bf17c84216f9ded6c4e0cadd9190096",
+      "edit": "Formato textual UTF-8 y LF; eliminación de blancos finales, sin cambiar datos o resultados."
+    },
+    {
+      "path": "evidencias/herramientas-ci.xml",
+      "originalSHA256": "ed9db63f13d1cb1811be1cf5f286a7d807bd802ff509aa3692200d78b88c9baa",
+      "publicSHA256": "306c43b70e455887e872221ed19224f77a7d5fbf3a9eff5ecaef20884c34a0d6",
+      "edit": "Formato textual UTF-8 y LF; eliminación de blancos finales, sin cambiar datos o resultados."
+    },
+    {
+      "path": "evidencias/integracion.xml",
+      "originalSHA256": "94b9ae49737f28baa50fb27826050027efbb86407bcf9d9f7006310d03de0f5a",
+      "publicSHA256": "5f7ec7520291808277e7e1e91222b942a5969108d62cc0c086817c01f02bef8f",
+      "edit": "Formato textual UTF-8 y LF; eliminación de blancos finales, sin cambiar datos o resultados."
+    },
+    {
+      "path": "evidencias/integration.log",
+      "originalSHA256": "cb4a4c34c2e23c33d7e739463bfa811e9640440c6f244266a6e4d4c9056d5044",
+      "publicSHA256": "e4cb8f80d620be2b57fdfaa18bb14108558bd04abb92e7878dc096633f06136f",
+      "edit": "Formato textual UTF-8 y LF; eliminación de blancos finales, sin cambiar datos o resultados."
+    },
+    {
+      "path": "evidencias/liberacion-local.json",
+      "originalSHA256": "ab61e015e4832986a920903b06bd8d3925381967a286f37ce16a1fe990e19205",
+      "publicSHA256": "c43418450183f0131a767acc7d049301a7ba6713848d3708fb54ac8b06bd68e9",
+      "edit": "Formato textual UTF-8 y LF; eliminación de blancos finales, sin cambiar datos o resultados."
+    },
+    {
+      "path": "evidencias/load-local-intento1.log",
+      "originalSHA256": "3ee91db6fdb7590958112f60e9f642f8b3c74f4df03fb429b1704937b805526b",
+      "publicSHA256": "8b1a9ff4451e6d98d986ef1555c7f353c3ed611eeb10f6a2d0a64434c17fd6e8",
+      "edit": "Formato textual UTF-8 y LF; eliminación de blancos finales, sin cambiar datos o resultados."
+    },
+    {
+      "path": "evidencias/reintento-carga.json",
+      "originalSHA256": "9a17de1bbd80cd1020ae859a82b3b1d8f598c9bece8ef139b9c2a8bbe7255de5",
+      "publicSHA256": "0a0963071791940f80eae7cc38e1d8fa58f3256e315b141355fcd5ed54e82fd1",
+      "edit": "Formato textual UTF-8 y LF; eliminación de blancos finales, sin cambiar datos o resultados."
+    },
+    {
+      "path": "evidencias/report-tools.log",
+      "originalSHA256": "5d9c7a66d1f26138424f235d309eca593dc9ea81fa28337a9c2b8a1803a1f519",
+      "publicSHA256": "7efc75fe334ac04c2d1dc64879acd775b72edf974478dde519841ee5d8eb47c5",
+      "edit": "Formato textual UTF-8 y LF; eliminación de blancos finales, sin cambiar datos o resultados."
+    },
+    {
+      "path": "evidencias/revision-final/analisis-estatico.json",
+      "originalSHA256": "e592eb56ce35261e825d17e309b7d01c660ac1a5707bb3bd9eed00dc7e87eacf",
+      "publicSHA256": "3d6fc7ddfd7d948e8769528d4eaaf2a490877344e8715299b1b1368920d31c6d",
+      "edit": "Formato textual UTF-8 y LF; eliminación de blancos finales, sin cambiar datos o resultados."
+    },
+    {
+      "path": "evidencias/revision-final/deepwiki-estado.json",
+      "originalSHA256": "720c76a006bfab07fa8ca166a67cbb51482182ed4b3d44f2bda9d333c350bb60",
+      "publicSHA256": "b9524109d220564ceffcf2a25494eabfe2857348a0a0655741076da605835170",
+      "edit": "Formato textual UTF-8 y LF; eliminación de blancos finales, sin cambiar datos o resultados."
+    },
+    {
+      "path": "evidencias/revision-final/github-procedencia.json",
+      "originalSHA256": "5cef80075da44346afacb443eddd908f06a674360eb753431b67b1a3b4752946",
+      "publicSHA256": "b2ac87a9f6adcf4ce5e5a7947e2fe750321f3930d542a8a4ddf0bc434705f645",
+      "edit": "Formato textual UTF-8 y LF; eliminación de blancos finales, sin cambiar datos o resultados."
+    },
+    {
+      "path": "evidencias/revision-final/lint.log",
+      "originalSHA256": "78296e3ef4cf6a44c9c83e37eed01c063d85529f843fd2a8b4b41d482ad19c48",
+      "publicSHA256": "d8802e092ba768da56770c4847c151f733268d95e6ede0d6e62be2363aefe1dc",
+      "edit": "Formato textual UTF-8 y LF; eliminación de blancos finales, sin cambiar datos o resultados."
+    },
+    {
+      "path": "evidencias/revision-final/rendimiento-comparacion.json",
+      "originalSHA256": "6f2f23d94178eb7ecf8b74637ead4bc0e3892cce224b6be01d459dd8737e405f",
+      "publicSHA256": "3f6fc523d18366692f5484392c0fb345fa3f954df16dacb92421c40dd0a999f6",
+      "edit": "Formato textual UTF-8 y LF; eliminación de blancos finales, sin cambiar datos o resultados."
+    },
+    {
+      "path": "evidencias/revision-final/typecheck.log",
+      "originalSHA256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+      "publicSHA256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "edit": "Formato textual UTF-8 y LF; eliminación de blancos finales, sin cambiar datos o resultados."
+    },
+    {
+      "path": "evidencias/verificacion-entrega.json",
+      "originalSHA256": "930f8fec6f28d1e31ff780d1b41ca9cac8e498fc9400fbb759633879563d0d55",
+      "publicSHA256": "aa89f99fb1dd699dcbabe358d42ba4c59e127e5a0f3129289cb13bbca59819b8",
+      "edit": "Formato textual UTF-8 y LF; eliminación de blancos finales, sin cambiar datos o resultados."
+    },
+    {
+      "path": "informe.md",
+      "originalSHA256": "9f515b073c159326abe63ddadd6dac44be3a78bc427b5fde1ba7b9f3b89ce2cd",
+      "publicSHA256": "e00bfd338d8be724148464ae7fc4b1684b4644d50e26a4d988cf27c71a636ea4",
+      "edit": "Formato textual UTF-8 y LF; eliminación de blancos finales, sin cambiar datos o resultados."
+    },
+    {
+      "path": "matriz-14-criterios.md",
+      "originalSHA256": "6ff7c547823467d2440ec6f0f14ef089046c3e1d0d39461827b5c2ccbf160d52",
+      "publicSHA256": "f709d5b8ce49636a89da851d2e05c1a0c806c0c8fb0861141979c7d08dfd631b",
+      "edit": "Formato textual UTF-8 y LF; eliminación de blancos finales, sin cambiar datos o resultados."
+    },
+    {
+      "path": "pipeline.mmd",
+      "originalSHA256": "b8964b53ef00d1dcad67b697d93d574de0593eb7fb1040577bc4d04cba91ec0d",
+      "publicSHA256": "0fec07a0c1079a50f007e8e156e26d0e87024c178ad33147c03966a7be0334a3",
+      "edit": "Formato textual UTF-8 y LF; eliminación de blancos finales, sin cambiar datos o resultados."
+    },
+    {
+      "path": "scripts/aceptacion-regresion.test.mjs",
+      "originalSHA256": "f8fcac73a09e148a8318b75c6fcf154e67821f46ada4eb272077fcb354414c7d",
+      "publicSHA256": "fd9b21f2a5de9cb99ac503607c8c4161e0ae7ff294b51dcda0d8a7cb7f49e844",
+      "edit": "Formato textual UTF-8 y LF; eliminación de blancos finales, sin cambiar datos o resultados."
+    },
+    {
+      "path": "scripts/auditar-entrega.mjs",
+      "originalSHA256": "30c7dc483c1ceccc6f561dfdd8e62600ed146533ef6875219e010dc7ca913902",
+      "publicSHA256": "64253a80d3594a3a9df444b39c2fffcd30156f37eae8f09378939bf7e96077ba",
+      "edit": "Formato textual UTF-8 y LF; eliminación de blancos finales, sin cambiar datos o resultados."
+    },
+    {
+      "path": "scripts/carga-local.mjs",
+      "originalSHA256": "518bfab8c091de552b54a0a84a0fa419c6bdecb85df78744f44266138e05392d",
+      "publicSHA256": "b39db8ba6e0a37dd8a01fad58725d4dc9d0e605e5c813c9648993634507dc47e",
+      "edit": "Formato textual UTF-8 y LF; eliminación de blancos finales, sin cambiar datos o resultados."
+    },
+    {
+      "path": "scripts/normalizar-evidencias.mjs",
+      "originalSHA256": "fbd2184f90e32d1cb49d69c893ee0fe41e76c4753e7b153c75adc09051fb5caa",
+      "publicSHA256": "d2238527a2c2a15ae14ce4febef2301fa3e1fd711d27b0007760130207aa4c17",
+      "edit": "Formato textual UTF-8 y LF; eliminación de blancos finales, sin cambiar datos o resultados."
+    },
+    {
+      "path": "scripts/preparar-entorno.mjs",
+      "originalSHA256": "7c7900a99063364398bb9b21b703c8ca13e3a4d321ac2bc6880114ef3804d4b6",
+      "publicSHA256": "90e49fcb0dec50cbc096acca8b3ced8dffcfa560d98a8d777b04fa39ebd2ea6a",
+      "edit": "Formato textual UTF-8 y LF; eliminación de blancos finales, sin cambiar datos o resultados."
+    },
+    {
+      "path": "scripts/preparar-liberacion.mjs",
+      "originalSHA256": "06a6e51a18ab6294f32fec24c712d21e48d846154b8a53948627720930186c1f",
+      "publicSHA256": "e93b8057ea1bb2c2d96fc99c9a0291a1edbad0fb177de914da7e210ebeb4a2b4",
+      "edit": "Formato textual UTF-8 y LF; eliminación de blancos finales, sin cambiar datos o resultados."
+    },
+    {
+      "path": "scripts/verificar-local.mjs",
+      "originalSHA256": "a36e667295b07a00d7ee145e15ffc675a96b520dbbb826dda02359852aa03261",
+      "publicSHA256": "3237af7e51835cb467154179f53d13d2a332fdedde8887b087cc90cb6b8ea15e",
+      "edit": "Formato textual UTF-8 y LF; eliminación de blancos finales, sin cambiar datos o resultados."
+    }
+  ]
+}

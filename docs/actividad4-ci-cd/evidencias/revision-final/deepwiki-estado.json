@@ -1,0 +1,32 @@
+{
+  "checkedUTC": "2026-10-26T03:09:59.670668+00:00",
+  "url": "https://deepwiki.com/eduardohgo/La-Pape-Mobile",
+  "status": "Wiki generated and opened",
+  "requestAccepted": true,
+  "wikiReviewed": true,
+  "reviewScope": "Overview y enlaces a fuentes; contraste de versión, estructura y scripts. No revisión exhaustiva de cada página.",
+  "indexedSHA": "f197a73c848b63f6d8fc5466243c769eeaf45eb2",
+  "indexedBranch": "main",
+  "auditedSHA": "14a33cd5a508c263f77c15a5237ae4033dddd072",
+  "sameVersion": false,
+  "uiDateLabel": "26 October 2026",
+  "reviewLocalDate": "2026-10-25",
+  "differences": [
+    {
+      "aspect": "Estructura",
+      "wiki": "package.json y src en raíz",
+      "audit": "frontend y backend separados"
+    },
+    {
+      "aspect": "Backend",
+      "wiki": "No existe backend en f197a73c",
+      "audit": "Express y pruebas en backend"
+    },
+    {
+      "aspect": "CI",
+      "wiki": "No existe .github/workflows/ci.yml en f197a73c",
+      "audit": "Workflow con pruebas y reportes"
+    }
+  ],
+  "note": "El rótulo de fecha de DeepWiki difiere de la fecha local. La wiki no incluye cambios sin publicar del worktree. Sin credenciales o archivos privados enviados."
+}

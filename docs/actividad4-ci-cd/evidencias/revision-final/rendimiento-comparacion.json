@@ -1,0 +1,10 @@
+{
+  "referenceSource": "carga-local-intento1.json phases[0]",
+  "currentSource": "carga-local.json phases[0]",
+  "referenceP95Ms": 4.001900000000035,
+  "currentP95Ms": 5.937399999999911,
+  "deltaP95Percent": 48.36452684974286,
+  "thresholdMs": 250,
+  "bothPerformancePhasesPassed": true,
+  "note": "Comparación exploratoria de mediciones previas, no nueva ejecución. El primer script completo falló por un criterio de regresión posterior, pero su fase de rendimiento tenía passed true. Sin línea base estable ni inferencia estadística."
+}

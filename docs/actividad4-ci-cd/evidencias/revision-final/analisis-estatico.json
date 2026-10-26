@@ -1,0 +1,13 @@
+{
+  "lint": {
+    "exitCode": 0,
+    "command": "npm run lint -- --no-cache"
+  },
+  "cwd": "frontend",
+  "scope": "Reverificación de análisis estático; sin nuevas pruebas de carga",
+  "typecheck": {
+    "exitCode": 0,
+    "command": "npx --no-install tsc --noEmit"
+  },
+  "timestampUTC": "2026-10-26T02:56:46.6246815Z"
+}
