@@ -33,12 +33,15 @@ test('internal demo protections and real product lookup stay in place', () => {
   const catalog = content['src/pantallas/pantalla-catalogo.tsx'];
   const detail = content['src/pantallas/pantalla-detalle-producto.tsx'];
   const service = readFileSync(join(cwd(), 'src/services/servicio-catalogo.ts'), 'utf8');
+  const composition = readFileSync(join(cwd(), 'src/features/catalogo/composicion.ts'), 'utf8');
+  const repository = readFileSync(join(cwd(), 'src/features/catalogo/datos/repositorio-http.ts'), 'utf8');
 
   assert.match(home, /useHomeProducts\(\)/);
-  assert.match(catalog, /__DEV__ && process\.env\.EXPO_PUBLIC_CATALOG_MODE === 'demo'/);
-  assert.match(detail, /__DEV__ && process\.env\.EXPO_PUBLIC_CATALOG_MODE === 'demo'/);
-  assert.match(catalog, /service\.demoProducts/);
-  assert.match(detail, /service\.demoProduct\(id,/);
+  assert.match(composition, /__DEV__ && process\.env\.EXPO_PUBLIC_CATALOG_MODE === 'demo'/);
+  assert.match(catalog, /useCatalogViewModel\(\)/);
+  assert.match(detail, /useProductDetailViewModel\(id\)/);
+  assert.match(repository, /service\.demoProducts/);
+  assert.match(repository, /service\.demoProduct\(id,/);
   assert.match(service, /item\.is_demo === true && item\.is_for_sale === false/);
 });
 
@@ -50,5 +53,5 @@ test('product cards navigate to actual details without purchase actions', () => 
   assert.match(catalog, /router\.push\(\{ pathname: '\/products\/\[id\]'/);
   assert.doesNotMatch(catalog, /Agregar · próximamente|Agregar al carrito/);
   assert.doesNotMatch(detail, /Agregar al carrito|Comprar ahora|Selección no disponible/);
-  assert.match(detail, /service\.demoProduct\(id,/);
+  assert.match(detail, /useProductDetailViewModel\(id\)/);
 });

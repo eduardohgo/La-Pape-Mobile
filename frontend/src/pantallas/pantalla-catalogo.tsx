@@ -1,20 +1,13 @@
 import { router, usePathname } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { type ComponentRef, useMemo, useRef, useState } from 'react';
 import { Keyboard, Pressable, ScrollView, StyleSheet, Text, TextInput, View, useWindowDimensions } from 'react-native';
 
 import { HomeIcon } from '@/components/compartidos/iconos-papeleria';
 import { CatalogTabBar, PendingFeatureModal, ProductVisual, ShopHeader, ShopModal, ShopStatus, palette } from '@/components/catalogo/componentes-catalogo';
-import { type CatalogCategory, type CatalogProduct, type DemoCatalogProduct, getCatalogService } from '@/services/servicio-catalogo';
+import type { VisibleProduct } from '@/features/catalogo/dominio/modelos';
+import { useCatalogViewModel } from '@/features/catalogo/presentacion/hooks';
 import { filterCatalogProducts } from '@/utils/busqueda-catalogo';
-
-// Keep the same explicit development-only demo gate as the existing catalog.
-const demoMode = __DEV__ && process.env.EXPO_PUBLIC_CATALOG_MODE === 'demo';
-type VisibleProduct = CatalogProduct | DemoCatalogProduct;
-type CatalogState =
-  | { status: 'loading' }
-  | { status: 'error' }
-  | { status: 'loaded'; products: VisibleProduct[]; categories: CatalogCategory[] };
 
 function categoryColor(name: string) {
   return name === 'Arte' ? '#FDEBF2' : name === 'Cuadernos' ? '#F0EBFC' : name === 'Oficina' ? '#E3F5FC' : '#FFF7D9';
@@ -70,48 +63,13 @@ export default function CatalogScreen() {
   const pathname = usePathname();
   const { width, fontScale } = useWindowDimensions();
   const columns = fontScale > 1.35 ? 1 : width >= 600 ? 3 : 2;
-  const scroll = useRef<ScrollView>(null);
-  const searchInput = useRef<TextInput>(null);
+  const scroll = useRef<ComponentRef<typeof ScrollView>>(null);
+  const searchInput = useRef<ComponentRef<typeof TextInput>>(null);
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [query, setQuery] = useState('');
-  const [reload, setReload] = useState(0);
-  const [resolved, setResolved] = useState<{ key: number; result: CatalogState } | null>(null);
   const [feature, setFeature] = useState<string | null>(null);
   const [showFilters, setShowFilters] = useState(false);
-  const state = useMemo<CatalogState>(() => resolved?.key === reload
-    ? resolved.result : { status: 'loading' }, [resolved, reload]);
-
-  useEffect(() => {
-    const controller = new AbortController();
-    async function load() {
-      try {
-        const service = getCatalogService();
-        let products: VisibleProduct[];
-        let categories: CatalogCategory[];
-        if (demoMode) {
-          products = await service.demoProducts({ signal: controller.signal });
-          const unique = new Map<string, CatalogCategory>();
-          for (const product of products) unique.set(product.category_id, {
-            id: product.category_id, name: product.category_name, description: null,
-          });
-          categories = [...unique.values()];
-        } else {
-          [categories, products] = await Promise.all([
-            service.categories({ signal: controller.signal }),
-            service.products({ signal: controller.signal }),
-          ]);
-        }
-        if (!controller.signal.aborted) setResolved({
-          key: reload,
-          result: { status: 'loaded', products, categories: categories.slice().sort((a, b) => a.name.localeCompare(b.name, 'es')) },
-        });
-      } catch {
-        if (!controller.signal.aborted) setResolved({ key: reload, result: { status: 'error' } });
-      }
-    }
-    void load();
-    return () => controller.abort();
-  }, [reload]);
+  const { state, retry } = useCatalogViewModel();
 
   const filtered = useMemo(() => state.status === 'loaded'
     ? filterCatalogProducts(state.products, query, selectedCategory) : [], [state, query, selectedCategory]);
@@ -158,8 +116,8 @@ export default function CatalogScreen() {
           </View>
 
           {state.status === 'loading' ? <ShopStatus title="Consultando catálogo…" loading /> :
-            state.status === 'error' ? <ShopStatus title="No pudimos cargar el catálogo" message="Revisa tu conexión e inténtalo de nuevo." onRetry={() => setReload(value => value + 1)} /> :
-              state.products.length === 0 ? <ShopStatus title="Por ahora no hay artículos disponibles" message="Vuelve a visitarnos para conocer más de nuestra selección." onRetry={() => setReload(value => value + 1)} retryLabel="Actualizar catálogo" /> :
+            state.status === 'error' ? <ShopStatus title="No pudimos cargar el catálogo" message="Revisa tu conexión e inténtalo de nuevo." onRetry={retry} /> :
+              state.products.length === 0 ? <ShopStatus title="Por ahora no hay artículos disponibles" message="Vuelve a visitarnos para conocer más de nuestra selección." onRetry={retry} retryLabel="Actualizar catálogo" /> :
                 <>
                   <View style={styles.resultsHeader}>
                     <Text style={styles.resultsCount} accessibilityLiveRegion="polite">{filtered.length} {filtered.length === 1 ? 'artículo' : 'artículos'}</Text>

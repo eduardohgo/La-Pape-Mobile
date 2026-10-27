@@ -1,0 +1,108 @@
+✔ Repository commercial adapter delegates reads, identity and cancellation without demo calls (4.9387ms)
+✔ Repository demo adapter derives unique categories and stays separate from commercial (0.4324ms)
+✔ Repository maps 404 to domain not-found and does not disguise outages or fall back (1.983ms)
+✔ Factory builds independent HTTP services and adapters using injected transports (64.2999ms)
+✔ Singleton is lazy, built once per scope and isolated between application/test scopes (0.3879ms)
+✔ Singleton does not cache a failed construction (0.3059ms)
+✔ loadCatalog sorts categories without mutating input and preserves official fields and null images (20.0798ms)
+✔ loadProduct rejects malformed UUID before repository I/O and preserves valid detail (0.6633ms)
+✔ use cases reject pre-cancelled work without repository calls (0.6484ms)
+✔ use cases discard results if cancellation happens during repository work (0.4705ms)
+✔ Observer emits loading/loaded, keeps snapshots stable and removes duplicate subscriptions safely (0.9376ms)
+✔ catalog ViewModel distinguishes loaded-empty from error and retries successfully (0.5406ms)
+✔ cancel aborts the active signal and suppresses late success and late failure notifications (0.5668ms)
+✔ retry aborts earlier requests and an out-of-order result cannot replace the current result (0.4975ms)
+✔ ViewModel survives effect cleanup and restart, with no callbacks after all unsubscribes (1.8897ms)
+✔ separate screen ViewModels share only the repository, not request state or cancellation (0.5441ms)
+✔ detail ViewModel maps invalid identity, missing product and outages to distinct states (0.5906ms)
+✔ detail cancellation, retry and UUID changes cannot display stale product data (0.4562ms)
+✔ detail retries recover from both missing products and temporary errors (0.4401ms)
+✔ configuration failure becomes sanitized UI error and can be retried (0.3046ms)
+✔ failed parallel reads are aborted when the ViewModel finishes with an error (0.3207ms)
+✔ model runtime contracts accept UUID, nullable images and exact decimal text without mutation (3.2551ms)
+✔ model runtime contracts reject malformed envelopes and category fields (0.4746ms)
+✔ commercial product guards exercise every required field failure branch (0.5869ms)
+✔ pagination model distinguishes final pages, continuing pages and invalid cursors (0.3462ms)
+✔ detail model requires a string description and all base product fields (0.3138ms)
+✔ demo model guards reject each altered safety flag and missing presentation field (0.9689ms)
+✔ domain error retains Error identity and a generic message without attaching input (0.503ms)
+✔ loadCatalog accepts empty data and propagates the original repository failure (2.4542ms)
+✔ loadProduct forwards the UUID and signal and freezes a copy without mutating repository data (0.5191ms)
+✔ loadProduct propagates both domain not-found and unrelated repository errors unchanged (0.7103ms)
+✔ React SSR: catalog hook exposes its stable initial snapshot without reading configuration or fetching (18.0537ms)
+✔ React SSR: detail hook renders loading for each UUID without starting effects or repository I/O (1.3129ms)
+✔ integration: ViewModel -> use case -> Repository -> HTTP validates paginated products and observer states (62.1267ms)
+✔ integration: actual HTTP empty responses become loaded-empty, never demo or errors (1.9932ms)
+✔ integration: malformed remote product is rejected before the ViewModel publishes data (1.5088ms)
+✔ integration: HTTP 503 produces sanitized error and retry can recover through all layers (2.2311ms)
+✔ integration: detail distinguishes 200, 404 and invalid successful JSON (2.5547ms)
+✔ integration: cancelling a detail aborts HTTP and prevents late observer publication (1.011ms)
+✔ integration: repeated pagination cursor is bounded and becomes a UI error (1.2274ms)
+✔ Observer permits removal during notification without calling the removed listener (0.4291ms)
+✔ empty or whitespace-only search returns the selected category in API order (5.638ms)
+✔ search matches name, category and SKU independently without case or accent sensitivity (1.0644ms)
+✔ search normalizes decomposed accents and repeated whitespace (0.4472ms)
+✔ every query term must match, allowing terms across different searchable fields (0.3272ms)
+✔ category selection and search combine with AND instead of expanding results (0.3114ms)
+✔ user punctuation is literal and never interpreted as a regular expression (0.4217ms)
+✔ filtering never alters API rows, preserves references and returns a separate array (0.4963ms)
+✔ empty data and unmatched queries produce empty results without fabricated products (0.3041ms)
+✔ the all-category key only affects selection and is not a magic search query (0.3208ms)
+✔ configuration permits LAN HTTP only in a development build/environment (4.5779ms)
+✔ the actual health contract is validated at runtime (0.6135ms)
+✔ GET health uses the root route, no credentials, and validates the response (58.7296ms)
+✔ HTTP errors retain status, do not reflect server secrets, and do not retry (2.6072ms)
+✔ unexpected body types, malformed JSON and invalid shape are rejected (3.6271ms)
+✔ network errors are sanitized (0.3889ms)
+✔ timeout aborts a request and also bounds a stalled JSON body (53.5718ms)
+✔ external cancellation is distinct and pre-cancelled requests never fetch (0.8522ms)
+✔ catalog contract validates remote data and nullable photos (1.046ms)
+✔ catalog gets products and categories from HTTP; never substitutes local demo items (1.6984ms)
+✔ catalog follows server cursors and avoids duplicate page fetches (1.0901ms)
+✔ catalog does not confuse API failures with an empty catalog (0.4341ms)
+✔ demo preview from Neon is explicitly non-purchasable and has no brand field (1.035ms)
+✔ demo preview rejects server errors instead of using the ten static fixtures (0.5253ms)
+✔ demo detail validates identity and reads only the requested item from the API (1.0093ms)
+✔ commercial detail validates description but does not mark merchandise as demo (1.0605ms)
+✔ missing demo details return 404 and invalid remote contracts do not produce fake products (1.021ms)
+✔ all storefront screens exclude provisional-price and photo-review labels (2.1643ms)
+✔ internal demo protections and real product lookup stay in place (1.9384ms)
+✔ product cards navigate to actual details without purchase actions (0.5346ms)
+ℹ tests 70
+ℹ suites 0
+ℹ pass 70
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 438.5435
+ℹ start of coverage report
+ℹ --------------------------------------------------------------------------
+ℹ file                      | line % | branch % | funcs % | uncovered lines
+ℹ --------------------------------------------------------------------------
+ℹ .test-build               |        |          |         | 
+ℹ  config                   |        |          |         | 
+ℹ   configuracion-api.js    |  84.44 |   100.00 |   75.00 | 39-45
+ℹ  features                 |        |          |         | 
+ℹ   catalogo                |        |          |         | 
+ℹ    composicion.js         | 100.00 |   100.00 |   66.67 | 
+ℹ    datos                  |        |          |         | 
+ℹ     repositorio-http.js   | 100.00 |   100.00 |  100.00 | 
+ℹ    dominio                |        |          |         | 
+ℹ     casos-uso.js          | 100.00 |   100.00 |  100.00 | 
+ℹ     modelos.js            | 100.00 |   100.00 |  100.00 | 
+ℹ    presentacion           |        |          |         | 
+ℹ     hooks.js              |  84.00 |   100.00 |   66.67 | 12-13 21-22
+ℹ     viewmodels.js         | 100.00 |    96.88 |  100.00 | 
+ℹ  services                 |        |          |         | 
+ℹ   http                    |        |          |         | 
+ℹ    cliente-http.js        |  97.14 |    93.18 |   88.89 | 14-15
+ℹ    errores-http.js        | 100.00 |   100.00 |  100.00 | 
+ℹ   servicio-catalogo.js    |  96.67 |    96.77 |   94.12 | 114 118-120
+ℹ   servicio-salud-api.js   |  80.00 |   100.00 |   50.00 | 13-15
+ℹ  utils                    |        |          |         | 
+ℹ   busqueda-catalogo.js    | 100.00 |   100.00 |  100.00 | 
+ℹ --------------------------------------------------------------------------
+ℹ all files                 |  95.81 |    97.41 |   90.14 | 
+ℹ --------------------------------------------------------------------------
+ℹ end of coverage report
