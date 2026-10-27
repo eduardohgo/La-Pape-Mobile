@@ -1,0 +1,90 @@
+rules:
+  - id: lapape.dynamic-code
+    languages: [javascript, typescript]
+    severity: ERROR
+    message: Evitar eval y Function; revisar generación dinámica de código (no prueba explotabilidad).
+    metadata:
+      cwe: CWE-95
+      source: La Pape - regla original local
+      license: MIT
+    pattern-either:
+      - pattern: eval(...)
+      - pattern: new Function(...)
+
+  - id: lapape.tls-validation-disabled
+    languages: [javascript, typescript]
+    severity: ERROR
+    message: Validación TLS deshabilitada explícitamente; revisar contexto y eliminar bypasses.
+    metadata:
+      cwe: CWE-295
+      source: La Pape - regla original local
+      license: MIT
+    pattern-either:
+      - pattern: '{ ..., rejectUnauthorized: false, ... }'
+      - pattern: process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
+
+  - id: lapape.request-data-in-sql
+    languages: [javascript, typescript]
+    severity: ERROR
+    message: Datos de solicitud alcanzan texto SQL; usar parámetros y revisar el flujo detectado.
+    metadata:
+      cwe: CWE-89
+      source: La Pape - regla original local
+      license: MIT
+    mode: taint
+    pattern-sources:
+      - pattern-either:
+          - pattern: $REQ.query.$FIELD
+          - pattern: $REQ.body.$FIELD
+          - pattern: $REQ.params.$FIELD
+    pattern-sinks:
+      - patterns:
+          - pattern: $DB.query($SQL, ...)
+          - focus-metavariable: $SQL
+
+  - id: lapape.request-data-in-shell
+    languages: [javascript, typescript]
+    severity: ERROR
+    message: Datos de solicitud alcanzan un comando shell; revisar la llamada y sus argumentos.
+    metadata:
+      cwe: CWE-78
+      source: La Pape - regla original local
+      license: MIT
+    mode: taint
+    pattern-sources:
+      - pattern-either:
+          - pattern: $REQ.query.$FIELD
+          - pattern: $REQ.body.$FIELD
+          - pattern: $REQ.params.$FIELD
+    pattern-sinks:
+      - patterns:
+          - pattern-either:
+              - pattern: exec($CMD, ...)
+              - pattern: execSync($CMD, ...)
+              - pattern: $CP.exec($CMD, ...)
+              - pattern: $CP.execSync($CMD, ...)
+          - focus-metavariable: $CMD
+
+  - id: lapape.react-raw-html
+    languages: [javascript, typescript]
+    severity: WARNING
+    message: Inserción de HTML sin escape de React; revisar procedencia y saneamiento, no asumir XSS confirmado.
+    metadata:
+      cwe: CWE-79
+      source: La Pape - regla original local
+      license: MIT
+    pattern: '<$TAG ... dangerouslySetInnerHTML={{ __html: $HTML }} ... />'
+
+  - id: lapape.weak-token-randomness
+    languages: [javascript, typescript]
+    severity: WARNING
+    message: Math.random asignado a variable con nombre de token, secret u OTP; revisar si es material de seguridad.
+    metadata:
+      cwe: CWE-338
+      source: La Pape - regla original local
+      license: MIT
+    patterns:
+      - pattern: $TOKEN = Math.random(...)
+      - metavariable-regex:
+          metavariable: $TOKEN
+          regex: (?i).*(token|secret|otp).*

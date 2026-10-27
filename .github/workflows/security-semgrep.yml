@@ -1,0 +1,44 @@
+name: Security - Semgrep CE SAST
+
+on:
+  pull_request:
+    branches: [develop, main]
+  push:
+    branches: [develop, main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  semgrep:
+    name: Semgrep CE - reglas locales
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    container:
+      image: semgrep/semgrep:1.182.1@sha256:451b3d875c00dac7ed5db5293e584a07de11449a409c10b3c2d2652f429630b6
+    env:
+      SEMGREP_SEND_METRICS: 'off'
+      SEMGREP_ENABLE_VERSION_CHECK: '0'
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - name: Pruebas del generador y gates
+        run: python3 -m unittest discover -s security/semgrep/tests -p 'test_*.py' -v
+      - name: Fixtures reales con Semgrep
+        run: python3 security/semgrep/verify.py
+      - name: Escaneo completo de fuentes de esta revisión
+        if: ${{ !cancelled() && steps.checkout.outcome == 'success' }}
+        run: python3 security/semgrep/run.py
+      - name: Conservar reportes incluso ante fallo
+        if: ${{ always() && steps.checkout.outcome == 'success' }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: semgrep-${{ github.run_id }}-${{ github.run_attempt }}
+          path: reportes/ci/semgrep/
+          if-no-files-found: error
+          retention-days: 30

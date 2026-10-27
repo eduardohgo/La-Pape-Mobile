@@ -1,0 +1,117 @@
+{
+  "timestamp_utc": "2026-10-27T08:40:43.531699+00:00",
+  "base_commit": "14a33cd5a508c263f77c15a5237ae4033dddd072",
+  "semgrep_version": "1.182.1",
+  "docker_client": "29.2.0",
+  "docker_server": "29.2.0",
+  "container_exit_code": 0,
+  "auxiliary_tests_passed": 9,
+  "scanned_count": 48,
+  "scanned": [
+    "backend/src/app.js",
+    "backend/src/config/variables-entorno.js",
+    "backend/src/controllers/controlador-salud.js",
+    "backend/src/db/conexion-postgres.js",
+    "backend/src/middlewares/manejo-errores.js",
+    "backend/src/repositories/repositorio-catalogo.js",
+    "backend/src/routes/rutas-catalogo-demo.js",
+    "backend/src/routes/rutas-catalogo.js",
+    "backend/src/routes/rutas-salud.js",
+    "backend/src/server.js",
+    "backend/src/services/servicio-salud.js",
+    "backend/src/validators/validacion-registro.js",
+    "frontend/src/app/(tabs)/_layout.tsx",
+    "frontend/src/app/(tabs)/explore.tsx",
+    "frontend/src/app/(tabs)/index.tsx",
+    "frontend/src/app/_layout.tsx",
+    "frontend/src/app/products/[id].tsx",
+    "frontend/src/components/arranque/splash-animado.tsx",
+    "frontend/src/components/arranque/splash-animado.web.tsx",
+    "frontend/src/components/catalogo/componentes-catalogo.tsx",
+    "frontend/src/components/compartidos/iconos-papeleria.tsx",
+    "frontend/src/components/compartidos/ilustraciones-papeleria.tsx",
+    "frontend/src/components/diagnostico/comprobacion-api.tsx",
+    "frontend/src/components/navegacion/pestanas-app.tsx",
+    "frontend/src/components/navegacion/pestanas-app.web.tsx",
+    "frontend/src/components/plantilla/enlace-externo.tsx",
+    "frontend/src/components/plantilla/fila-ayuda.tsx",
+    "frontend/src/components/plantilla/insignia-expo.tsx",
+    "frontend/src/components/plantilla/seccion-desplegable.tsx",
+    "frontend/src/components/plantilla/texto-tematico.tsx",
+    "frontend/src/components/plantilla/vista-tematica.tsx",
+    "frontend/src/config/configuracion-api.ts",
+    "frontend/src/constants/theme.ts",
+    "frontend/src/features/catalogo/productos-demo-referencia.ts",
+    "frontend/src/hooks/use-color-scheme.ts",
+    "frontend/src/hooks/use-color-scheme.web.ts",
+    "frontend/src/hooks/use-productos-inicio.ts",
+    "frontend/src/hooks/use-theme.ts",
+    "frontend/src/pantallas/pantalla-catalogo.tsx",
+    "frontend/src/pantallas/pantalla-detalle-producto.tsx",
+    "frontend/src/pantallas/pantalla-inicio.tsx",
+    "frontend/src/services/http/cliente-http.ts",
+    "frontend/src/services/http/errores-http.ts",
+    "frontend/src/services/servicio-catalogo.ts",
+    "frontend/src/services/servicio-salud-api.ts",
+    "frontend/src/types/estilos.d.ts",
+    "frontend/src/utils/busqueda-catalogo.ts",
+    "scripts/ci/generar-resumen.mjs"
+  ],
+  "explicit_skips": [
+    {
+      "path": "scripts/ci/fixtures/fallo-simulado.cjs",
+      "reason": "semgrepignore_patterns_match"
+    },
+    {
+      "path": "scripts/ci/test/reportes.test.mjs",
+      "reason": "semgrepignore_patterns_match"
+    }
+  ],
+  "tracked_files_in_roots": 53,
+  "not_in_scanned": [
+    "backend/src/validators/README.md",
+    "frontend/src/components/arranque/splash-animado.module.css",
+    "frontend/src/global.css",
+    "scripts/ci/fixtures/fallo-simulado.cjs",
+    "scripts/ci/test/reportes.test.mjs"
+  ],
+  "ci_sha256": "a67cf41f9e26fe878194db1935d76290a93cdac9e90f73fe35aa4246e9e140ae",
+  "limitations": [
+    "Six local rules only; not proof of zero vulnerabilities",
+    "Base develop only, not uncommitted SDK58/Actividad4",
+    "No GitHub Actions execution yet",
+    "Not DAST"
+  ],
+  "findings_count": 0,
+  "errors_count": 0,
+  "fixtures": [
+    {
+      "case": "positive",
+      "passed": true,
+      "exit_code": 1,
+      "rule_ids": [
+        "lapape.dynamic-code",
+        "lapape.react-raw-html",
+        "lapape.request-data-in-shell",
+        "lapape.request-data-in-sql",
+        "lapape.tls-validation-disabled",
+        "lapape.weak-token-randomness"
+      ],
+      "json_sarif_generated": true
+    },
+    {
+      "case": "negative",
+      "passed": true,
+      "exit_code": 0,
+      "rule_ids": [],
+      "json_sarif_generated": true
+    },
+    {
+      "case": "invalid",
+      "passed": true,
+      "exit_code": 7,
+      "rule_ids": [],
+      "json_sarif_generated": true
+    }
+  ]
+}
