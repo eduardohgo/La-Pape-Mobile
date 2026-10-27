@@ -1,6 +1,6 @@
 import { router, usePathname } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { type ComponentRef, useEffect, useMemo, useRef, useState } from 'react';
 import { Keyboard, Pressable, ScrollView, StyleSheet, Text, TextInput, View, useWindowDimensions } from 'react-native';
 
 import { HomeIcon } from '@/components/compartidos/iconos-papeleria';
@@ -70,8 +70,8 @@ export default function CatalogScreen() {
   const pathname = usePathname();
   const { width, fontScale } = useWindowDimensions();
   const columns = fontScale > 1.35 ? 1 : width >= 600 ? 3 : 2;
-  const scroll = useRef<ScrollView>(null);
-  const searchInput = useRef<TextInput>(null);
+  const scroll = useRef<ComponentRef<typeof ScrollView>>(null);
+  const searchInput = useRef<ComponentRef<typeof TextInput>>(null);
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [query, setQuery] = useState('');
   const [reload, setReload] = useState(0);
