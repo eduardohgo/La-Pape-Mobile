@@ -3,10 +3,11 @@
 Entrega académica: **29 de octubre de 2026**. Expediente preparado el **27 de octubre de 2026**.
 Aplicación: La Pape Mobile, React Native con Expo SDK 58. Repositorio existente La-Pape-Mobile.
 
-**Nota de publicación:** la implementación y las evidencias originales se prepararon
-con SDK 58. Este PR separa arquitectura/pruebas de la actualización de dependencias:
-conserva SDK 57 de develop. Ver [alcance de la rama independiente](PUBLICACION-INDEPENDIENTE.md)
-antes de reproducir o interpretar la validación física y los manifiestos históricos.
+**Nota de publicación:** la revisión actual del PR #131 incorpora SDK 58 del PR #130
+conservando la arquitectura y las pruebas de Actividad 4. Ninguno se ha fusionado a develop.
+Ver [alcance e integración de la rama](PUBLICACION-INDEPENDIENTE.md) y la
+[revisión del riesgo de Zod](../../security/dependencies/EXPO-ZOD-2026-10-27.md).
+Las evidencias físicas y manifiestos originales siguen siendo históricos, no una validación nueva.
 
 ## Lectura para el profesor
 
