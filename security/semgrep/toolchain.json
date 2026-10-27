@@ -1,0 +1,11 @@
+{
+  "version": "1.182.1",
+  "image": "semgrep/semgrep:1.182.1@sha256:451b3d875c00dac7ed5db5293e584a07de11449a409c10b3c2d2652f429630b6",
+  "verified_date": "2026-10-27",
+  "provenance": [
+    "https://pypi.org/pypi/semgrep/json",
+    "https://hub.docker.com/v2/repositories/semgrep/semgrep/tags/1.182.1",
+    "https://github.com/semgrep/semgrep"
+  ],
+  "base_commit": "14a33cd5a508c263f77c15a5237ae4033dddd072"
+}

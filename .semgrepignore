@@ -1,0 +1,19 @@
+# Production roots are explicit; never inspect private environments or local artifacts.
+**/node_modules/**
+**/.env
+**/.env.*
+**/local/**
+**/.test-build/**
+**/coverage/**
+**/dist/**
+**/.expo/**
+**/backups/**
+**/*.snapshot
+**/*.dump
+**/*.backup
+reportes/**
+security/semgrep/tests/**
+frontend/test/**
+backend/test/**
+scripts/ci/fixtures/**
+scripts/ci/test/**
