@@ -1,0 +1,144 @@
+{
+  "date": "2026-10-27",
+  "purpose": "Review selection only; no publication executed",
+  "base": "14a33cd5a508c263f77c15a5237ae4033dddd072",
+  "files": [
+    {
+      "path": "docs/actividad4-desarrollo-movil-2026-10-29/ARCHIVOS-PARA-REVISION.md",
+      "sha256": "7d0f70373ed79c6c293692dd825dcc7e695fab1db4df47f446b347bd9b513879"
+    },
+    {
+      "path": "docs/actividad4-desarrollo-movil-2026-10-29/ARQUITECTURA-Y-PATRONES.md",
+      "sha256": "5b3076bb1b85e8c61fd296a078f85dceee3a69e498cc7e5b7a33c2bbf644a749"
+    },
+    {
+      "path": "docs/actividad4-desarrollo-movil-2026-10-29/GUIA-DEMOSTRACION.md",
+      "sha256": "fdddef41ba27b8a40870b2d41f283b79d43df54401dae34012ddb44427b2deee"
+    },
+    {
+      "path": "docs/actividad4-desarrollo-movil-2026-10-29/MATRIZ-RUBRICA.md",
+      "sha256": "5d3743d036399b5658b6a65459a24066637bf8e7d59eb1279d7b1e018b62187f"
+    },
+    {
+      "path": "docs/actividad4-desarrollo-movil-2026-10-29/README.md",
+      "sha256": "e17b9a40117590a333d64bd85f433ee7536c52b1baaa7992581bc21dd0149bf8"
+    },
+    {
+      "path": "docs/actividad4-desarrollo-movil-2026-10-29/VALIDACION-IPHONE.md",
+      "sha256": "e602060f929ce9e6277d5278b1e3d2bae7ca64f8df96e7cf9ed5e2c82c8ce069"
+    },
+    {
+      "path": "docs/actividad4-desarrollo-movil-2026-10-29/evidencias/ejecucion-frontend.txt",
+      "sha256": "de8dc53c8fd7cfb9848f21e5ac019024583d7d23f54a0e4d82b813ac7568af32"
+    },
+    {
+      "path": "docs/actividad4-desarrollo-movil-2026-10-29/evidencias/resultados-automaticos.json",
+      "sha256": "1172a6414824d46f749f25b495ed6b4f74c89eb40856b94867a40849003c9281"
+    },
+    {
+      "path": "frontend/package-lock.json",
+      "sha256": "331326ce8c145a6f7e06a019d14097525712f5cf06f920ffe120bd659cf90f62"
+    },
+    {
+      "path": "frontend/package.json",
+      "sha256": "069e719cb0f6d599403075382fd867c9e7b9141d59defb5d5b99fbc6452f824e"
+    },
+    {
+      "path": "frontend/scripts/test-coverage.cjs",
+      "sha256": "ddc3eaf5ad080eff0dbae09edd937020d3e83ab70f814f84488b7ff2aa28e721"
+    },
+    {
+      "path": "frontend/src/components/navegacion/pestanas-app.tsx",
+      "sha256": "35006486458dd8d42856d821b010f7fde306abc1aee77f70cc47b30411306911"
+    },
+    {
+      "path": "frontend/src/components/navegacion/pestanas-app.web.tsx",
+      "sha256": "48b8fac6100f7bed990a1804bea432c7c95e195a05e94b5749245135826d2a12"
+    },
+    {
+      "path": "frontend/src/features/catalogo/README.md",
+      "sha256": "80ed6fbfdfaa0ad4d438f03bf2573104578fd8d48d7bf0710e4b85c39697ffd1"
+    },
+    {
+      "path": "frontend/src/features/catalogo/composicion.ts",
+      "sha256": "5872b61dbf18364e8e96085d645c20f090d3d3b6138ce00b70f4778df0232dce"
+    },
+    {
+      "path": "frontend/src/features/catalogo/datos/repositorio-http.ts",
+      "sha256": "fd307e7135215a34a4ed1f2a3f34ebf61f436d5f66e61adbd2b276c1a9017727"
+    },
+    {
+      "path": "frontend/src/features/catalogo/dominio/casos-uso.ts",
+      "sha256": "cbaa256f38299d146a68006ba724497f85d31ee58803ffbd9f9cceb019616393"
+    },
+    {
+      "path": "frontend/src/features/catalogo/dominio/modelos.ts",
+      "sha256": "214e543b2f9d24a41914139c29f906a1917cb398b1702fedf6bfbef93db35781"
+    },
+    {
+      "path": "frontend/src/features/catalogo/dominio/repositorio-catalogo.ts",
+      "sha256": "f26266229a134958dda2287408d84d330c788633fa87e3be29fc765a351f4091"
+    },
+    {
+      "path": "frontend/src/features/catalogo/presentacion/hooks.ts",
+      "sha256": "4c02f72dc8662dbbd1ebb5a614b1bc6e12fcf56c46a7c22c3538b5b857da4a52"
+    },
+    {
+      "path": "frontend/src/features/catalogo/presentacion/viewmodels.ts",
+      "sha256": "6e1091b1f09792a095783c1d2202eb13c0544580a72e4a1973f1e3c317ff9791"
+    },
+    {
+      "path": "frontend/src/hooks/use-theme.ts",
+      "sha256": "36bad08c42b9fe4617c5bc7ecdb2de2890145b31896349d0db8495cbfd0c7394"
+    },
+    {
+      "path": "frontend/src/pantallas/pantalla-catalogo.tsx",
+      "sha256": "7065ef42d9f196e33abf3b348c749d494f7f207d92e9dfc7f7260a6cda8b6497"
+    },
+    {
+      "path": "frontend/src/pantallas/pantalla-detalle-producto.tsx",
+      "sha256": "c8a018bed96152fedd8d1f85661e865b57f0f8df0858b96c23b102ccbaeefacb"
+    },
+    {
+      "path": "frontend/src/pantallas/pantalla-inicio.tsx",
+      "sha256": "bf8c54e51ac52556496f8f32e91dd28776855d52be7b817b85757356cdc18224"
+    },
+    {
+      "path": "frontend/src/services/servicio-catalogo.ts",
+      "sha256": "0026516639108124a483ae575d8dcaa9164c16b4d5a50355eccf45fefcecc4e2"
+    },
+    {
+      "path": "frontend/test/INFORME-CAJA-BLANCA-2026-10-27.md",
+      "sha256": "90e98d1510325abc88ecf5cb22f6e8909e88011cf0d28d61173342347c306dba"
+    },
+    {
+      "path": "frontend/test/catalog-architecture.test.cjs",
+      "sha256": "fb652e203149f1e60d06fa91155b826f5f67973d87947e6c8ace8219e69de36d"
+    },
+    {
+      "path": "frontend/test/catalog-domain.test.cjs",
+      "sha256": "88870265a5f38143628879a475b1f17cdb164744b963db7d3f3a7f0cfe34f2a1"
+    },
+    {
+      "path": "frontend/test/catalog-hooks-ssr.test.cjs",
+      "sha256": "3a5c8f53f0e9927f7d963784943678e90610333f61c56e26f4016731d1dc2bcf"
+    },
+    {
+      "path": "frontend/test/catalog-integration.test.cjs",
+      "sha256": "b769f7d7a62df8728f99a25df10948710ac7afa87fb7486d58acce85866f5b09"
+    },
+    {
+      "path": "frontend/test/storefront-ux.test.cjs",
+      "sha256": "b844ef6bdb9ced311ec5985c87b883e490e5e552f8fea348c408f461a726c7dd"
+    },
+    {
+      "path": "frontend/test/support/coverage-reporter.cjs",
+      "sha256": "ef648932b154857d27c27c49ecb5d283331e93fe8b66d52a84dc3730b09c8f2f"
+    },
+    {
+      "path": "frontend/tsconfig.test.json",
+      "sha256": "258530783ec28cee582ea43ac15a144f7bb8b0c44f682ea281b629da94f7ece9"
+    }
+  ],
+  "manifestSelfHashOmitted": true
+}

@@ -1,50 +1,15 @@
 import { getApiConfig, type ApiConfig } from '../config/configuracion-api';
 import { ApiError } from './http/errores-http';
 import { createHttpClient, type FetchFunction, type RequestOptions } from './http/cliente-http';
+import type { CatalogCategory, CatalogProduct, CatalogPage, DemoCatalogProduct, CatalogProductDetail } from '../features/catalogo/dominio/modelos';
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const DECIMAL = /^(?:0|[1-9][0-9]{0,7})\.[0-9]{2}$/;
 const PAGE_LIMIT = 50;
 const MAX_PAGES = 100;
 
-export type CatalogCategory = Readonly<{
-  id: string;
-  name: string;
-  description: string | null;
-}>;
-
-export type CatalogProduct = Readonly<{
-  id: string;
-  sku: string;
-  name: string;
-  category_id: string;
-  category_name: string;
-  brand_id: string;
-  brand_name: string;
-  price: string;
-  currency: 'MXN';
-  image_url: string | null;
-}>;
-
-export type CatalogPage = Readonly<{
-  data: CatalogProduct[];
-  page: { hasMore: boolean; nextCursor: string | null };
-}>;
-
-export type DemoCatalogProduct = Readonly<{
-  id: string;
-  sku: string;
-  name: string;
-  category_id: string;
-  category_name: string;
-  price: string;
-  currency: 'MXN';
-  image_url: null;
-  is_demo: true;
-  is_for_sale: false;
-}>;
-
-export type CatalogProductDetail = CatalogProduct & Readonly<{ description: string }>;
+// Preserve existing imports while the domain owns the catalog model.
+export type { CatalogCategory, CatalogProduct, CatalogPage, DemoCatalogProduct, CatalogProductDetail } from '../features/catalogo/dominio/modelos';
 
 export type CatalogProductDetailResponse = Readonly<{ data: CatalogProductDetail }>;
 

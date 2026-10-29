@@ -1,0 +1,255 @@
+{
+  "purpose": "Academic evidence copied from existing automatic results, not a new test execution",
+  "sourceGeneratedAt": "2026-10-27T07:25:19.095Z",
+  "node": "v24.21.0",
+  "exitCode": 0,
+  "counts": {
+    "tests": 70,
+    "failed": 0,
+    "passed": 70,
+    "cancelled": 0,
+    "skipped": 0,
+    "todo": 0,
+    "topLevel": 70,
+    "suites": 0
+  },
+  "measurements": {
+    "catalog": {
+      "totalLineCount": 182,
+      "coveredLineCount": 178,
+      "totalBranchCount": 69,
+      "coveredBranchCount": 68,
+      "totalFunctionCount": 32,
+      "coveredFunctionCount": 29,
+      "lines": 97.8021978021978,
+      "branches": 98.55072463768116,
+      "functions": 90.625
+    },
+    "executedCompiledSubset": {
+      "totalLineCount": 477,
+      "coveredLineCount": 457,
+      "totalBranchCount": 270,
+      "coveredBranchCount": 263,
+      "totalFunctionCount": 71,
+      "coveredFunctionCount": 64,
+      "lines": 95.80712788259959,
+      "branches": 97.4074074074074,
+      "functions": 90.14084507042253
+    },
+    "globalApplication": null
+  },
+  "checksFromPreviousRecord": {
+    "typescript": "passed",
+    "eslint": "passed; zero warnings",
+    "tests": {
+      "previous": 50,
+      "added": 20,
+      "total": 70,
+      "passed": 70,
+      "failed": 0
+    },
+    "coverageCommand": "npm run test:coverage",
+    "gitDiffCheck": "passed; CRLF notices only"
+  },
+  "limitations": {
+    "globalCoverageMeasured": false,
+    "mountedHooksTested": false,
+    "ssrTests": 2,
+    "staticUxTests": 3,
+    "coverageOnCompiledJavaScript": true,
+    "physicalExecutionByAgent": false
+  },
+  "versions": {
+    "expo": "58.0.19",
+    "react": "19.3.0",
+    "react-native": "0.88.0",
+    "expo-router": "58.0.26"
+  },
+  "provenance": [
+    {
+      "source": "frontend/coverage/caja-blanca/resultado.json",
+      "sha256": "072895504c9e19acf38b6e62f77508d627fbb99fe71ba45af00f2926cc3797c9"
+    },
+    {
+      "source": "frontend/local/caja-blanca-2026-10-27/verificacion.json",
+      "sha256": "524fbcf1deef80d8745776c5d95bd4c5ae5378976d56be376f22127fc166dae2"
+    },
+    {
+      "source": "frontend/coverage/caja-blanca/ejecucion.txt",
+      "sha256": "de8dc53c8fd7cfb9848f21e5ac019024583d7d23f54a0e4d82b813ac7568af32"
+    }
+  ],
+  "uncovered": [
+    {
+      "compiledFile": ".test-build/config/configuracion-api.js",
+      "lines": [
+        39,
+        40,
+        41,
+        42,
+        43,
+        44,
+        45
+      ],
+      "branches": [],
+      "functions": [
+        {
+          "name": "getApiConfig",
+          "count": 0,
+          "line": 39
+        }
+      ]
+    },
+    {
+      "compiledFile": ".test-build/features/catalogo/composicion.js",
+      "lines": [],
+      "branches": [],
+      "functions": [
+        {
+          "name": "",
+          "count": 0,
+          "line": 18
+        }
+      ]
+    },
+    {
+      "compiledFile": ".test-build/features/catalogo/presentacion/hooks.js",
+      "lines": [
+        12,
+        13,
+        21,
+        22
+      ],
+      "branches": [],
+      "functions": [
+        {
+          "name": "",
+          "count": 0,
+          "line": 11
+        },
+        {
+          "name": "",
+          "count": 0,
+          "line": 20
+        }
+      ]
+    },
+    {
+      "compiledFile": ".test-build/features/catalogo/presentacion/viewmodels.js",
+      "lines": [],
+      "branches": [
+        {
+          "line": 34,
+          "count": 0
+        }
+      ],
+      "functions": []
+    },
+    {
+      "compiledFile": ".test-build/services/http/cliente-http.js",
+      "lines": [
+        14,
+        15
+      ],
+      "branches": [
+        {
+          "line": 13,
+          "count": 0
+        },
+        {
+          "line": 63,
+          "count": 0
+        },
+        {
+          "line": 24,
+          "count": 0
+        }
+      ],
+      "functions": [
+        {
+          "name": "rejectAbort",
+          "count": 0,
+          "line": 19
+        }
+      ]
+    },
+    {
+      "compiledFile": ".test-build/services/servicio-catalogo.js",
+      "lines": [
+        114,
+        118,
+        119,
+        120
+      ],
+      "branches": [
+        {
+          "line": 39,
+          "count": 0
+        },
+        {
+          "line": 87,
+          "count": 0
+        },
+        {
+          "line": 113,
+          "count": 0
+        }
+      ],
+      "functions": [
+        {
+          "name": "getCatalogService",
+          "count": 0,
+          "line": 118
+        }
+      ]
+    },
+    {
+      "compiledFile": ".test-build/services/servicio-salud-api.js",
+      "lines": [
+        13,
+        14,
+        15
+      ],
+      "branches": [],
+      "functions": [
+        {
+          "name": "checkApiHealth",
+          "count": 0,
+          "line": 13
+        }
+      ]
+    }
+  ],
+  "unmeasuredSourceFiles": [
+    "src/app/_layout.tsx",
+    "src/constants/theme.ts",
+    "src/hooks/use-color-scheme.ts",
+    "src/hooks/use-color-scheme.web.ts",
+    "src/hooks/use-productos-inicio.ts",
+    "src/hooks/use-theme.ts",
+    "src/pantallas/pantalla-catalogo.tsx",
+    "src/pantallas/pantalla-detalle-producto.tsx",
+    "src/pantallas/pantalla-inicio.tsx",
+    "src/types/estilos.d.ts",
+    "src/app/(tabs)/explore.tsx",
+    "src/app/(tabs)/index.tsx",
+    "src/app/(tabs)/_layout.tsx",
+    "src/app/products/[id].tsx",
+    "src/components/arranque/splash-animado.tsx",
+    "src/components/arranque/splash-animado.web.tsx",
+    "src/components/catalogo/componentes-catalogo.tsx",
+    "src/components/compartidos/iconos-papeleria.tsx",
+    "src/components/compartidos/ilustraciones-papeleria.tsx",
+    "src/components/diagnostico/comprobacion-api.tsx",
+    "src/components/navegacion/pestanas-app.tsx",
+    "src/components/navegacion/pestanas-app.web.tsx",
+    "src/components/plantilla/enlace-externo.tsx",
+    "src/components/plantilla/fila-ayuda.tsx",
+    "src/components/plantilla/insignia-expo.tsx",
+    "src/components/plantilla/seccion-desplegable.tsx",
+    "src/components/plantilla/texto-tematico.tsx",
+    "src/components/plantilla/vista-tematica.tsx",
+    "src/features/catalogo/productos-demo-referencia.ts",
+    "src/features/catalogo/dominio/repositorio-catalogo.ts"
+  ]
+}

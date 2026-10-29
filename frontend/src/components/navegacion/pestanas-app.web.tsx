@@ -8,6 +8,7 @@ import {
 } from 'expo-router/ui';
 import { usePathname } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
+import type { ComponentPropsWithRef } from 'react';
 import { Pressable, useColorScheme, View, StyleSheet } from 'react-native';
 
 import { ExternalLink } from '../plantilla/enlace-externo';
@@ -34,7 +35,10 @@ export default function AppTabs() {
   );
 }
 
-export function TabButton({ children, isFocused, ...props }: TabTriggerSlotProps) {
+// Router's slot ref still names View as a component; RN 0.88 expects its instance.
+type TabButtonProps = Omit<TabTriggerSlotProps, 'ref'> & Pick<ComponentPropsWithRef<typeof Pressable>, 'ref'>;
+
+export function TabButton({ children, isFocused, ...props }: TabButtonProps) {
   return (
     <Pressable {...props} style={({ pressed }) => pressed && styles.pressed}>
       <ThemedView
@@ -51,7 +55,7 @@ export function TabButton({ children, isFocused, ...props }: TabTriggerSlotProps
 export function CustomTabList(props: TabListProps) {
   const pathname = usePathname();
   const scheme = useColorScheme();
-  const colors = Colors[scheme === 'unspecified' ? 'light' : scheme];
+  const colors = Colors[scheme === 'dark' ? 'dark' : 'light'];
 
   return (
     <View {...props} style={[styles.tabListContainer, (pathname === '/' || pathname === '/explore') && styles.hidden]}>

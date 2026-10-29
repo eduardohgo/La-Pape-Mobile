@@ -1,6 +1,6 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -12,21 +12,7 @@ import {
   ShopHeader,
   ShopStatus,
 } from '@/components/catalogo/componentes-catalogo';
-import {
-  type CatalogProductDetail,
-  type DemoCatalogProduct,
-  getCatalogService,
-} from '@/services/servicio-catalogo';
-import { ApiError } from '@/services/http/errores-http';
-
-const demoMode = __DEV__ && process.env.EXPO_PUBLIC_CATALOG_MODE === 'demo';
-
-type VisibleProduct = CatalogProductDetail | DemoCatalogProduct;
-type DetailState =
-  | { status: 'loading' }
-  | { status: 'loaded'; product: VisibleProduct }
-  | { status: 'not-found' }
-  | { status: 'error' };
+import { useProductDetailViewModel } from '@/features/catalogo/presentacion/hooks';
 
 function returnToCatalog() {
   // Also reaches the catalog when this detail was opened from Home or a direct link.
@@ -38,41 +24,14 @@ export default function ProductDetailScreen() {
   const insets = useSafeAreaInsets();
   const { width, fontScale } = useWindowDimensions();
   const compact = width < 360 || fontScale > 1.25;
-  const [resolved, setResolved] = useState<{ key: string; result: DetailState } | null>(null);
-  const [reload, setReload] = useState(0);
   const [pendingFeature, setPendingFeature] = useState<string | null>(null);
-  const requestKey = `${id}:${reload}`;
-  // Each UUID or retry remains loading until its own validated request completes.
-  const state: DetailState = resolved?.key === requestKey ? resolved.result : { status: 'loading' };
-
-  useEffect(() => {
-    const controller = new AbortController();
-
-    async function load() {
-      try {
-        const service = getCatalogService();
-        const product = demoMode
-          ? await service.demoProduct(id, { signal: controller.signal })
-          : await service.product(id, { signal: controller.signal });
-        if (!controller.signal.aborted) setResolved({ key: requestKey, result: { status: 'loaded', product } });
-      } catch (error) {
-        if (controller.signal.aborted) return;
-        const invalidId = !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id ?? '');
-        const notFound = error instanceof ApiError &&
-          (error.status === 404 || (error.kind === 'configuration' && invalidId));
-        setResolved({ key: requestKey, result: { status: notFound ? 'not-found' : 'error' } });
-      }
-    }
-    void load();
-    return () => controller.abort();
-  }, [id, requestKey]);
+  const { state, retry } = useProductDetailViewModel(id);
 
   const product = state.status === 'loaded' ? state.product : null;
   // An unverified demo description is never manufactured or exposed.
   const description = product && 'description' in product && product.description.trim()
     ? product.description
     : null;
-  const retry = () => setReload((value) => value + 1);
 
   return (
     <View style={styles.screen}>
