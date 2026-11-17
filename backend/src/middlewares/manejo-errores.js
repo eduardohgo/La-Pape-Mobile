@@ -1,9 +1,14 @@
+import { logFailure } from '../log-operativo.js';
+
 export function notFound(_req, res) {
   res.status(404).json({ error: 'Ruta no encontrada' });
 }
 
 export function errorHandler(err, _req, res, next) {
-  if (res.headersSent) return next(err);
+  if (res.headersSent) {
+    logFailure('response_interrupted');
+    return next(new Error('Respuesta interrumpida'));
+  }
   if (err.type === 'entity.parse.failed') {
     return res.status(400).json({ error: 'JSON inválido' });
   }
@@ -13,5 +18,6 @@ export function errorHandler(err, _req, res, next) {
   if (err.code === 'ORIGIN_DENIED') {
     return res.status(403).json({ error: 'Origen no permitido' });
   }
+  logFailure('unexpected_request_error');
   return res.status(500).json({ error: 'Error interno del servidor' });
 }

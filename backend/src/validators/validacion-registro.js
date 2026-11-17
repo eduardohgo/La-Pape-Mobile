@@ -21,7 +21,7 @@ function failure(errors) {
   return { ok: false, ...REGISTRATION_VALIDATION, errors };
 }
 
-function validEmail(email) {
+export function validEmail(email) {
   if (/[^\x21-\x7e]/.test(email)) return false;
   const parts = email.split('@');
   if (parts.length !== 2) return false;

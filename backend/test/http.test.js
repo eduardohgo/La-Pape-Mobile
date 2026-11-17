@@ -73,13 +73,16 @@ test('malformed JSON and oversized bodies have bounded sanitized responses', asy
 
 test('rate limit rejects repeated requests with JSON and security headers', async (t) => {
   const base = await localServer(t, { RATE_LIMIT_MAX: '2' });
-  assert.equal((await fetch(`${base}/health`)).status, 200);
-  assert.equal((await fetch(`${base}/health`)).status, 200);
-  const limited = await fetch(`${base}/health`);
+  assert.equal((await fetch(`${base}/unknown`)).status, 404);
+  assert.equal((await fetch(`${base}/unknown`)).status, 404);
+  const limited = await fetch(`${base}/unknown`);
   assert.equal(limited.status, 429);
   assert.deepEqual(await limited.json(), { error: 'Demasiadas peticiones, intenta más tarde' });
   assert.ok(limited.headers.has('retry-after'));
   assert.equal(limited.headers.get('x-content-type-options'), 'nosniff');
+  const health = await fetch(`${base}/health`);
+  assert.equal(health.status, 200);
+  assert.equal(health.headers.has('ratelimit'), false);
 });
 
 test('unexpected exceptions never disclose their messages', async (t) => {
@@ -101,4 +104,13 @@ test('the HTTP server can close without leaving a listener running', async () =>
   await once(server, 'listening');
   await stopServer(server);
   assert.equal(server.listening, false);
+});
+
+test('late errors forwarded to the Express handler omit their original details', () => {
+  const original = new Error('private-message-do-not-log');
+  let forwarded;
+  errorHandler(original, {}, { headersSent: true }, error => { forwarded = error; });
+  assert.ok(forwarded instanceof Error);
+  assert.notEqual(forwarded, original);
+  assert.doesNotMatch(forwarded.stack, /private-message-do-not-log/);
 });

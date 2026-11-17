@@ -14,8 +14,8 @@ function integer(value, fallback, name, minimum, maximum) {
   return result;
 }
 
-function origins(value) {
-  const items = String(value ?? DEFAULT_ORIGINS).split(',').map((item) => item.trim()).filter(Boolean);
+function origins(value, render) {
+  const items = String(value ?? (render ? '' : DEFAULT_ORIGINS)).split(',').map((item) => item.trim()).filter(Boolean);
   return Object.freeze([...new Set(items.map((item) => {
     let url;
     try {
@@ -23,7 +23,8 @@ function origins(value) {
     } catch {
       throw new Error('Configuración inválida: FRONTEND_ORIGINS');
     }
-    if (!['http:', 'https:'].includes(url.protocol) || url.username || url.password || url.search || url.hash || url.pathname !== '/') {
+    if (!(render ? ['https:'] : ['http:', 'https:']).includes(url.protocol)
+      || url.username || url.password || url.search || url.hash || url.pathname !== '/') {
       throw new Error('Configuración inválida: FRONTEND_ORIGINS');
     }
     return url.origin;
@@ -94,27 +95,145 @@ function database(env, nodeEnv) {
   });
 }
 
+function cloudinary(env) {
+  const enabled = env.CLOUDINARY_ENABLED ?? 'false';
+  if (!['true', 'false'].includes(enabled)) {
+    throw new Error('Configuración inválida: CLOUDINARY_ENABLED');
+  }
+  // Disabled means optional: do not read credentials or expose a partial configuration.
+  if (enabled === 'false') return null;
+
+  const rules = [
+    ['CLOUDINARY_CLOUD_NAME', /^[a-z0-9][a-z0-9_-]{0,127}$/],
+    ['CLOUDINARY_API_KEY', /^[0-9]{1,128}$/],
+    ['CLOUDINARY_API_SECRET', /^[\x21-\x7e]{1,1024}$/],
+  ];
+  const values = rules.map(([name, pattern]) => {
+    const value = env[name];
+    // Validate without trimming, coercing or echoing credential values.
+    if (typeof value !== 'string' || /\s/.test(value) || !pattern.test(value)) {
+      throw new Error(`Configuración inválida: ${name}`);
+    }
+    return value;
+  });
+  const config = { cloudName: values[0] };
+  // Available to a future server-side adapter, omitted from ordinary JSON/spread/logging.
+  Object.defineProperties(config, {
+    apiKey: { value: values[1], enumerable: false },
+    apiSecret: { value: values[2], enumerable: false },
+  });
+  return Object.freeze(config);
+}
+
+function flag(value, name) {
+  const option = value ?? 'false';
+  if (!['true', 'false'].includes(option)) throw new Error('Configuración inválida: ' + name);
+  return option === 'true';
+}
+
+function assertNeonRole(config, name, role) {
+  if (!config) throw new Error('Se requiere ' + name);
+  const url = new URL(config.connectionString);
+  if (!/^ep-[a-z0-9-]+(?:\.[a-z0-9-]+)+\.neon\.tech$/.test(url.hostname)
+    || (url.port && url.port !== '5432') || !url.password
+    || decodeURIComponent(url.username) !== role || decodeURIComponent(url.pathname) !== '/lapape_mobile_dev'
+    || config.ssl?.rejectUnauthorized !== true) {
+    throw new Error(name + ' requiere el rol dedicado, la base esperada y TLS verificado en Neon');
+  }
+  return url.hostname;
+}
+
+function authentication(env, nodeEnv, render, catalogDatabase, proxyIps) {
+  const enabled = env.AUTH_ENABLED ?? 'false';
+  if (!['true', 'false'].includes(enabled)) throw new Error('Configuración inválida: AUTH_ENABLED');
+  const mode = env.AUTH_MODE ?? 'pilot';
+  if (!['pilot', 'hosted'].includes(mode)) throw new Error('Configuración inválida: AUTH_MODE');
+  if (enabled === 'false') return null;
+  if ((mode === 'hosted') !== render || (mode === 'pilot' && nodeEnv === 'production')) {
+    throw new Error('La autenticación piloto requiere desarrollo o pruebas; Render requiere AUTH_MODE=hosted');
+  }
+  const allowLoopbackHttp = flag(env.AUTH_ALLOW_LOOPBACK_HTTP, 'AUTH_ALLOW_LOOPBACK_HTTP');
+  if (render && (allowLoopbackHttp || !proxyIps.length)) {
+    throw new Error('La autenticación alojada requiere proxies verificados y HTTPS obligatorio');
+  }
+  const db = database({ DATABASE_URL: env.AUTH_DATABASE_URL }, nodeEnv);
+  if (!db) throw new Error('Se requiere AUTH_DATABASE_URL');
+  const url = new URL(db.connectionString);
+  if (decodeURIComponent(url.username) !== 'lapape_auth_runtime'
+    || decodeURIComponent(url.pathname) !== '/lapape_mobile_dev') {
+    throw new Error('AUTH_DATABASE_URL requiere el rol y la base del piloto');
+  }
+  if (render) {
+    const authHost = assertNeonRole(db, 'AUTH_DATABASE_URL', 'lapape_auth_runtime');
+    if (env.AUTH_DATABASE_HOST !== authHost) throw new Error('AUTH_DATABASE_HOST no coincide con el destino aprobado de autenticación');
+    const endpoint = host => host.replace('-pooler.', '.');
+    if (catalogDatabase && endpoint(new URL(catalogDatabase.connectionString).hostname) === endpoint(authHost)) {
+      throw new Error('El catálogo y la autenticación requieren endpoints de Neon separados');
+    }
+  }
+
+  const input = env.AUTH_RATE_LIMIT_KEY;
+  const key = typeof input === 'string' && /^[A-Za-z0-9_-]{43}$/.test(input)
+    ? Buffer.from(input, 'base64url') : null;
+  if (!key || key.length !== 32 || key.toString('base64url') !== input || new Set(key).size === 1) {
+    throw new Error('Configuración inválida: AUTH_RATE_LIMIT_KEY');
+  }
+  const config = { allowLoopbackHttp, hosted: render };
+  Object.defineProperties(config, {
+    database: { value: db },
+    limitKey: { value: key },
+  });
+  return Object.freeze(config);
+}
+
 export function loadConfig(env = process.env) {
   const nodeEnv = String(env.NODE_ENV ?? 'development').trim();
   if (!['development', 'test', 'production'].includes(nodeEnv)) {
     throw new Error('Configuración inválida: NODE_ENV');
   }
-  const host = String(env.HOST ?? '127.0.0.1').trim();
+  const runtime = env.APP_RUNTIME ?? 'local';
+  if (!['local', 'render'].includes(runtime) || (runtime === 'render' && nodeEnv !== 'production')) {
+    throw new Error('Configuración inválida: APP_RUNTIME');
+  }
+  const render = runtime === 'render';
+  const host = String(env.HOST ?? (render ? '0.0.0.0' : '127.0.0.1')).trim();
+  if (render && (host !== '0.0.0.0' || !String(env.PORT ?? '').trim())) {
+    throw new Error('Render requiere HOST=0.0.0.0 y PORT de la plataforma');
+  }
   if (host !== 'localhost' && !isIP(host)) {
     throw new Error('Configuración inválida: HOST');
   }
-  return Object.freeze({
+  // A hop count cannot distinguish the public edge from a direct private peer.
+  integer(env.TRUST_PROXY, 0, 'TRUST_PROXY', 0, 0);
+  const proxyInput = env.RENDER_TRUSTED_PROXY_IPS?.trim() ?? '';
+  const proxyIps = Object.freeze(proxyInput ? [...new Set(proxyInput.split(',').map(ip => ip.trim()))] : []);
+  if (proxyIps.length > 32 || proxyIps.some(ip => !isIP(ip) || ip.includes('%')
+    || ip === '0.0.0.0' || ip === '::' || ip === '::ffff:0.0.0.0') || (!render && proxyIps.length)) {
+    throw new Error('Configuración inválida: RENDER_TRUSTED_PROXY_IPS');
+  }
+  const catalogDb = database(env, nodeEnv);
+  const catalogApiEnabled = flag(env.CATALOG_API_ENABLED, 'CATALOG_API_ENABLED');
+  if (render && catalogApiEnabled) assertNeonRole(catalogDb, 'DATABASE_URL', 'lapape_catalog_render');
+  const config = {
     nodeEnv,
+    runtime,
     host,
     port: integer(env.PORT, 3000, 'PORT', 1, 65535),
-    allowedOrigins: origins(env.FRONTEND_ORIGINS),
-    trustProxy: integer(env.TRUST_PROXY, 0, 'TRUST_PROXY', 0, 1),
+    allowedOrigins: origins(env.FRONTEND_ORIGINS, render),
+    proxyIps,
     rateLimitMax: integer(env.RATE_LIMIT_MAX, 100, 'RATE_LIMIT_MAX', 1, 10000),
     rateLimitWindowMs: integer(env.RATE_LIMIT_WINDOW_MS, 900000, 'RATE_LIMIT_WINDOW_MS', 1000, 3600000),
     jsonBodyLimitBytes: integer(env.JSON_BODY_LIMIT_BYTES, 65536, 'JSON_BODY_LIMIT_BYTES', 1, 1048576),
-    catalogApiEnabled: String(env.CATALOG_API_ENABLED ?? 'false').trim() === 'true',
+    catalogApiEnabled,
     // Never enable demo routes in test/staging/production, even if the flag leaks.
     catalogDemoApiEnabled: nodeEnv === 'development' && String(env.CATALOG_DEMO_API_ENABLED ?? 'false').trim() === 'true',
-    database: database(env, nodeEnv),
+    cloudinary: cloudinary(env),
+    auth: authentication(env, nodeEnv, render, catalogDb, proxyIps),
+  };
+  // Keep the property copyable for callers composing config, but redact JSON output.
+  Object.defineProperties(config, {
+    database: { value: catalogDb, enumerable: true },
+    toJSON: { value: () => ({ ...config, database: catalogDb ? '[configurada]' : null }) },
   });
+  return Object.freeze(config);
 }

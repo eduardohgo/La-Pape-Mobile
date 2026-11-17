@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 
 const checks = [
   { id: 'repositorio', name: 'Descarga del repositorio' },
-  { id: 'node', name: 'Configuracion de Node.js 22' },
+  { id: 'node', name: 'Configuracion de Node.js 24' },
   { id: 'dependencias_backend', name: 'Dependencias del backend' },
   { id: 'dependencias_frontend', name: 'Dependencias del frontend' },
   { id: 'sintaxis_backend', name: 'Sintaxis del backend' },
