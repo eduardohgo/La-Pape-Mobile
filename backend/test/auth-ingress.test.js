@@ -422,3 +422,60 @@ test('contradictory Host and ingress duplicates are rejected before all auth ope
   }
   assert.deepEqual(f.calls, []);
 });
+
+test('Render Free ingress opt-in is isolated and denied on other services or runtimes', () => {
+  const approved = {
+    ...environment({ RENDER_TRUSTED_PROXY_IPS: '' }),
+    RENDER_FREE_PUBLIC_INGRESS: 'true',
+    RENDER: 'true',
+    RENDER_SERVICE_ID: 'srv-dc2rth7lk1mc73arpul0',
+    RENDER_SERVICE_TYPE: 'web',
+    RENDER_EXTERNAL_URL: 'https://la-pape-mobile-auth-tigre10.onrender.com',
+  };
+  const config = loadConfig(approved);
+  assert.equal(config.managedFreeEdge, true);
+  assert.equal(config.proxyIps.length, 0);
+  assert.equal(config.expectedHost, 'la-pape-mobile-auth-tigre10.onrender.com');
+  for (const change of [
+    { RENDER: 'false' },
+    { RENDER_SERVICE_ID: 'srv-other' },
+    { RENDER_SERVICE_TYPE: 'private_service' },
+    { RENDER_EXTERNAL_URL: 'https://other.onrender.com' },
+    { RENDER_TRUSTED_PROXY_IPS: '127.0.0.1' },
+    { NODE_ENV: 'development', APP_RUNTIME: 'local' },
+    { API_PROFILE: 'shared' },
+  ]) assert.throws(() => loadConfig({ ...approved, ...change }));
+  assert.equal(loadConfig({ ...approved, RENDER_FREE_PUBLIC_INGRESS: 'false', RENDER_TRUSTED_PROXY_IPS: '127.0.0.1' }).managedFreeEdge, false);
+});
+
+test('Render Free public ingress rejects incorrect Host, scheme or missing CF client', () => {
+  const check = renderIngress([], {
+    managedFreeEdge: true, expectedHost: 'la-pape-mobile-auth-tigre10.onrender.com',
+  });
+  const valid = {
+    socket: { remoteAddress: '10.1.2.3' }, ip: '10.1.2.3',
+    headers: {
+      host: 'la-pape-mobile-auth-tigre10.onrender.com',
+      'cf-connecting-ip': '203.0.113.44',
+      'x-forwarded-proto': 'https',
+    },
+  };
+  const cases = [
+    { host: 'other.onrender.com' },
+    { 'x-forwarded-proto': 'http' },
+    { 'cf-connecting-ip': 'not-an-ip' },
+    { 'cf-connecting-ip': undefined },
+  ];
+  for (const change of cases) {
+    const req = { ...valid, headers: { ...valid.headers, ...change } };
+    check(req, {}, () => {});
+    assert.equal(hasTrustedRenderHttps(req), false);
+    assert.equal(clientAddress(req), '10.1.2.3');
+  }
+  const req = { ...valid, headers: { ...valid.headers } };
+  check(req, {}, () => {});
+  assert.equal(hasTrustedRenderHttps(req), true);
+  assert.equal(clientAddress(req), '203.0.113.44');
+  assert.equal(req.headers['cf-connecting-ip'], undefined);
+  assert.equal(req.headers['x-forwarded-proto'], undefined);
+});
