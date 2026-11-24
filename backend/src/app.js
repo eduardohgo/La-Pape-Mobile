@@ -51,7 +51,10 @@ export function createApp(config, { catalogRepository, authService, authReposito
   if (observer) app.use(observer);
   // Inspect the original header pairs before Node's merged values are trusted.
   app.use(rejectAmbiguousHeaders);
-  app.use(renderIngress(config.runtime === 'render' ? config.proxyIps : []));
+  app.use(renderIngress(config.runtime === 'render' ? config.proxyIps : [], {
+    managedFreeEdge: config.managedFreeEdge === true,
+    expectedHost: config.expectedHost,
+  }));
   app.use(cors({
     origin(origin, callback) {
       if (!origin || config.allowedOrigins.includes(origin)) return callback(null, true);
