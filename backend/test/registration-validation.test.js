@@ -156,16 +156,21 @@ test('approved length policy still explicitly reports registration as not produc
     assert.equal(result.ok, true);
     assert.equal(result.productionReady, false);
     assert.equal(result.passwordPolicy, 'approved-length');
-    assert.equal(result.passwordMinCodePoints, 15);
+    assert.equal(result.passwordMinCodePoints, 8);
   }
 });
 
 test('password minimum counts Unicode code points rather than UTF-16 units or UTF-8 bytes', () => {
-  for (const character of ['a', 'á', '🔒', '𠮷']) {
-    for (const length of [1, 7, 14]) {
+  for (const character of ['a', 'á', '🔒', '🗝️']) {
+    const units = [...character].length;
+    const belowMinimum = Math.floor(7 / units);
+    const atMinimum = Math.ceil(8 / units);
+
+    for (const length of [1, belowMinimum]) {
       rejects({ ...valid(), password: character.repeat(length) }, 'password', 'TOO_SHORT');
     }
-    for (const length of [15, 16, 64]) {
+
+    for (const length of [atMinimum, atMinimum + 1, 64]) {
       const password = character.repeat(length);
       const result = validateRegistration({ ...valid(), password });
       assert.equal(result.ok, true);
@@ -180,7 +185,7 @@ test('password is never trimmed, case-folded or Unicode-normalized', () => {
     assert.equal(validateRegistration(input).data.password, password);
     assert.equal(input.password, password);
   }
-  rejects({ ...valid(), password: 'é'.repeat(14) }, 'password', 'TOO_SHORT');
+  rejects({ ...valid(), password: 'é'.repeat(7) }, 'password', 'TOO_SHORT');
   // Combining marks are separate code points; grapheme clusters are not the unit.
   assert.equal(validateRegistration({ ...valid(), password: 'e\u0301'.repeat(7) + 'a' }).ok, true);
 });
@@ -194,13 +199,26 @@ test('empty, whitespace-only and malformed Unicode passwords remain invalid unde
   }
 });
 
+
 test('validation errors accumulate field failures but never reflect secrets or input keys', () => {
-  const result = validateRegistration({ name: '', email: 'private-invalid-email', password: 'secret'.repeat(200) });
+  const result = validateRegistration({
+    name: '',
+    email: 'private-invalid-email',
+    password: 'secret'.repeat(200)
+  });
+
   assert.deepEqual(result.errors.map(({ field }) => field), ['name', 'email', 'password']);
   assert.doesNotMatch(JSON.stringify(result), /private-invalid-email|secret/);
-  const short = rejects({ ...valid(), password: 'private-short' }, 'password', 'TOO_SHORT');
-  assert.doesNotMatch(JSON.stringify(short), /private-short|Maria\.Jose|escuela|example\.com/);
-  const extra = rejects({ ...valid(), 'private-key-do-not-reflect': true, role: 'DUENO' }, null, 'UNKNOWN_FIELDS');
+
+  const short = rejects({ ...valid(), password: 'private' }, 'password', 'TOO_SHORT');
+  assert.doesNotMatch(JSON.stringify(short), /private|Maria\.Jose|escuela|example\.com/);
+
+  const extra = rejects({
+    ...valid(),
+    'private-key-do-not-reflect': true,
+    role: 'DUENO'
+  }, null, 'UNKNOWN_FIELDS');
+
   assert.ok(extra.errors.some(({ code }) => code === 'PRIVILEGED_FIELDS'));
   assert.doesNotMatch(JSON.stringify(extra), /private-key-do-not-reflect|DUENO/);
 });

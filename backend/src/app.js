@@ -13,16 +13,24 @@ import { createDemoCatalogRouter } from './routes/rutas-catalogo-demo.js';
 import { createCatalogRepository } from './repositories/repositorio-catalogo.js';
 import { clientAddress, renderIngress } from './middlewares/ingreso-render.js';
 import { logFailure } from './log-operativo.js';
+import { rejectAmbiguousHeaders } from './middlewares/encabezados-http.js';
+import { createIngressObserver } from './middlewares/observador-ingreso.js';
+import { createRegistrationService } from './services/servicio-registro.js';
+import { createRegistrationMailer } from './services/correo-registro.js';
 
-export function createApp(config, { catalogRepository, authService, authRepository } = {}) {
+export function createApp(config, { catalogRepository, authService, authRepository, ingressObserverLogger, registrationService, registrationMailer } = {}) {
   const app = express();
+  const observer = createIngressObserver(config, { write: ingressObserverLogger });
   const databases = [];
+  const draining = [];
   let closing;
   app.locals.closeDatabases = () => {
-    closing ??= Promise.allSettled(databases.map(({ repository }) =>
-      Promise.resolve().then(() => repository.close?.()))).then(results => {
+    closing ??= (async () => {
+      await Promise.allSettled(draining.map(service => Promise.resolve().then(() => service.close?.())));
+      const results = await Promise.allSettled(databases.map(({ repository }) =>
+        Promise.resolve().then(() => repository.close?.())));
       if (results.some(result => result.status === 'rejected')) throw new Error('Error al cerrar pools PostgreSQL');
-    });
+    })();
     return closing;
   };
   app.locals.verifyDatabases = async () => {
@@ -38,8 +46,12 @@ export function createApp(config, { catalogRepository, authService, authReposito
   };
   app.disable('x-powered-by');
   app.set('trust proxy', false);
-  app.use(renderIngress(config.runtime === 'render' ? config.proxyIps : []));
   app.use(helmet());
+  // Observe sanitized syntax before validation/stripping, without changing trust.
+  if (observer) app.use(observer);
+  // Inspect the original header pairs before Node's merged values are trusted.
+  app.use(rejectAmbiguousHeaders);
+  app.use(renderIngress(config.runtime === 'render' ? config.proxyIps : []));
   app.use(cors({
     origin(origin, callback) {
       if (!origin || config.allowedOrigins.includes(origin)) return callback(null, true);
@@ -53,23 +65,30 @@ export function createApp(config, { catalogRepository, authService, authReposito
     maxAge: 600,
   }));
   app.use(createHealthRouter());
-  app.use(rateLimit({
+  const httpLimit = rateLimit({
     windowMs: config.rateLimitWindowMs,
     limit: config.rateLimitMax,
     standardHeaders: 'draft-8',
     legacyHeaders: false,
     keyGenerator: req => ipKeyGenerator(clientAddress(req)),
     message: { error: 'Demasiadas peticiones, intenta más tarde' },
-  }));
+  });
   if (config.auth) {
-    const hasher = authService ? null : createPasswordHasher();
-    const repository = authService ? null : authRepository ?? createAuthRepository(config.auth.database);
+    const needsRepository = !authService || (config.auth.registration && !registrationService);
+    const hasher = needsRepository ? createPasswordHasher() : null;
+    const repository = needsRepository ? authRepository ?? createAuthRepository(config.auth.database, { registrationEnabled: Boolean(config.auth.registration) }) : null;
     const service = authService ?? createAuthService(repository, hasher, config.auth.limitKey);
     if (repository) databases.push({ name: 'auth', repository });
-    app.use('/auth', createAuthRouter(service, config.auth));
+    // The router rejects ambiguous transport before consuming an IP budget or body.
+    const signup = config.auth.registration ? registrationService ?? createRegistrationService(repository, hasher, {
+      key: config.auth.registration.key, mailer: registrationMailer ?? createRegistrationMailer(config.auth.registration.mail),
+    }) : null;
+    if (signup) draining.push(signup);
+    app.use('/auth', createAuthRouter(service, config.auth, httpLimit, signup));
   }
-  app.use(express.json({ limit: config.jsonBodyLimitBytes }));
-  if (config.catalogApiEnabled) {
+  app.use(httpLimit);
+  if (config.apiProfile !== 'auth-only') app.use(express.json({ limit: config.jsonBodyLimitBytes }));
+  if (config.apiProfile !== 'auth-only' && config.catalogApiEnabled) {
     const repository = catalogRepository ?? createCatalogRepository(config.database);
     databases.push({ name: 'catalog', repository });
     app.use(createCatalogRouter(repository));

@@ -1,4 +1,5 @@
 import { isIP } from 'node:net';
+import { validEmail } from '../validators/validacion-registro.js';
 
 const DEFAULT_ORIGINS = 'http://localhost:8081,http://localhost:19006';
 
@@ -182,8 +183,44 @@ function authentication(env, nodeEnv, render, catalogDatabase, proxyIps) {
   Object.defineProperties(config, {
     database: { value: db },
     limitKey: { value: key },
+    registration: { value: registration(env, key) },
   });
   return Object.freeze(config);
+}
+
+function registration(env, limitKey) {
+  if (!flag(env.AUTH_REGISTRATION_ENABLED, 'AUTH_REGISTRATION_ENABLED')) return null;
+  const input = env.AUTH_REGISTRATION_HMAC_KEY;
+  const key = typeof input === 'string' && /^[A-Za-z0-9_-]{43}$/.test(input) ? Buffer.from(input, 'base64url') : null;
+  if (!key || key.length !== 32 || key.toString('base64url') !== input || new Set(key).size < 16 || key.equals(limitKey)) {
+    throw new Error('Configuración inválida: AUTH_REGISTRATION_HMAC_KEY');
+  }
+  if (env.AUTH_MAIL_PROVIDER !== 'brevo' || typeof env.BREVO_API_KEY !== 'string'
+    || !/^[\x21-\x7e]{20,512}$/.test(env.BREVO_API_KEY)
+    || typeof env.AUTH_MAIL_FROM !== 'string' || !validEmail(env.AUTH_MAIL_FROM)) {
+    throw new Error('Configuración inválida del correo de registro');
+  }
+  const mail = {};
+  Object.defineProperties(mail, { apiKey: { value: env.BREVO_API_KEY }, sender: { value: env.AUTH_MAIL_FROM } });
+  const config = {};
+  Object.defineProperties(config, { key: { value: key }, mail: { value: Object.freeze(mail) } });
+  return Object.freeze(config);
+}
+
+function ingressObservation(env, apiProfile) {
+  if (!flag(env.INGRESS_OBSERVER_ENABLED, 'INGRESS_OBSERVER_ENABLED')) return null;
+  // Reject before authentication() can read any database credential.
+  if (apiProfile !== 'auth-only' || env.AUTH_ENABLED !== 'false') {
+    throw new Error('El observador requiere API_PROFILE=auth-only y AUTH_ENABLED=false explícito');
+  }
+  const input = env.INGRESS_OBSERVER_EXPIRES_AT;
+  const expiresAt = typeof input === 'string' ? Date.parse(input) : NaN;
+  if (!Number.isFinite(expiresAt) || new Date(expiresAt).toISOString() !== input
+    || expiresAt > Date.now() + 30 * 60 * 1000) {
+    throw new Error('Configuración inválida: INGRESS_OBSERVER_EXPIRES_AT');
+  }
+  // An expired observer stays silent; health must survive subsequent cold starts.
+  return Object.freeze({ expiresAt });
 }
 
 export function loadConfig(env = process.env) {
@@ -196,6 +233,20 @@ export function loadConfig(env = process.env) {
     throw new Error('Configuración inválida: APP_RUNTIME');
   }
   const render = runtime === 'render';
+  const apiProfile = env.API_PROFILE ?? 'shared';
+  if (!['shared', 'auth-only'].includes(apiProfile)) throw new Error('Configuración inválida: API_PROFILE');
+  if (apiProfile === 'auth-only') {
+    const forbidden = ['CATALOG_API_ENABLED', 'CATALOG_DEMO_API_ENABLED', 'CLOUDINARY_ENABLED',
+      'AUTH_RECOVERY_ENABLED'];
+    if (forbidden.some(name => flag(env[name], name)) || String(env.DATABASE_URL ?? '').trim()) {
+      throw new Error('API_PROFILE=auth-only no admite catálogo, módulos adicionales ni DATABASE_URL');
+    }
+  }
+  if (flag(env.AUTH_REGISTRATION_ENABLED, 'AUTH_REGISTRATION_ENABLED')
+    && (apiProfile !== 'auth-only' || env.AUTH_ENABLED !== 'true')) {
+    throw new Error('Registro requiere auth-only y AUTH_ENABLED=true');
+  }
+  const observer = ingressObservation(env, apiProfile);
   const host = String(env.HOST ?? (render ? '0.0.0.0' : '127.0.0.1')).trim();
   if (render && (host !== '0.0.0.0' || !String(env.PORT ?? '').trim())) {
     throw new Error('Render requiere HOST=0.0.0.0 y PORT de la plataforma');
@@ -217,6 +268,8 @@ export function loadConfig(env = process.env) {
   const config = {
     nodeEnv,
     runtime,
+    apiProfile,
+    ingressObserver: observer,
     host,
     port: integer(env.PORT, 3000, 'PORT', 1, 65535),
     allowedOrigins: origins(env.FRONTEND_ORIGINS, render),

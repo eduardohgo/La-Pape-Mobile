@@ -87,8 +87,8 @@ test('only an approved TCP peer can authorize forwarded HTTPS and provide the lo
   };
   assert.equal(await send(port, '127.0.0.1', edge), 403);
   assert.equal(await send(port, '127.0.0.2', { ...edge, 'X-Forwarded-Proto': 'http' }), 403);
-  assert.equal(await send(port, '127.0.0.2', { ...edge, 'X-Forwarded-Proto': 'https,http' }), 403);
-  assert.equal(await send(port, '127.0.0.2', { ...edge, 'CF-Connecting-IP': '203.0.113.35,203.0.113.36' }), 403);
+  assert.equal(await send(port, '127.0.0.2', { ...edge, 'X-Forwarded-Proto': 'https,http' }), 400);
+  assert.equal(await send(port, '127.0.0.2', { ...edge, 'CF-Connecting-IP': '203.0.113.35,203.0.113.36' }), 400);
   assert.deepEqual(verifiedClients, []);
 
   assert.equal(await send(port, '127.0.0.2', { ...edge, 'X-Forwarded-For': '203.0.113.101' }), 200);

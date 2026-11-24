@@ -6,7 +6,7 @@ export const REGISTRATION_VALIDATION = Object.freeze({
   passwordPolicy: 'approved-length',
   nameMaxCodePoints: 120,
   emailMaxLength: 254,
-  passwordMinCodePoints: 15,
+  passwordMinCodePoints: 8,
   passwordMaxBytes: 1024,
 });
 

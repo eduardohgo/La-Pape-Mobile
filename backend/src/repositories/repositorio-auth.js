@@ -1,7 +1,7 @@
 import { createDatabasePool } from '../db/conexion-postgres.js';
 import { verifyRuntimePermissions } from '../db/permisos-runtime.js';
 
-export function createAuthRepository(config) {
+export function createAuthRepository(config, { registrationEnabled = false } = {}) {
   const pool = createDatabasePool({
     ...config, max: 3, statement_timeout: 5000, idle_in_transaction_session_timeout: 5000,
   }, undefined, 'auth');
@@ -31,8 +31,23 @@ export function createAuthRepository(config) {
     revoke(tokenHash) {
       return call('SELECT identity.revoke_mobile_session($1) AS result', [tokenHash]);
     },
+    registrationBudget(originKey, accountKey, operation) {
+      return call('SELECT identity.registration_budget($1, $2, $3) AS result', [originKey, accountKey, operation]);
+    },
+    prepareRegistration(name, email, passwordHash, id, proofHash, codeHash) {
+      return call('SELECT identity.prepare_registration($1, $2, $3, $4, $5, $6) AS result', [name, email, passwordHash, id, proofHash, codeHash]);
+    },
+    resendRegistration(id, proofHash, codeHash) {
+      return call('SELECT identity.resend_registration($1, $2, $3) AS result', [id, proofHash, codeHash]);
+    },
+    registrationDelivery(id, codeHash, sent) {
+      return call('SELECT identity.registration_delivery($1, $2, $3) AS result', [id, codeHash, sent]);
+    },
+    confirmRegistration(id, proofHash, codeHash) {
+      return call('SELECT identity.confirm_registration($1, $2, $3) AS result', [id, proofHash, codeHash]);
+    },
     verifyPermissions() {
-      return verifyRuntimePermissions(pool, 'auth');
+      return verifyRuntimePermissions(pool, 'auth', registrationEnabled);
     },
     close() {
       return pool.end();

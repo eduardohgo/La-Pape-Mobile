@@ -1,6 +1,6 @@
 # Backend Express de La Pape Mobile
 
-Base independiente de Node.js y Express dentro del repositorio mobile. Node.js >=22.13; mantiene JavaScript ESM del backend de referencia. Instala sus dependencias desde esta carpeta con `npm ci`. `npm start` carga una `.env` local, si existe, mediante la opción oficial de Node. `npm run dev` añade recarga del servidor. No hay despliegue ni modificación de servicios existentes.
+Base independiente de Node.js y Express dentro del repositorio mobile. Node.js >=24.7 y <25 (versión fijada 24.21.0); mantiene JavaScript ESM del backend de referencia. Instala sus dependencias desde esta carpeta con `npm ci`. `npm start` carga una `.env` local, si existe, mediante la opción oficial de Node. `npm run dev` añade recarga del servidor. No hay despliegue ni modificación de servicios existentes.
 
 ```powershell
 cd backend
@@ -109,3 +109,9 @@ Issue durante esta tarea. Los resultados actuales se registran en la guía de
 estructura; los informes históricos conservan la evidencia de cada etapa.
 
 Referencias oficiales: [Node env-file](https://nodejs.org/docs/latest-v22.x/api/cli.html#--env-file-if-existsfile), [Express: seguridad](https://expressjs.com/en/advanced/best-practice-security/), [pg Pool](https://node-postgres.com/apis/pool), [pg y TLS](https://node-postgres.com/features/ssl).
+
+## Candidato exclusivo de autenticación en Render
+
+Registro/verificación local opt-in, contratos y migración 006: [REGISTRO_PILOTO.md](REGISTRO_PILOTO.md). Sin migraciones remotas ni servicios activados.
+
+El perfil `API_PROFILE=auth-only`, sus restricciones y las pruebas del ingreso se documentan en [SEGURIDAD_AUTH_RENDER.md](SEGURIDAD_AUTH_RENDER.md). No activa autenticación, no configura proxies ni ejecuta migraciones. El despliegue y la activación requieren autorización separada.

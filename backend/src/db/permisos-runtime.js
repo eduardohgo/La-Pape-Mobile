@@ -7,6 +7,13 @@ const authFunctions = [
   'identity.read_mobile_session(bytea)',
   'identity.revoke_mobile_session(bytea)',
 ];
+export const registrationFunctions = [
+  'identity.registration_budget(bytea,bytea,text)',
+  'identity.prepare_registration(text,text,text,uuid,bytea,bytea)',
+  'identity.resend_registration(uuid,bytea,bytea)',
+  'identity.registration_delivery(uuid,bytea,boolean)',
+  'identity.confirm_registration(uuid,bytea,bytea)',
+];
 const catalogSql = readFileSync(new URL('../../db/queries/catalog-render-permissions.sql', import.meta.url), 'utf8');
 const authSchemas = ['identity', 'audit', 'catalog', 'demo'];
 
@@ -42,10 +49,10 @@ const authSql = `
     ) AS ready
 `;
 
-export async function verifyRuntimePermissions(pool, kind) {
+export async function verifyRuntimePermissions(pool, kind, registrationEnabled = false) {
   const [text, values] = kind === 'catalog'
     ? [catalogSql, [true]]
-    : [authSql, ['lapape_auth_runtime', authFunctions, authSchemas]];
+    : [authSql, ['lapape_auth_runtime', registrationEnabled ? [...authFunctions, ...registrationFunctions] : authFunctions, authSchemas]];
   const { rows } = await pool.query({ text, values, query_timeout: 5000 });
   return rows[0]?.ready === true;
 }
