@@ -144,7 +144,7 @@ function assertNeonRole(config, name, role) {
   return url.hostname;
 }
 
-function authentication(env, nodeEnv, render, catalogDatabase, proxyIps) {
+function authentication(env, nodeEnv, render, catalogDatabase, proxyIps, managedFreeEdge) {
   const enabled = env.AUTH_ENABLED ?? 'false';
   if (!['true', 'false'].includes(enabled)) throw new Error('Configuración inválida: AUTH_ENABLED');
   const mode = env.AUTH_MODE ?? 'pilot';
@@ -154,7 +154,7 @@ function authentication(env, nodeEnv, render, catalogDatabase, proxyIps) {
     throw new Error('La autenticación piloto requiere desarrollo o pruebas; Render requiere AUTH_MODE=hosted');
   }
   const allowLoopbackHttp = flag(env.AUTH_ALLOW_LOOPBACK_HTTP, 'AUTH_ALLOW_LOOPBACK_HTTP');
-  if (render && (allowLoopbackHttp || !proxyIps.length)) {
+  if (render && (allowLoopbackHttp || (!proxyIps.length && !managedFreeEdge))) {
     throw new Error('La autenticación alojada requiere proxies verificados y HTTPS obligatorio');
   }
   const db = database({ DATABASE_URL: env.AUTH_DATABASE_URL }, nodeEnv);
@@ -262,6 +262,18 @@ export function loadConfig(env = process.env) {
     || ip === '0.0.0.0' || ip === '::' || ip === '::ffff:0.0.0.0') || (!render && proxyIps.length)) {
     throw new Error('Configuración inválida: RENDER_TRUSTED_PROXY_IPS');
   }
+  // Render Free web services have no private-network ingress. This opt-in
+  // must never be used after an upgrade or on another provider or service.
+  const managedFreeEdge = flag(env.RENDER_FREE_PUBLIC_INGRESS, 'RENDER_FREE_PUBLIC_INGRESS');
+  const expectedHost = 'la-pape-mobile-auth-tigre10.onrender.com';
+  if (managedFreeEdge && (!render || nodeEnv !== 'production'
+    || apiProfile !== 'auth-only' || proxyIps.length
+    || env.RENDER !== 'true'
+    || env.RENDER_SERVICE_ID !== 'srv-dc2rth7lk1mc73arpul0'
+    || env.RENDER_SERVICE_TYPE !== 'web'
+    || env.RENDER_EXTERNAL_URL !== 'https://' + expectedHost)) {
+    throw new Error('Render Free public ingress requires the approved isolated web service');
+  }
   const catalogDb = database(env, nodeEnv);
   const catalogApiEnabled = flag(env.CATALOG_API_ENABLED, 'CATALOG_API_ENABLED');
   if (render && catalogApiEnabled) assertNeonRole(catalogDb, 'DATABASE_URL', 'lapape_catalog_render');
@@ -274,6 +286,8 @@ export function loadConfig(env = process.env) {
     port: integer(env.PORT, 3000, 'PORT', 1, 65535),
     allowedOrigins: origins(env.FRONTEND_ORIGINS, render),
     proxyIps,
+    managedFreeEdge,
+    expectedHost,
     rateLimitMax: integer(env.RATE_LIMIT_MAX, 100, 'RATE_LIMIT_MAX', 1, 10000),
     rateLimitWindowMs: integer(env.RATE_LIMIT_WINDOW_MS, 900000, 'RATE_LIMIT_WINDOW_MS', 1000, 3600000),
     jsonBodyLimitBytes: integer(env.JSON_BODY_LIMIT_BYTES, 65536, 'JSON_BODY_LIMIT_BYTES', 1, 1048576),
@@ -281,7 +295,7 @@ export function loadConfig(env = process.env) {
     // Never enable demo routes in test/staging/production, even if the flag leaks.
     catalogDemoApiEnabled: nodeEnv === 'development' && String(env.CATALOG_DEMO_API_ENABLED ?? 'false').trim() === 'true',
     cloudinary: cloudinary(env),
-    auth: authentication(env, nodeEnv, render, catalogDb, proxyIps),
+    auth: authentication(env, nodeEnv, render, catalogDb, proxyIps, managedFreeEdge),
   };
   // Keep the property copyable for callers composing config, but redact JSON output.
   Object.defineProperties(config, {
