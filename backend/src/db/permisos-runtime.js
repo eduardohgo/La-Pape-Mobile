@@ -49,10 +49,14 @@ const authSql = `
     ) AS ready
 `;
 
-export async function verifyRuntimePermissions(pool, kind, registrationEnabled = false) {
+export async function verifyRuntimePermissions(pool, kind, registrationEnabled = false, deletionEnabled = false) {
+  const functions = [...authFunctions];
+  if (registrationEnabled) functions.push(...registrationFunctions);
+  if (deletionEnabled) functions.push('identity.registration_budget(bytea,bytea,text)',
+    'identity.mobile_deletion_candidate(bytea)', 'identity.delete_mobile_account(bytea,text,bigint)');
   const [text, values] = kind === 'catalog'
     ? [catalogSql, [true]]
-    : [authSql, ['lapape_auth_runtime', registrationEnabled ? [...authFunctions, ...registrationFunctions] : authFunctions, authSchemas]];
+    : [authSql, ['lapape_auth_runtime', functions, authSchemas]];
   const { rows } = await pool.query({ text, values, query_timeout: 5000 });
   return rows[0]?.ready === true;
 }

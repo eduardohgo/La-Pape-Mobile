@@ -179,7 +179,7 @@ function authentication(env, nodeEnv, render, catalogDatabase, proxyIps, managed
   if (!key || key.length !== 32 || key.toString('base64url') !== input || new Set(key).size === 1) {
     throw new Error('Configuración inválida: AUTH_RATE_LIMIT_KEY');
   }
-  const config = { allowLoopbackHttp, hosted: render };
+  const config = { allowLoopbackHttp, hosted: render, deletionEnabled: flag(env.AUTH_ACCOUNT_DELETION_ENABLED, 'AUTH_ACCOUNT_DELETION_ENABLED') };
   Object.defineProperties(config, {
     database: { value: db },
     limitKey: { value: key },
@@ -245,6 +245,10 @@ export function loadConfig(env = process.env) {
   if (flag(env.AUTH_REGISTRATION_ENABLED, 'AUTH_REGISTRATION_ENABLED')
     && (apiProfile !== 'auth-only' || env.AUTH_ENABLED !== 'true')) {
     throw new Error('Registro requiere auth-only y AUTH_ENABLED=true');
+  }
+  if (flag(env.AUTH_ACCOUNT_DELETION_ENABLED, 'AUTH_ACCOUNT_DELETION_ENABLED')
+    && (apiProfile !== 'auth-only' || env.AUTH_ENABLED !== 'true')) {
+    throw new Error('Eliminar cuenta requiere auth-only y AUTH_ENABLED=true');
   }
   const observer = ingressObservation(env, apiProfile);
   const host = String(env.HOST ?? (render ? '0.0.0.0' : '127.0.0.1')).trim();

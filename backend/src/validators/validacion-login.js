@@ -8,9 +8,13 @@ export function validateLogin(body) {
   const password = Object.getOwnPropertyDescriptor(body, 'password')?.value;
   if (typeof email !== 'string' || email.length > REGISTRATION_VALIDATION.emailMaxLength
     || !validEmail(email.trim())) return null;
-  if (typeof password !== 'string' || !password.trim() || /\p{Cs}/u.test(password)
-    || Buffer.byteLength(password, 'utf8') > REGISTRATION_VALIDATION.passwordMaxBytes) return null;
+  if (!validCurrentPassword(password)) return null;
   return { emailKey: email.trim().toLowerCase(), password };
+}
+
+export function validCurrentPassword(password) {
+  return typeof password === 'string' && Boolean(password.trim()) && !/\p{Cs}/u.test(password)
+    && Buffer.byteLength(password, 'utf8') <= REGISTRATION_VALIDATION.passwordMaxBytes;
 }
 
 export function readBearer(header) {

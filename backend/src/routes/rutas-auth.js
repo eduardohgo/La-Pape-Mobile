@@ -7,10 +7,11 @@ import { createRegistrationController } from '../controllers/controlador-registr
 const LOOPBACK = new Set(['127.0.0.1', '::1', '::ffff:127.0.0.1']);
 const ENDPOINTS = new Map([['/login', 'POST'], ['/me', 'GET'], ['/logout', 'POST']]);
 
-export function createAuthRouter(service, { allowLoopbackHttp, hosted }, httpLimit, registrationService) {
+export function createAuthRouter(service, { allowLoopbackHttp, hosted, deletionEnabled }, httpLimit, registrationService) {
   const router = Router();
   const controller = createAuthController(service);
   const endpoints = new Map(ENDPOINTS);
+  if (deletionEnabled) endpoints.set('/account/delete', 'POST');
   if (registrationService) for (const path of ['/register', '/register/resend', '/register/verify']) endpoints.set(path, 'POST');
   router.use((req, res, next) => {
     res.set('Cache-Control', 'no-store');
@@ -27,6 +28,7 @@ export function createAuthRouter(service, { allowLoopbackHttp, hosted }, httpLim
   router.post('/login', express.json({ limit: 8192 }), controller.login);
   router.get('/me', controller.me);
   router.post('/logout', controller.logout);
+  if (deletionEnabled) router.post('/account/delete', express.json({ limit: 8192 }), controller.deleteAccount);
   if (registrationService) {
     const signup = createRegistrationController(registrationService);
     router.post('/register', express.json({ limit: 8192 }), signup.request);

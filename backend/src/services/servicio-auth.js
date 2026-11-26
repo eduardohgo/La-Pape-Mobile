@@ -41,6 +41,23 @@ export function createAuthService(repository, passwordHasher, limitKey) {
         pending--;
       }
     },
+    async deleteAccount(token, password, origin) {
+      if (pending >= 2) return 'limited';
+      pending++;
+      try {
+        const tokenHash = digest(token);
+        const candidate = await repository.deletionCandidate(tokenHash);
+        if (!candidate) return 'unauthorized';
+        const allowed = await repository.registrationBudget(
+          key('deletion-origin', origin), key('deletion-account', candidate.id), 'verify',
+        );
+        if (!allowed) return 'limited';
+        if (!await passwordHasher.verify(password, candidate.passwordHash)) return 'incorrect';
+        return await repository.deleteAccount(tokenHash, candidate) ? 'deleted' : 'unauthorized';
+      } finally {
+        pending--;
+      }
+    },
     session(token) {
       return repository.session(digest(token));
     },

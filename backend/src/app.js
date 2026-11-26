@@ -79,7 +79,7 @@ export function createApp(config, { catalogRepository, authService, authReposito
   if (config.auth) {
     const needsRepository = !authService || (config.auth.registration && !registrationService);
     const hasher = needsRepository ? createPasswordHasher() : null;
-    const repository = needsRepository ? authRepository ?? createAuthRepository(config.auth.database, { registrationEnabled: Boolean(config.auth.registration) }) : null;
+    const repository = needsRepository ? authRepository ?? createAuthRepository(config.auth.database, { registrationEnabled: Boolean(config.auth.registration), deletionEnabled: config.auth.deletionEnabled }) : null;
     const service = authService ?? createAuthService(repository, hasher, config.auth.limitKey);
     if (repository) databases.push({ name: 'auth', repository });
     // The router rejects ambiguous transport before consuming an IP budget or body.

@@ -1,7 +1,7 @@
 import { createDatabasePool } from '../db/conexion-postgres.js';
 import { verifyRuntimePermissions } from '../db/permisos-runtime.js';
 
-export function createAuthRepository(config, { registrationEnabled = false } = {}) {
+export function createAuthRepository(config, { registrationEnabled = false, deletionEnabled = false } = {}) {
   const pool = createDatabasePool({
     ...config, max: 3, statement_timeout: 5000, idle_in_transaction_session_timeout: 5000,
   }, undefined, 'auth');
@@ -46,8 +46,15 @@ export function createAuthRepository(config, { registrationEnabled = false } = {
     confirmRegistration(id, proofHash, codeHash) {
       return call('SELECT identity.confirm_registration($1, $2, $3) AS result', [id, proofHash, codeHash]);
     },
+    deletionCandidate(tokenHash) {
+      return call('SELECT identity.mobile_deletion_candidate($1) AS result', [tokenHash]);
+    },
+    deleteAccount(tokenHash, candidate) {
+      return call('SELECT identity.delete_mobile_account($1, $2, $3) AS result',
+        [tokenHash, candidate.passwordHash, candidate.securityVersion]);
+    },
     verifyPermissions() {
-      return verifyRuntimePermissions(pool, 'auth', registrationEnabled);
+      return verifyRuntimePermissions(pool, 'auth', registrationEnabled, deletionEnabled);
     },
     close() {
       return pool.end();

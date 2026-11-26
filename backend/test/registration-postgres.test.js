@@ -47,7 +47,7 @@ test('PostgreSQL 18 disposable integration: migrations, least privilege, registr
   await bootstrap.query('CREATE DATABASE lapape_mobile_dev'); await bootstrap.end();
   owner = new Pool({ ...connection, database: 'lapape_mobile_dev' });
   await owner.query('CREATE ROLE lapape_catalog_reader NOLOGIN');
-  for (const name of ['001_catalog_schema.sql', '002_catalog_demo.sql', '003_identity_auth_schema.sql', '004_mobile_auth_runtime.sql', '006_mobile_registration.sql']) {
+  for (const name of ['001_catalog_schema.sql', '002_catalog_demo.sql', '003_identity_auth_schema.sql', '004_mobile_auth_runtime.sql', '006_mobile_registration.sql', '007_mobile_account_deletion.sql']) {
     // Resolve actual reviewed 001/002 filenames; no environment URL or remote connection is accepted.
     const names = (await import('node:fs')).readdirSync('db/migrations');
     const file = names.find(value => value.slice(0, 3) === name.slice(0, 3));
@@ -57,7 +57,7 @@ test('PostgreSQL 18 disposable integration: migrations, least privilege, registr
   // Password is synthetic, ephemeral and never emitted or passed as a process argument.
   await owner.query("ALTER ROLE lapape_auth_runtime LOGIN PASSWORD '" + runtimePassword + "'");
   const runtimeConfig = { ...connection, database: 'lapape_mobile_dev', user: 'lapape_auth_runtime', password: runtimePassword };
-  runtime = createAuthRepository(runtimeConfig, { registrationEnabled: true });
+  runtime = createAuthRepository(runtimeConfig, { registrationEnabled: true, deletionEnabled: true });
   await t.test('runtime preflight and actual restrictions on tables, role assignment and other schemas', async () => {
     assert.equal(await runtime.verifyPermissions(), true);
     const pool = new Pool(runtimeConfig);
@@ -69,7 +69,7 @@ test('PostgreSQL 18 disposable integration: migrations, least privilege, registr
   const mail = []; let rejectMail = false;
   const config = loadConfig({ NODE_ENV: 'test', API_PROFILE: 'auth-only', AUTH_ENABLED: 'true', AUTH_ALLOW_LOOPBACK_HTTP: 'true',
     AUTH_DATABASE_URL: 'postgresql://lapape_auth_runtime:synthetic@localhost/lapape_mobile_dev', AUTH_RATE_LIMIT_KEY: secret(),
-    AUTH_REGISTRATION_ENABLED: 'true', AUTH_REGISTRATION_HMAC_KEY: secret(), AUTH_MAIL_PROVIDER: 'brevo',
+    AUTH_ACCOUNT_DELETION_ENABLED: 'true', AUTH_REGISTRATION_ENABLED: 'true', AUTH_REGISTRATION_HMAC_KEY: secret(), AUTH_MAIL_PROVIDER: 'brevo',
     BREVO_API_KEY: secret(), AUTH_MAIL_FROM: 'sender@example.test' });
   app = createApp(config, { authRepository: runtime, registrationMailer: { async send(email, code) {
     if (rejectMail) throw Error('synthetic provider failure'); mail.push({ email, code });
@@ -161,6 +161,70 @@ test('PostgreSQL 18 disposable integration: migrations, least privilege, registr
     assert.equal(first.token_hash.equals(current), false);
     const code = mail.findLast(item => item.email === 'resend@example.test').code;
     assert.equal((await post('register/verify', { ...challenge, code })).status, 200);
+  });
+  await t.test('account deletion requires own session, exact confirmation and current password, then rolls back on database failure', async () => {
+    await clearBudget();
+    const email = 'new@example.test';
+    const login = async email => {
+      const response = await post('login', { email, password });
+      assert.equal(response.status, 200);
+      return response.json();
+    };
+    const first = await login(email);
+    const second = await login(email);
+    const other = await login('resend@example.test');
+    const id = first.user.id;
+    const body = { password, confirm: true };
+    const erase = (data = body, token = first.accessToken) => post('account/delete', data, token);
+    assert.equal((await erase(body, null)).status, 401);
+    assert.equal((await erase({ ...body, confirm: false })).status, 400);
+    assert.equal((await erase({ ...body, id: other.user.id })).status, 400);
+    assert.equal((await erase({ ...body, password: 'Wrong synthetic password' })).status, 422);
+
+    await owner.query(`INSERT INTO identity.password_resets(id,user_id,token_hash,security_version,expires_at)
+      VALUES(gen_random_uuid(),$1,$2,1,now()+interval '10 minutes')`, [id, randomBytes(32)]);
+    async function counts() {
+      const { rows } = await owner.query(`SELECT
+        (SELECT count(*)::int FROM identity.users WHERE id=$1) AS users,
+        (SELECT count(*)::int FROM identity.sessions WHERE user_id=$1) AS sessions,
+        (SELECT count(*)::int FROM identity.password_credentials WHERE user_id=$1) AS credentials,
+        (SELECT count(*)::int FROM identity.email_verifications WHERE user_id=$1) AS verifications,
+        (SELECT count(*)::int FROM identity.password_resets WHERE user_id=$1) AS resets,
+        (SELECT count(*)::int FROM audit.security_events WHERE actor_user_id=$1 OR subject_user_id=$1) AS linked`, [id]);
+      return rows[0];
+    }
+    const before = await counts();
+    assert.ok(Object.values(before).every(value => value > 0));
+    const auditCount = async () => (await owner.query('SELECT count(*)::int AS n FROM audit.security_events')).rows[0].n;
+    const eventsBefore = await auditCount();
+    const sessionIds = (await owner.query('SELECT id FROM identity.sessions WHERE user_id=$1', [id])).rows.map(row => row.id);
+    await owner.query(`CREATE FUNCTION identity.synthetic_delete_failure() RETURNS trigger LANGUAGE plpgsql AS
+      'BEGIN RAISE EXCEPTION ''synthetic failure at final deletion''; END;';
+      CREATE TRIGGER synthetic_delete_failure BEFORE DELETE ON identity.users
+      FOR EACH ROW EXECUTE FUNCTION identity.synthetic_delete_failure()`);
+    try {
+      assert.equal((await erase()).status, 503);
+      assert.deepEqual(await counts(), before);
+      assert.equal(await auditCount(), eventsBefore);
+      assert.equal((await me(first.accessToken)).status, 200);
+    } finally {
+      await owner.query('DROP TRIGGER synthetic_delete_failure ON identity.users');
+    }
+    const success = await erase();
+    assert.equal(success.status, 200);
+    assert.deepEqual(await success.json(), { deleted: true });
+    assert.deepEqual(Object.values(await counts()), [0, 0, 0, 0, 0, 0]);
+    assert.equal(await auditCount(), eventsBefore);
+    assert.equal((await owner.query('SELECT count(*)::int AS n FROM audit.security_events WHERE session_id=ANY($1::uuid[])', [sessionIds])).rows[0].n, 0);
+    for (const credential of [first, second]) assert.equal((await me(credential.accessToken)).status, 401);
+    assert.equal((await erase()).status, 401);
+    assert.equal((await me(other.accessToken)).status, 200);
+    assert.equal((await post('login', { email, password })).status, 401);
+    for (let i = 0; i < 5; i++) {
+      assert.equal((await erase({ ...body, password: 'Wrong synthetic password' }, other.accessToken)).status, 422);
+    }
+    assert.equal((await erase(body, other.accessToken)).status, 429);
+    assert.equal((await me(other.accessToken)).status, 200);
   });
   await t.test('catalog/demo counts untouched and disabled endpoints remain absent', async () => {
     assert.equal((await owner.query('SELECT count(*)::int AS n FROM catalog.products')).rows[0].n, 0);
