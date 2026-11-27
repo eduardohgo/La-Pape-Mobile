@@ -10,7 +10,9 @@ import { Pool } from 'pg';
 const require = createRequire(import.meta.url);
 const read = file => readFileSync(new URL('../../tls-local/' + file, import.meta.url));
 const debug = process.env.ARCO_F4_DEBUG === '1';
-const refresh = debug && process.env.ARCO_F4_RUN === '4';
+const runId = process.env.ARCO_F4_RUN ?? '4';
+if (!/^[a-zA-Z0-9_-]{1,32}$/.test(runId)) throw new Error('Invalid laboratory run ID');
+const refresh = debug;
 const evidence = new URL(debug ? '../../evidencias-debug-android-2026-11-27/' : '../../evidencias/', import.meta.url);
 
 function transport(agent, base) {
@@ -145,10 +147,10 @@ export async function exerciseArcoTls({ app, owner, runtimeConfig, mail, clearBu
     assert.equal(other.getSnapshot().status, 'authenticated');
     assert.equal((await other.readPrivacyData()).account.name, 'Persona sintética');
     events.push({ caso: 'Cancelación sintética y compatibilidad V4', observado: 'Solo se suprimió la cuenta objetivo; alta V4 sin consentimientos' });
-    writeFileSync(new URL(refresh ? 'resultado-https-cliente-r4.json' : 'resultado-https-cliente.json', evidence), JSON.stringify(events, null, 2), { flag: 'wx' });
+    writeFileSync(new URL(refresh ? ('resultado-https-cliente-' + runId + '.json') : 'resultado-https-cliente.json', evidence), JSON.stringify(events, null, 2), { flag: 'wx' });
 
     if (android) {
-      const dir = new URL(debug ? (refresh ? '../../runtime-android/debug-2026-11-27-r4/' : '../../runtime-android/debug-2026-11-27/') : '../../runtime-android/', import.meta.url);
+      const dir = new URL(debug ? (refresh ? ('../../runtime-android/run-' + runId + '/') : '../../runtime-android/debug-2026-11-27/') : '../../runtime-android/', import.meta.url);
       mkdirSync(dir, { recursive: true });
       const deviceAccount = await register('android-f3@example.test', true);
       writeFileSync(new URL('device-fixture.local', dir), JSON.stringify(deviceAccount), { flag: 'wx' });
@@ -188,7 +190,7 @@ export async function exerciseArcoTls({ app, owner, runtimeConfig, mail, clearBu
       }
       if (debug) {
         server.off('request', trace);
-        writeFileSync(new URL(refresh ? 'transporte-android-r4.json' : 'transporte-android.json', evidence), JSON.stringify(traffic, null, 2), { flag: 'wx' });
+        writeFileSync(new URL(refresh ? ('transporte-android-' + runId + '.json') : 'transporte-android.json', evidence), JSON.stringify(traffic, null, 2), { flag: 'wx' });
       }
     }
   } finally {
