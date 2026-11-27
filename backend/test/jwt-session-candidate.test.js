@@ -1,0 +1,20 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { generateKeyPairSync, randomUUID } from 'node:crypto';
+import { createSessionJwt } from '../src/services/jwt-session-candidate.js';
+test('Ed25519 session candidate verifies signature, issuer, audience, expiry and rejects tampering', () => {
+ const pair = generateKeyPairSync('ed25519');
+ const privateKey=pair.privateKey.export({type:'pkcs8',format:'pem'});
+ const publicKey=pair.publicKey.export({type:'spki',format:'pem'});
+ let time=1000;
+ const config={privateKey,publicKey,issuer:'tigre10-lab',audience:'android-lab',kid:'lab-1',now:()=>time};
+ const jwt=createSessionJwt(config);
+ const subject=randomUUID(), token=jwt.issue(subject,1600);
+ assert.equal(jwt.validate(token).sub,subject);
+ const parts=token.split('.'); parts[1]=Buffer.from(JSON.stringify({...jwt.validate(token),sub:randomUUID()})).toString('base64url');
+ assert.equal(jwt.validate(parts.join('.')),null);
+ assert.equal(createSessionJwt({...config,audience:'other'}).validate(token),null);
+ assert.equal(createSessionJwt({...config,issuer:'other'}).validate(token),null);
+ assert.equal(jwt.validate('eyJhbGciOiJub25lIn0.e30.'),null);
+ time=1600; assert.equal(jwt.validate(token),null);
+});

@@ -1,0 +1,39 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "Node16",
+    "moduleResolution": "Node16",
+    "strict": true,
+    "skipLibCheck": true,
+    "lib": [
+      "ES2022",
+      "DOM"
+    ],
+    "types": [
+      "node",
+      "react-native"
+    ],
+    "rootDir": "src",
+    "outDir": ".test-build"
+  },
+  "include": [
+    "src/features/compra-local/almacenamiento.ts",
+    "src/features/compra-local/controlador-local.ts",
+    "src/features/compra-local/carrito.ts",
+    "src/features/compra-local/accion-agregar.ts",
+    "src/features/compra-local/vuelo-carrito.ts",
+    "src/features/compra-local/checkout.ts",
+    "src/features/compra-local/pedidos-demostracion.ts",
+    "src/features/compra-local/favoritos.ts",
+    "src/config/configuracion-api.ts",
+    "src/services/**/*.ts",
+    "src/features/auth/*.ts",
+    "src/utils/busqueda-catalogo.ts",
+    "src/features/catalogo/dominio/**/*.ts",
+    "src/features/catalogo/datos/**/*.ts",
+    "src/features/catalogo/composicion.ts",
+    "src/features/catalogo/presentacion/viewmodels.ts",
+    "src/features/catalogo/presentacion/paginacion.ts",
+    "src/features/catalogo/presentacion/hooks.ts"
+  ]
+}

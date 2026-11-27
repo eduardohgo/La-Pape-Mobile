@@ -1,0 +1,4 @@
+Backend base e0af54b4ca626e92374991a24665831ee0519121
+Frontend base auditada 14a33cd con cambios locales conservados
+Candidato ARCO fases 1-3; adaptacion nativa Debug queda solo en laboratorio
+JWT criptografico candidato sin integracion activa
