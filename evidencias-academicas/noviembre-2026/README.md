@@ -10,7 +10,7 @@
 
 | Criterio | Valor | Evidencia actual / pendiente |
 |---|---:|---|
-| 6.1 API Cloud y JWT | 1.50 | API HTTPS y Bearer opaco probados; JWT integrado aún por verificar |
+| 6.1 API Cloud y JWT | 1.50 | JWT Ed25519 integrado y probado en backend/AVD de laboratorio; Render y APK V4 siguen usando Bearer opaco |
 | 6.2 Certificate Pinning | 1.50 | Pruebas TLS de laboratorio en Node; falta prueba nativa Android |
 | 6.3 Derechos ARCO | 1.50 | Capturas Android Debug de acceso, rectificación, oposición y consentimiento; cancelación desde interfaz pendiente; aviso legal borrador |
 | 6.4 Ofuscación R8/ProGuard | 1.50 | Compilación Release V4, análisis JADX, inspección DEX; faltan reglas y shrinkResources plenamente acreditados |
