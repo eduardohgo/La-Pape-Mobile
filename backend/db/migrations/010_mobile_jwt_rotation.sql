@@ -42,6 +42,10 @@ $fn$;
 
 REVOKE ALL ON FUNCTION identity.rotate_mobile_jwt_session(bytea,bytea,uuid) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION identity.rotate_mobile_jwt_session(bytea,bytea,uuid) TO lapape_auth_runtime;
+-- Transferring function ownership requires temporary SET membership in PG18.
+GRANT lapape_auth_executor TO CURRENT_USER WITH INHERIT FALSE, SET TRUE;
+GRANT CREATE ON SCHEMA identity TO lapape_auth_executor;
 ALTER FUNCTION identity.rotate_mobile_jwt_session(bytea,bytea,uuid) OWNER TO lapape_auth_executor;
+REVOKE SET OPTION FOR lapape_auth_executor FROM CURRENT_USER;
 REVOKE CREATE ON SCHEMA identity FROM lapape_auth_executor;
 COMMIT;

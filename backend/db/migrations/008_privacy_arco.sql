@@ -24,8 +24,19 @@ GRANT REFERENCES (id) ON identity.users, identity.email_verifications TO lapape_
 GRANT SELECT (id, name, updated_at, email_verified_at, created_at),
       UPDATE (name, updated_at) ON identity.users TO lapape_privacy_executor;
 GRANT SELECT (secret_hash, user_id) ON identity.sessions TO lapape_privacy_executor;
-GRANT EXECUTE ON FUNCTION identity.read_mobile_session(bytea),
-  identity.prepare_registration(text,text,text,uuid,bytea,bytea) TO lapape_privacy_executor;
+-- Each function is owned by its dedicated NOLOGIN executor. Temporarily allow
+-- the migrator to SET only those roles so the grants come from their owners.
+GRANT lapape_auth_executor TO CURRENT_USER WITH INHERIT FALSE, SET TRUE;
+GRANT lapape_registration_executor TO CURRENT_USER WITH INHERIT FALSE, SET TRUE, ADMIN FALSE;
+SET LOCAL ROLE lapape_auth_executor;
+GRANT EXECUTE ON FUNCTION identity.read_mobile_session(bytea) TO lapape_privacy_executor;
+RESET ROLE;
+SET LOCAL ROLE lapape_registration_executor;
+GRANT EXECUTE ON FUNCTION identity.prepare_registration(text,text,text,uuid,bytea,bytea)
+  TO lapape_privacy_executor;
+RESET ROLE;
+REVOKE SET OPTION FOR lapape_auth_executor FROM CURRENT_USER;
+REVOKE lapape_registration_executor FROM CURRENT_USER;
 
 SET LOCAL ROLE lapape_privacy_executor;
 ALTER DEFAULT PRIVILEGES REVOKE EXECUTE ON FUNCTIONS FROM PUBLIC;
