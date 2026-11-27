@@ -1,0 +1,14 @@
+backend/node_modules/
+frontend/node_modules/
+frontend/.expo/
+frontend/.test-build/
+frontend/android/
+frontend/ios/
+**/.env
+**/.env.*
+!**/.env.example
+**/*.key
+**/*.pem
+**/*.p12
+**/*.jks
+**/*.keystore

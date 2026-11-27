@@ -9,8 +9,9 @@ test('Ed25519 session candidate verifies signature, issuer, audience, expiry and
  let time=1000;
  const config={privateKey,publicKey,issuer:'tigre10-lab',audience:'android-lab',kid:'lab-1',now:()=>time};
  const jwt=createSessionJwt(config);
- const subject=randomUUID(), token=jwt.issue(subject,1600);
+ const subject=randomUUID(), sid=randomUUID(), token=jwt.issue(subject,sid,1600);
  assert.equal(jwt.validate(token).sub,subject);
+ assert.equal(jwt.validate(token).sid,sid);
  const parts=token.split('.'); parts[1]=Buffer.from(JSON.stringify({...jwt.validate(token),sub:randomUUID()})).toString('base64url');
  assert.equal(jwt.validate(parts.join('.')),null);
  assert.equal(createSessionJwt({...config,audience:'other'}).validate(token),null);

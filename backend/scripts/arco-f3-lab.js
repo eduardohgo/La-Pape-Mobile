@@ -8,12 +8,12 @@ import { setTimeout as wait } from 'node:timers/promises';
 import { Pool } from 'pg';
 
 const require = createRequire(import.meta.url);
-const read = file => readFileSync(new URL('../../tls-local/' + file, import.meta.url));
+const read = file => readFileSync(new URL('../../../tls-local/' + file, import.meta.url));
 const debug = process.env.ARCO_F4_DEBUG === '1';
 const runId = process.env.ARCO_F4_RUN ?? '4';
 if (!/^[a-zA-Z0-9_-]{1,32}$/.test(runId)) throw new Error('Invalid laboratory run ID');
 const refresh = debug;
-const evidence = new URL(debug ? '../../evidencias-debug-android-2026-11-27/' : '../../evidencias/', import.meta.url);
+const evidence = new URL('../../../Evidencias-Actividad6-Punto1-JWT/', import.meta.url);
 
 function transport(agent, base) {
   return (address, { method, headers, signal, body } = {}) => {
@@ -150,7 +150,7 @@ export async function exerciseArcoTls({ app, owner, runtimeConfig, mail, clearBu
     writeFileSync(new URL(refresh ? ('resultado-https-cliente-' + runId + '.json') : 'resultado-https-cliente.json', evidence), JSON.stringify(events, null, 2), { flag: 'wx' });
 
     if (android) {
-      const dir = new URL(debug ? (refresh ? ('../../runtime-android/run-' + runId + '/') : '../../runtime-android/debug-2026-11-27/') : '../../runtime-android/', import.meta.url);
+      const dir = new URL('../../../jwt-runtime-android/run-' + runId + '/', import.meta.url);
       mkdirSync(dir, { recursive: true });
       const deviceAccount = await register('android-f3@example.test', true);
       writeFileSync(new URL('device-fixture.local', dir), JSON.stringify(deviceAccount), { flag: 'wx' });
@@ -160,12 +160,16 @@ export async function exerciseArcoTls({ app, owner, runtimeConfig, mail, clearBu
       const traffic = [];
       const trace = (req, res) => {
         const route = (req.originalUrl ?? req.url).split('?')[0];
-        if (!/^\/auth\/(?:login|logout|me|register(?:\/v2(?:\/documents)?|\/verify)?|privacy\/(?:data|profile|preferences|consents\/promotions|requests(?:\/[a-f0-9-]+)?))$/i.test(route)) return;
+        if (!/^\/auth\/(?:login|logout|me|refresh|register(?:\/v2(?:\/documents)?|\/verify)?|privacy\/(?:data|profile|preferences|consents\/promotions|requests(?:\/[a-f0-9-]+)?))$/i.test(route)) return;
         res.once('finish', () => {
           const match = /^\/auth\/privacy\/requests\/([a-f0-9-]{36})$/i.exec(route);
           traffic.push({ at: new Date().toISOString(), method: req.method,
             route: match ? '/auth/privacy/requests/:folio' : route,
             status: res.statusCode, tls: req.socket.getProtocol(),
+            jwtRequested: req.headers['x-auth-format'] === 'jwt-v1',
+            bearerKind: typeof req.headers.authorization !== 'string' ? 'none'
+              : /^Bearer [A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/.test(req.headers.authorization)
+                ? 'jwt-shape' : 'other-shape',
             client: /^(?:okhttp|Expo)\b/i.test(req.headers['user-agent'] ?? '') ? 'android-client' : 'unclassified' });
         });
       };

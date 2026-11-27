@@ -1,7 +1,8 @@
 import type { ApiConfig } from '../../config/configuracion-api';
 import { ApiError } from './errores-http';
 
-export type RequestOptions = { signal?: AbortSignal; query?: Readonly<Record<string, string>>; bearer?: string };
+export type RequestOptions = { signal?: AbortSignal; query?: Readonly<Record<string, string>>; bearer?: string;
+  authFormat?: 'jwt-v1' };
 export type FetchFunction = (
   url: string,
   options: {
@@ -25,12 +26,19 @@ export function createHttpClient(config: ApiConfig, fetchRequest: FetchFunction 
     if (options.query && Object.keys(options.query).some((key) => !/^[a-zA-Z][a-zA-Z0-9_]*$/.test(key))) {
       throw new ApiError('configuration');
     }
-    if (options.bearer !== undefined && !/^[A-Za-z0-9_-]+$/.test(options.bearer)) throw new ApiError('configuration');
+    if (options.bearer !== undefined && (options.bearer.length > 2400
+      || !/^(?:[A-Za-z0-9_-]{43}|[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+)$/.test(options.bearer))) {
+      throw new ApiError('configuration');
+    }
+    if (options.authFormat && (path !== '/auth/login' || method !== 'POST' || options.bearer)) {
+      throw new ApiError('configuration');
+    }
 
     const sensitive = method !== 'GET' || options.bearer !== undefined;
     if (sensitive && !config.baseUrl.startsWith('https://')) throw new ApiError('configuration');
     const headers: Record<string, string> = { Accept: 'application/json' };
     if (options.bearer) headers.Authorization = 'Bearer ' + options.bearer;
+    if (options.authFormat) headers['X-Auth-Format'] = options.authFormat;
     if (body !== undefined) headers['Content-Type'] = 'application/json';
     const search = options.query ? new URLSearchParams(Object.entries(options.query)).toString() : '';
     const requestUrl = config.baseUrl + path + (search ? '?' + search : '');

@@ -37,6 +37,13 @@ export function checkAndroidBuild(env) {
   }
 
   const input = env.EXPO_PUBLIC_API_URL?.trim();
+  const format = env.EXPO_PUBLIC_AUTH_TOKEN_FORMAT;
+  if (format !== undefined && format !== 'jwt') {
+    throw new Error('EXPO_PUBLIC_AUTH_TOKEN_FORMAT debe omitirse o ser jwt.');
+  }
+  if (format === 'jwt' && !input) {
+    throw new Error('JWT requiere EXPO_PUBLIC_API_URL con autenticación pública.');
+  }
   if (input === undefined && profile === 'preview') {
     return 'Preview con catálogo público y funciones locales. El acceso a cuentas todavía no está disponible en esta versión de prueba.';
   }

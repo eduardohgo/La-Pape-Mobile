@@ -21,6 +21,67 @@ const session = {
 const loginResponse = { ...session, tokenType: 'Bearer', accessToken: token };
 const errorWith = (kind, status) => (error) => error instanceof ApiError && error.kind === kind && error.status === status;
 
+test('JWT client requests the new format only at the auth origin and rotates without exposing bearer elsewhere', async () => {
+  const first = 'eyJhbGciOiJFZERTQSJ9.eyJzdWIiOiJ0ZXN0In0.c2lnbmF0dXJl';
+  const next = 'eyJhbGciOiJFZERTQSJ9.eyJzdWIiOiJ0ZXN0In0.bmV4dA';
+  const calls = [];
+  const auth = createAuthService(config, async (url, options) => {
+    calls.push({ url, options });
+    if (url.endsWith('/login')) return Response.json({ ...session, tokenType: 'Bearer', tokenFormat: 'jwt', accessToken: first });
+    if (url.endsWith('/refresh')) return Response.json({ ...session, tokenType: 'Bearer', tokenFormat: 'jwt', accessToken: next });
+    return Response.json(session);
+  }, true);
+  assert.equal((await auth.login(credentials)).token, first);
+  assert.equal((await auth.me(first)).user.id, session.user.id);
+  assert.equal((await auth.refresh(first)).token, next);
+  assert.deepEqual(calls.map(call => new URL(call.url).pathname), ['/auth/login', '/auth/me', '/auth/refresh']);
+  assert.equal(calls[0].options.headers['X-Auth-Format'], 'jwt-v1');
+  assert.equal(calls[0].options.headers.Authorization, undefined);
+  assert.equal(calls[1].options.headers.Authorization, 'Bearer ' + first);
+  assert.equal(calls[2].options.headers.Authorization, 'Bearer ' + first);
+  assert.ok(calls.every(call => new URL(call.url).origin === config.baseUrl && call.options.redirect === 'error'));
+});
+
+test('JWT restoration renews once after 401, persists the rotated token and revokes it on logout', async () => {
+  const first = 'a.b.c', next = 'd.e.f';
+  let saved = first, renewals = 0, reads = 0, revoked;
+  const controller = createSessionController({
+    async me(value) { assert.equal(value, first); return session; },
+    async refresh(value) { assert.equal(value, first); renewals++; return { session, token: next }; },
+    async readPrivacyData(value) {
+      reads++;
+      if (value === first) throw new ApiError('http', 401);
+      assert.equal(value, next);
+      return { account: session.user, createdAt: session.expiresAt, emailVerifiedAt: session.expiresAt, decisions: [] };
+    },
+    async logout(value) { revoked = value; },
+  }, { async read() { return saved; }, async save(value) { saved = value; }, async clear() { saved = null; } }, () => now);
+  await controller.restore();
+  assert.equal(controller.getSnapshot().status, 'authenticated');
+  assert.equal((await controller.readPrivacyData()).account.id, session.user.id);
+  assert.equal(renewals, 1);
+  assert.equal(reads, 2);
+  assert.equal(saved, next);
+  await controller.logout();
+  assert.equal(revoked, next);
+  assert.equal(saved, null);
+  assert.equal(controller.getSnapshot().status, 'guest');
+});
+
+test('revoked JWT cannot renew and clears SecureStore without an unbounded retry', async () => {
+  let saved = 'a.b.c', renewals = 0;
+  const controller = createSessionController({
+    async me() { return session; },
+    async readPrivacyData() { throw new ApiError('http', 401); },
+    async refresh() { renewals++; throw new ApiError('http', 401); },
+  }, { async read() { return saved; }, async save(value) { saved = value; }, async clear() { saved = null; } }, () => now);
+  await controller.restore();
+  await assert.rejects(controller.readPrivacyData(), errorWith('http', 401));
+  assert.equal(renewals, 1);
+  assert.equal(saved, null);
+  assert.equal(controller.getSnapshot().status, 'guest');
+});
+
 
 test('privacy uses only the authenticated origin, whitelists fields and patches only the name', async () => {
   const calls = [];

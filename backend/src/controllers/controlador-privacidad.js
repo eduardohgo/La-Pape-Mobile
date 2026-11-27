@@ -8,14 +8,15 @@ const tokenDigest = token => createHash('sha256').update(token).digest();
 const unauthorized = res => res.set('WWW-Authenticate', 'Bearer').status(401)
   .json({ error: 'Sesión inválida o vencida' });
 
-export function createPrivacyController(repository) {
+export function createPrivacyController(repository, resolveToken = tokenDigest) {
   const handle = (operation, validate) => async (req, res) => {
     const token = readBearer(req.get('Authorization'));
     if (!token) return unauthorized(res);
     const input = validate?.(req.body);
     if (validate && input === null) return res.status(400).json({ error: 'Revisa el nombre.' });
     try {
-      const hash = tokenDigest(token);
+      const hash = resolveToken(token);
+      if (!hash) return unauthorized(res);
       const result = await repository[operation](hash, ...(validate ? [input] : []));
       return result ? res.json(result) : unauthorized(res);
     } catch {
@@ -29,7 +30,9 @@ export function createPrivacyController(repository) {
     const payload = parse(req);
     if (payload === null) return res.status(400).json({ error: 'Revisa los datos de la solicitud.' });
     try {
-      const result = await repository[operation](tokenDigest(token), payload);
+      const hash = resolveToken(token);
+      if (!hash) return unauthorized(res);
+      const result = await repository[operation](hash, payload);
       if (!result) return unauthorized(res);
       if (result.missing) return res.status(404).json({ error: 'Solicitud no encontrada.' });
       if (result.conflict) return res.status(409).json({ error: 'La clave de operación ya se usó con otros datos.' });
@@ -53,7 +56,9 @@ export function createPrivacyController(repository) {
       const input = validatePromotions(req.body);
       if (!input) return res.status(400).json({ error: 'Revisa la decisión de promociones.' });
       try {
-        const result = await repository.recordPromotions(tokenDigest(token), input);
+        const hash = resolveToken(token);
+        if (!hash) return unauthorized(res);
+        const result = await repository.recordPromotions(hash, input);
         if (result === 'unauthorized') return unauthorized(res);
         if (result === 'recorded') return res.status(204).end();
         if (result === 'documents_changed' || result === 'conflict') {

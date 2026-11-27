@@ -147,6 +147,10 @@ function assertNeonRole(config, name, role) {
 function authentication(env, nodeEnv, render, catalogDatabase, proxyIps, managedFreeEdge) {
   const enabled = env.AUTH_ENABLED ?? 'false';
   if (!['true', 'false'].includes(enabled)) throw new Error('Configuración inválida: AUTH_ENABLED');
+  const jwtEnabled = flag(env.AUTH_JWT_ENABLED, 'AUTH_JWT_ENABLED');
+  if (jwtEnabled && (enabled !== 'true' || env.API_PROFILE !== 'auth-only')) {
+    throw new Error('JWT requiere autenticación y perfil auth-only');
+  }
   const mode = env.AUTH_MODE ?? 'pilot';
   if (!['pilot', 'hosted'].includes(mode)) throw new Error('Configuración inválida: AUTH_MODE');
   if (enabled === 'false') return null;
@@ -179,12 +183,38 @@ function authentication(env, nodeEnv, render, catalogDatabase, proxyIps, managed
   if (!key || key.length !== 32 || key.toString('base64url') !== input || new Set(key).size === 1) {
     throw new Error('Configuración inválida: AUTH_RATE_LIMIT_KEY');
   }
-  const config = { allowLoopbackHttp, hosted: render, deletionEnabled: flag(env.AUTH_ACCOUNT_DELETION_ENABLED, 'AUTH_ACCOUNT_DELETION_ENABLED') };
+  const config = { allowLoopbackHttp, hosted: render, jwtEnabled,
+    deletionEnabled: flag(env.AUTH_ACCOUNT_DELETION_ENABLED, 'AUTH_ACCOUNT_DELETION_ENABLED') };
+  let jwt = null;
+  if (jwtEnabled) {
+    const decodeKey = (name) => {
+      const encoded = env[name];
+      if (typeof encoded !== 'string' || !/^[A-Za-z0-9+/]+={0,2}$/.test(encoded)) {
+        throw new Error('Configuración JWT inválida: ' + name);
+      }
+      const content = Buffer.from(encoded, 'base64');
+      if (content.toString('base64') !== encoded || content.length < 100 || content.length > 4096) {
+        throw new Error('Configuración JWT inválida: ' + name);
+      }
+      return content.toString('utf8');
+    };
+    const issuer = env.AUTH_JWT_ISSUER;
+    const audience = env.AUTH_JWT_AUDIENCE;
+    const kid = env.AUTH_JWT_KID;
+    if (typeof issuer !== 'string' || !/^https:\/\/[a-z0-9.-]+$/.test(issuer)
+      || typeof audience !== 'string' || !/^[a-z0-9:_-]{3,80}$/.test(audience)
+      || typeof kid !== 'string' || !/^[A-Za-z0-9_-]{1,40}$/.test(kid)) {
+      throw new Error('Configuración JWT inválida');
+    }
+    jwt = Object.freeze({ privateKey: decodeKey('AUTH_JWT_PRIVATE_KEY_B64'),
+      publicKey: decodeKey('AUTH_JWT_PUBLIC_KEY_B64'), issuer, audience, kid });
+  }
   Object.defineProperties(config, {
     privacyEnabled: { value: flag(env.AUTH_PRIVACY_PHASE1_ENABLED, 'AUTH_PRIVACY_PHASE1_ENABLED') },
     database: { value: db },
     limitKey: { value: key },
     registration: { value: registration(env, key) },
+    jwt: { value: jwt },
   });
   return Object.freeze(config);
 }

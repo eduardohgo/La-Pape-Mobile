@@ -15,7 +15,7 @@ export function validateSignup(body) {
 }
 export function validateSignupChallenge(body, verify = false) {
   if (!plain(body, verify ? ['challengeId', 'verificationToken', 'code'] : ['challengeId', 'verificationToken'])
-    || !uuid.test(body.challengeId) || !readBearer('Bearer ' + body.verificationToken)
+    || !uuid.test(body.challengeId) || !Buffer.isBuffer(readBearer('Bearer ' + body.verificationToken))
     || (verify && !/^\d{6}$/.test(body.code))) return null;
   return body;
 }

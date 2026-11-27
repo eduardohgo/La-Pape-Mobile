@@ -20,7 +20,8 @@ function createMobileController() {
 
   function api() {
     if (Platform.OS === 'web') throw new ApiError('configuration');
-    return createAuthService(config(), expoFetch);
+    const preferJwt = typeof process !== 'undefined' && process.env.EXPO_PUBLIC_AUTH_TOKEN_FORMAT === 'jwt';
+    return createAuthService(config(), expoFetch, preferJwt);
   }
 
   const storageOptions = { keychainAccessible: SecureStore.WHEN_UNLOCKED_THIS_DEVICE_ONLY };
@@ -28,6 +29,7 @@ function createMobileController() {
   return createSessionController({
     async login(credentials) { return api().login(credentials); },
     async me(token) { return api().me(token); },
+    async refresh(token) { return api().refresh(token); },
     async deleteAccount(token, password) { return api().deleteAccount(token, password); },
     async readPrivacyData(token, signal) { return api().readPrivacyData(token, signal); },
     async readPrivacyPreferences(...args) { return api().readPrivacyPreferences(...args); },
@@ -67,7 +69,9 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     if (state.status !== 'authenticated') return;
     const expires = sessionDeadline(state.session);
     const timer = setTimeout(() => { void controller.expire(); }, Math.max(0, expires - Date.now()));
-    return () => clearTimeout(timer);
+    const renewTimer = controller.isJwtSession() ? setTimeout(() => { void controller.renew(); },
+      Math.max(0, expires - Date.now() - 120000)) : undefined;
+    return () => { clearTimeout(timer); if (renewTimer) clearTimeout(renewTimer); };
   }, [controller, state]);
 
   return <SessionContext.Provider value={controller}>{children}</SessionContext.Provider>;

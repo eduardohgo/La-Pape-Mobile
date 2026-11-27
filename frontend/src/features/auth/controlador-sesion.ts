@@ -1,6 +1,6 @@
 import type { OppositionInput } from './contratos-privacidad';
 import { ApiError } from '../../services/http/errores-http';
-import { isOpaqueToken, type AuthService, type AuthSession } from './servicio-auth';
+import { isAuthToken, isJwtToken, type AuthService, type AuthSession } from './servicio-auth';
 import type { LoginCredentials } from './validacion-login';
 
 export type TokenStorage = {
@@ -43,6 +43,7 @@ function authMessage(error: unknown, login: boolean): string {
 export function createSessionController(service: AuthService, storage: TokenStorage, now = Date.now) {
   let state: SessionState = { status: 'restoring' };
   let token: string | undefined;
+  let rememberSession = false;
   let pending = false;
   let cleanupNotice: string | undefined;
   const listeners = new Set<() => void>();
@@ -54,6 +55,7 @@ export function createSessionController(service: AuthService, storage: TokenStor
 
   async function clearLocal(notice?: string | Promise<string | undefined>) {
     token = undefined;
+    rememberSession = false;
     let cleared = false;
     try {
       await storage.clear();
@@ -62,6 +64,24 @@ export function createSessionController(service: AuthService, storage: TokenStor
     const message = await notice;
     cleanupNotice = cleared ? undefined : message;
     update(cleared ? { status: 'guest', message } : { status: 'cleanup-error', message: cleanupMessage });
+  }
+
+  async function refreshCurrent() {
+    if (!token || !isJwtToken(token) || state.status !== 'authenticated') return false;
+    const previous = token;
+    const renewed = await service.refresh(previous);
+    if (!isJwtToken(renewed.token) || renewed.session.user.id !== state.session.user.id
+      || sessionDeadline(renewed.session) <= now()) throw new ApiError('invalid-response');
+    try {
+      if (rememberSession) await storage.save(renewed.token);
+    } catch {
+      try { await service.logout(renewed.token); } catch { /* Best effort. */ }
+      await clearLocal('No pudimos guardar la sesión de forma segura.');
+      return false;
+    }
+    token = renewed.token;
+    update({ status: 'authenticated', session: renewed.session });
+    return true;
   }
 
   async function restore() {
@@ -79,11 +99,12 @@ export function createSessionController(service: AuthService, storage: TokenStor
         update({ status: 'guest' });
         return;
       }
-      if (!isOpaqueToken(saved)) {
+      if (!isAuthToken(saved)) {
         await clearLocal();
         return;
       }
       token = saved;
+      rememberSession = true;
       const session = await service.me(saved);
       if (sessionDeadline(session) <= now()) await clearLocal(expiredMessage);
       else update({ status: 'authenticated', session });
@@ -113,6 +134,7 @@ export function createSessionController(service: AuthService, storage: TokenStor
         return false;
       }
       token = result.token;
+      rememberSession = remember;
       update({ status: 'authenticated', session: result.session });
       return true;
     } catch (error) {
@@ -150,6 +172,11 @@ export function createSessionController(service: AuthService, storage: TokenStor
       return result;
     } catch (error) {
       if (error instanceof ApiError && error.status === 401 && token === current && !pending) {
+        if (isJwtToken(current) && !signal?.aborted) {
+          try {
+            if (await refreshCurrent() && token) return await action(token);
+          } catch { /* One retry only, then discard the invalid session. */ }
+        }
         pending = true;
         try { await clearLocal(expiredMessage); } finally { pending = false; }
       }
@@ -166,6 +193,15 @@ export function createSessionController(service: AuthService, storage: TokenStor
       apply?.(value);
       return value;
     } catch (error) {
+      if (error instanceof ApiError && error.status === 401 && isJwtToken(current)) {
+        try {
+          if (await refreshCurrent() && token) {
+            const value = await action(token);
+            apply?.(value);
+            return value;
+          }
+        } catch { /* One retry only. */ }
+      }
       if (error instanceof ApiError && error.status === 401) await clearLocal(expiredMessage);
       throw error;
     } finally {
@@ -233,6 +269,15 @@ export function createSessionController(service: AuthService, storage: TokenStor
         update({ status: 'authenticated', session });
       }),
     expire,
+    async renew() {
+      if (pending || state.status !== 'authenticated' || !token || !isJwtToken(token)) return;
+      if (sessionDeadline(state.session) <= now()) return expire();
+      pending = true;
+      try { await refreshCurrent(); }
+      catch (error) { if (error instanceof ApiError && error.status === 401) await clearLocal(expiredMessage); }
+      finally { pending = false; }
+    },
+    isJwtSession: () => Boolean(token && isJwtToken(token)),
     retryCleanup,
   };
 }

@@ -18,6 +18,10 @@ export function validCurrentPassword(password) {
 }
 
 export function readBearer(header) {
+  if (typeof header === 'string') {
+    const jwt = /^Bearer ([A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+)$/i.exec(header);
+    if (jwt && jwt[1].length <= 2400) return jwt[1];
+  }
   const match = typeof header === 'string' && /^Bearer ([A-Za-z0-9_-]{43})$/i.exec(header);
   if (!match) return null;
   const token = Buffer.from(match[1], 'base64url');

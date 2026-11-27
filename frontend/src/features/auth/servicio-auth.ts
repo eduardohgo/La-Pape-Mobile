@@ -1,5 +1,6 @@
 import type { ApiConfig } from '../../config/configuracion-api';
 import { createHttpClient, type FetchFunction } from '../../services/http/cliente-http';
+import { ApiError } from '../../services/http/errores-http';
 import {
   isFolio, isOppositionDetail, isOppositionPage, isPrivacyDecision, isPrivacyPreferences, validPrivacyDate,
   type OppositionInput, type PrivacyDecision,
@@ -14,7 +15,7 @@ export type PrivacyData = Readonly<{
   emailVerifiedAt: string;
   decisions: readonly PrivacyDecision[];
 }>;
-type LoginResponse = AuthSession & { tokenType: 'Bearer'; accessToken: string };
+type LoginResponse = AuthSession & { tokenType: 'Bearer'; accessToken: string; tokenFormat?: 'jwt' };
 
 const uuid = /^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i;
 const roles = new Set(['CLIENTE', 'TRABAJADOR', 'ADMIN', 'DUENO']);
@@ -25,6 +26,15 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 export function isOpaqueToken(value: unknown): value is string {
   return typeof value === 'string' && /^[A-Za-z0-9_-]{42}[AEIMQUYcgkosw048]$/.test(value);
+}
+
+export function isJwtToken(value: unknown): value is string {
+  return typeof value === 'string' && value.length <= 2400
+    && /^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/.test(value);
+}
+
+export function isAuthToken(value: unknown): value is string {
+  return isOpaqueToken(value) || isJwtToken(value);
 }
 
 function isSession(value: unknown): value is AuthSession {
@@ -50,7 +60,9 @@ function isPrivacyData(value: unknown): value is PrivacyData {
 }
 
 function isLogin(value: unknown): value is LoginResponse {
-  return isRecord(value) && value.tokenType === 'Bearer' && isOpaqueToken(value.accessToken) && isSession(value);
+  return isRecord(value) && value.tokenType === 'Bearer'
+    && (value.tokenFormat === 'jwt' ? isJwtToken(value.accessToken)
+      : value.tokenFormat === undefined && isOpaqueToken(value.accessToken)) && isSession(value);
 }
 
 function publicSession({ user, expiresAt, idleExpiresAt }: AuthSession): AuthSession {
@@ -58,11 +70,18 @@ function publicSession({ user, expiresAt, idleExpiresAt }: AuthSession): AuthSes
   return { user: { id, name, email, role }, expiresAt, idleExpiresAt };
 }
 
-export function createAuthService(config: ApiConfig, fetchRequest?: FetchFunction) {
+export function createAuthService(config: ApiConfig, fetchRequest?: FetchFunction, preferJwt = false) {
   const http = createHttpClient(config, fetchRequest);
   return {
     async login({ email, password }: LoginCredentials) {
-      const result = await http.post('/auth/login', { email, password }, isLogin);
+      const result = await http.post('/auth/login', { email, password }, isLogin,
+        preferJwt ? { authFormat: 'jwt-v1' } : {});
+      return { session: publicSession(result), token: result.accessToken };
+    },
+    async refresh(token: string) {
+      if (!isJwtToken(token)) throw new ApiError('configuration');
+      const result = await http.post('/auth/refresh', {}, isLogin, { bearer: token });
+      if (result.tokenFormat !== 'jwt') throw new ApiError('invalid-response');
       return { session: publicSession(result), token: result.accessToken };
     },
     async me(token: string) {

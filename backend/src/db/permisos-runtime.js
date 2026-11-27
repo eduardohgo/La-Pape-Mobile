@@ -53,8 +53,9 @@ const authSql = `
     ) AS ready
 `;
 
-export async function verifyRuntimePermissions(pool, kind, registrationEnabled = false, deletionEnabled = false, privacyEnabled = false) {
+export async function verifyRuntimePermissions(pool, kind, registrationEnabled = false, deletionEnabled = false, privacyEnabled = false, jwtEnabled = false) {
   const functions = [...authFunctions];
+  if (jwtEnabled) functions.push('identity.rotate_mobile_jwt_session(bytea,bytea,uuid)');
   if (registrationEnabled) functions.push(...registrationFunctions);
   if (deletionEnabled) functions.push('identity.registration_budget(bytea,bytea,text)',
     'identity.mobile_deletion_candidate(bytea)', 'identity.delete_mobile_account(bytea,text,bigint)');

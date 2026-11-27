@@ -4,12 +4,14 @@ import { execFileSync } from 'node:child_process';
 import { mkdtempSync, mkdirSync, readFileSync, writeFileSync, rmSync, realpathSync, existsSync } from 'node:fs';
 import path from 'node:path';
 import { createServer } from 'node:net';
+import { Agent, createServer as createHttpsServer, request as httpsRequest } from 'node:https';
 import { once } from 'node:events';
-import { randomBytes, randomUUID } from 'node:crypto';
+import { generateKeyPairSync, randomBytes, randomUUID } from 'node:crypto';
 import { Pool } from 'pg';
 import { createApp } from '../src/app.js';
 import { loadConfig } from '../src/config/variables-entorno.js';
 import { createAuthRepository } from '../src/repositories/repositorio-auth.js';
+import { createSessionJwt } from '../src/services/jwt-session-candidate.js';
 const secret = () => randomBytes(32).toString('base64url');
 test('PostgreSQL 18 disposable integration: migrations, least privilege, registration, OTP and existing sessions', {
   skip: process.env.REGISTRATION_PG_TEST !== '1' && 'Opt in REGISTRATION_PG_TEST=1 with local PostgreSQL 18; never uses DATABASE_URL',
@@ -62,10 +64,14 @@ test('PostgreSQL 18 disposable integration: migrations, least privilege, registr
   await owner.query(oppositionMigration.replace(/COMMIT;\s*$/, 'ROLLBACK;'));
   assert.equal((await owner.query("SELECT to_regclass('privacy.arco_request_events') AS relation")).rows[0].relation, null);
   await owner.query(oppositionMigration);
+  const jwtMigration = readFileSync('db/migrations/010_mobile_jwt_rotation.sql', 'utf8');
+  await owner.query(jwtMigration.replace(/COMMIT;\s*$/, 'ROLLBACK;'));
+  assert.equal((await owner.query("SELECT to_regprocedure('identity.rotate_mobile_jwt_session(bytea,bytea,uuid)') AS routine")).rows[0].routine, null);
+  await owner.query(jwtMigration);
   // Password is synthetic, ephemeral and never emitted or passed as a process argument.
   await owner.query("ALTER ROLE lapape_auth_runtime LOGIN PASSWORD '" + runtimePassword + "'");
   const runtimeConfig = { ...connection, database: 'lapape_mobile_dev', user: 'lapape_auth_runtime', password: runtimePassword };
-  runtime = createAuthRepository(runtimeConfig, { registrationEnabled: true, deletionEnabled: true, privacyEnabled: true });
+  runtime = createAuthRepository(runtimeConfig, { registrationEnabled: true, deletionEnabled: true, privacyEnabled: true, jwtEnabled: true });
   await t.test('runtime preflight and actual restrictions on tables, role assignment and other schemas', async () => {
     assert.equal(await runtime.verifyPermissions(), true);
     const pool = new Pool(runtimeConfig);
@@ -75,10 +81,18 @@ test('PostgreSQL 18 disposable integration: migrations, least privilege, registr
     await pool.end();
   });
   const mail = []; let rejectMail = false;
+  const pair = generateKeyPairSync('ed25519');
+  const privateKey = pair.privateKey.export({ type: 'pkcs8', format: 'pem' });
+  const publicKey = pair.publicKey.export({ type: 'spki', format: 'pem' });
+  const jwtSettings = { privateKey, publicKey, issuer: 'https://auth.example.test', audience: 'lapape-mobile', kid: 'lab-1' };
   const config = loadConfig({ NODE_ENV: 'test', RATE_LIMIT_MAX: '400', API_PROFILE: 'auth-only', AUTH_ENABLED: 'true', AUTH_ALLOW_LOOPBACK_HTTP: 'true',
     AUTH_DATABASE_URL: 'postgresql://lapape_auth_runtime:synthetic@localhost/lapape_mobile_dev', AUTH_RATE_LIMIT_KEY: secret(),
+    AUTH_JWT_ENABLED: 'true', AUTH_JWT_PRIVATE_KEY_B64: Buffer.from(privateKey).toString('base64'),
+    AUTH_JWT_PUBLIC_KEY_B64: Buffer.from(publicKey).toString('base64'), AUTH_JWT_ISSUER: jwtSettings.issuer,
+    AUTH_JWT_AUDIENCE: jwtSettings.audience, AUTH_JWT_KID: jwtSettings.kid,
     AUTH_PRIVACY_PHASE1_ENABLED: 'true', AUTH_ACCOUNT_DELETION_ENABLED: 'true', AUTH_REGISTRATION_ENABLED: 'true', AUTH_REGISTRATION_HMAC_KEY: secret(), AUTH_MAIL_PROVIDER: 'brevo',
     BREVO_API_KEY: secret(), AUTH_MAIL_FROM: 'sender@example.test' });
+  assert.equal(JSON.stringify(config).includes(privateKey), false);
   app = createApp(config, { authRepository: runtime, registrationMailer: { async send(email, code) {
     if (rejectMail) throw Error('synthetic provider failure'); mail.push({ email, code });
   } } });
@@ -128,6 +142,103 @@ test('PostgreSQL 18 disposable integration: migrations, least privilege, registr
     assert.equal((await me(session.accessToken)).status, 200);
     assert.equal((await post('logout', undefined, session.accessToken)).status, 204);
     assert.equal((await me(session.accessToken)).status, 401);
+  });
+  await t.test('JWT over HTTP uses Ed25519, PostgreSQL session, one-use rotation and opaque V4 compatibility', async () => {
+    await clearBudget();
+    const login = await fetch(base + '/auth/login', { method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Auth-Format': 'jwt-v1' },
+      body: JSON.stringify({ email: 'new@example.test', password }) });
+    assert.equal(login.status, 200);
+    const issued = await login.json();
+    assert.equal(issued.tokenFormat, 'jwt');
+    const signer = createSessionJwt(jwtSettings);
+    const claims = signer.validate(issued.accessToken);
+    assert.equal(claims.sub, issued.user.id);
+    assert.ok(claims.sid && claims.jti);
+    const absoluteBefore = (await owner.query('SELECT absolute_expires_at FROM identity.sessions WHERE id=$1', [claims.sid])).rows[0].absolute_expires_at;
+    assert.equal((await me(issued.accessToken)).status, 200);
+    assert.equal((await fetch(base + '/auth/privacy/data', { headers: { Authorization: 'Bearer ' + issued.accessToken } })).status, 200);
+    const broken = issued.accessToken.slice(0, -1) + (issued.accessToken.endsWith('A') ? 'B' : 'A');
+    assert.equal((await me(broken)).status, 401);
+    const parts = issued.accessToken.split('.');
+    const unsafe = Buffer.from(JSON.stringify({ alg: 'none', typ: 'JWT', kid: 'lab-1' })).toString('base64url') + '.' + parts[1] + '.' + parts[2];
+    assert.equal((await me(unsafe)).status, 401);
+    const wrongIssuer = createSessionJwt({ ...jwtSettings, issuer: 'https://wrong.example.test' });
+    const otherIssuer = wrongIssuer.issue(claims.sub, claims.sid, claims.exp);
+    assert.equal((await me(otherIssuer)).status, 401);
+    const wrongAudience = createSessionJwt({ ...jwtSettings, audience: 'wrong-mobile' });
+    assert.equal((await me(wrongAudience.issue(claims.sub, claims.sid, claims.exp))).status, 401);
+    const expiredSigner = createSessionJwt({ ...jwtSettings, now: () => Math.floor(Date.now() / 1000) - 7300 });
+    assert.equal((await me(expiredSigner.issue(claims.sub, claims.sid, Math.floor(Date.now() / 1000) - 7100))).status, 401);
+    const rotate = () => fetch(base + '/auth/refresh', { method: 'POST', headers: { Authorization: 'Bearer ' + issued.accessToken } });
+    const renewed = await rotate(); assert.equal(renewed.status, 200);
+    const next = await renewed.json(); assert.notEqual(next.accessToken, issued.accessToken);
+    const absoluteAfter = (await owner.query('SELECT absolute_expires_at FROM identity.sessions WHERE id=$1', [claims.sid])).rows[0].absolute_expires_at;
+    assert.equal(absoluteAfter.toISOString(), absoluteBefore.toISOString());
+    assert.equal((await rotate()).status, 401);
+    assert.equal((await me(issued.accessToken)).status, 401);
+    assert.equal((await me(next.accessToken)).status, 200);
+    assert.equal((await post('logout', undefined, next.accessToken)).status, 204);
+    assert.equal((await me(next.accessToken)).status, 401);
+    assert.equal((await fetch(base + '/auth/refresh', { method: 'POST', headers: { Authorization: 'Bearer ' + next.accessToken } })).status, 401);
+    const opaque = await post('login', { email: 'new@example.test', password });
+    assert.equal(opaque.status, 200);
+    const old = await opaque.json(); assert.equal(old.tokenFormat, undefined);
+    assert.equal((await me(old.accessToken)).status, 200);
+    assert.equal((await fetch(base + '/auth/refresh', { method: 'POST', headers: { Authorization: 'Bearer ' + old.accessToken } })).status, 401);
+    const idleLogin = await fetch(base + '/auth/login', { method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Auth-Format': 'jwt-v1' },
+      body: JSON.stringify({ email: 'new@example.test', password }) });
+    assert.equal(idleLogin.status, 200);
+    const idleToken = (await idleLogin.json()).accessToken;
+    const idleSessionId = signer.validate(idleToken).sid;
+    await owner.query(`UPDATE identity.sessions SET created_at=clock_timestamp()-interval '60 minutes',
+      last_activity_at=clock_timestamp()-interval '31 minutes 10 seconds',
+      absolute_expires_at=clock_timestamp()+interval '30 minutes',
+      idle_expires_at=clock_timestamp()-interval '1 minute 20 seconds' WHERE id=$1`, [idleSessionId]);
+    assert.equal((await me(idleToken)).status, 401);
+    assert.equal((await fetch(base + '/auth/refresh', { method: 'POST', headers: { Authorization: 'Bearer ' + idleToken } })).status, 401);
+  });
+  await t.test('JWT over verified HTTPS rejects unknown CA and revokes the rotated session', {
+    skip: process.env.JWT_LAB_TLS_TEST !== '1' && 'Opt in with synthetic TLS files outside the versioned candidate',
+  }, async () => {
+    const tls = path.resolve('..', '..', 'tls-local');
+    for (const file of ['https.pem', 'https.key', 'arco_lab_ca.pem']) assert.ok(existsSync(path.join(tls, file)));
+    const secureServer = createHttpsServer({ cert: readFileSync(path.join(tls, 'https.pem')),
+      key: readFileSync(path.join(tls, 'https.key')) }, app);
+    secureServer.listen(0, '127.0.0.1');
+    await once(secureServer, 'listening');
+    const root = 'https://127.0.0.1:' + secureServer.address().port;
+    const agent = new Agent({ ca: readFileSync(path.join(tls, 'arco_lab_ca.pem')), rejectUnauthorized: true });
+    async function call(route, { method = 'GET', body, token, trusted = true } = {}) {
+      return new Promise((resolve, reject) => {
+        const payload = body ? JSON.stringify(body) : undefined;
+        const req = httpsRequest(root + route, { method, agent: trusted ? agent : new Agent(),
+          headers: { ...(payload && { 'Content-Type': 'application/json' }),
+            ...(token && { Authorization: 'Bearer ' + token }),
+            ...(route === '/auth/login' && { 'X-Auth-Format': 'jwt-v1' }) } }, res => {
+          const parts = []; res.on('data', part => parts.push(part));
+          res.on('end', () => { const text = Buffer.concat(parts).toString('utf8');
+            resolve({ status: res.statusCode, body: text ? JSON.parse(text) : null }); });
+        });
+        req.on('error', reject); req.end(payload);
+      });
+    }
+    try {
+      await assert.rejects(call('/health', { trusted: false }), error =>
+        /CERT|ISSUER|SELF_SIGNED|UNABLE_TO_VERIFY/.test(error.code));
+      assert.equal((await call('/health')).status, 200);
+      await clearBudget();
+      const login = await call('/auth/login', { method: 'POST', body: { email: 'new@example.test', password } });
+      assert.equal(login.status, 200);
+      assert.equal(login.body.tokenFormat, 'jwt');
+      assert.equal((await call('/auth/me', { token: login.body.accessToken })).status, 200);
+      const rotated = await call('/auth/refresh', { method: 'POST', token: login.body.accessToken });
+      assert.equal(rotated.status, 200);
+      assert.equal((await call('/auth/me', { token: login.body.accessToken })).status, 401);
+      assert.equal((await call('/auth/logout', { method: 'POST', token: rotated.body.accessToken })).status, 204);
+      assert.equal((await call('/auth/me', { token: rotated.body.accessToken })).status, 401);
+    } finally { await new Promise(resolve => secureServer.close(resolve)); agent.destroy(); }
   });
   await t.test('case-only duplicate returns generic acceptance and cannot replace an active password or create extra users', async () => {
     await clearBudget(); const previousMail = mail.length;

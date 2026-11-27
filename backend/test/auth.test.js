@@ -180,6 +180,8 @@ test('pilot configuration is opt-in, excludes production and keeps secrets out o
     AUTH_RATE_LIMIT_KEY: key,
   };
   assert.equal(loadConfig({}).auth, null);
+  assert.throws(() => loadConfig({ AUTH_JWT_ENABLED: 'true' }), /JWT requiere/);
+  assert.throws(() => loadConfig({ ...env, AUTH_JWT_ENABLED: 'true' }), /JWT requiere/);
   assert.throws(() => loadConfig({ ...env, NODE_ENV: 'production' }), /piloto/);
   assert.throws(() => loadConfig({ ...env, AUTH_DATABASE_URL: env.AUTH_DATABASE_URL.replace('lapape_auth_runtime', 'owner') }));
   assert.throws(() => loadConfig({ ...env, AUTH_RATE_LIMIT_KEY: '' }));

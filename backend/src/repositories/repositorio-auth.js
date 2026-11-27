@@ -1,7 +1,7 @@
 import { createDatabasePool } from '../db/conexion-postgres.js';
 import { verifyRuntimePermissions } from '../db/permisos-runtime.js';
 
-export function createAuthRepository(config, { registrationEnabled = false, deletionEnabled = false, privacyEnabled = false } = {}) {
+export function createAuthRepository(config, { registrationEnabled = false, deletionEnabled = false, privacyEnabled = false, jwtEnabled = false } = {}) {
   const pool = createDatabasePool({
     ...config, max: 3, statement_timeout: 5000, idle_in_transaction_session_timeout: 5000,
   }, undefined, 'auth');
@@ -30,6 +30,10 @@ export function createAuthRepository(config, { registrationEnabled = false, dele
     },
     revoke(tokenHash) {
       return call('SELECT identity.revoke_mobile_session($1) AS result', [tokenHash]);
+    },
+    rotateJwtSession(previousHash, nextHash, sessionId) {
+      return call('SELECT identity.rotate_mobile_jwt_session($1,$2,$3) AS result',
+        [previousHash, nextHash, sessionId]);
     },
     registrationBudget(originKey, accountKey, operation) {
       return call('SELECT identity.registration_budget($1, $2, $3) AS result', [originKey, accountKey, operation]);
@@ -84,7 +88,7 @@ export function createAuthRepository(config, { registrationEnabled = false, dele
         [tokenHash, candidate.passwordHash, candidate.securityVersion]);
     },
     verifyPermissions() {
-      return verifyRuntimePermissions(pool, 'auth', registrationEnabled, deletionEnabled, privacyEnabled);
+      return verifyRuntimePermissions(pool, 'auth', registrationEnabled, deletionEnabled, privacyEnabled, jwtEnabled);
     },
     close() {
       return pool.end();

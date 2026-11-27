@@ -48,6 +48,15 @@ test('Android preview accepts the authorized catalog with auth absent or configu
     checkAndroidBuild({ ...profile(), EXPO_PUBLIC_API_URL: empty }), /EXPO_PUBLIC_API_URL/);
 });
 
+test('JWT preview requires an explicit public authentication origin', async () => {
+  const { checkAndroidBuild } = await check;
+  assert.throws(() => checkAndroidBuild({ ...profile(), EXPO_PUBLIC_AUTH_TOKEN_FORMAT: 'jwt' }), /JWT requiere/);
+  assert.throws(() => checkAndroidBuild({ ...profile(), EXPO_PUBLIC_API_URL: 'https://auth.example.com',
+    EXPO_PUBLIC_AUTH_TOKEN_FORMAT: 'opaque' }), /EXPO_PUBLIC_AUTH_TOKEN_FORMAT/);
+  assert.equal(checkAndroidBuild({ ...profile(), EXPO_PUBLIC_API_URL: 'https://auth.example.com',
+    EXPO_PUBLIC_AUTH_TOKEN_FORMAT: 'jwt' }), undefined);
+});
+
 test('distributed Android rejects missing, foreign, private or non-canonical catalog origins', async () => {
   const { checkAndroidBuild } = await check;
   const invalid = [undefined, '', ' ', 'not-a-url', 'https://otro.onrender.com', 'http://localhost:3000',

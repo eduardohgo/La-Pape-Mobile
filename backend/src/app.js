@@ -18,6 +18,7 @@ import { rejectAmbiguousHeaders } from './middlewares/encabezados-http.js';
 import { createIngressObserver } from './middlewares/observador-ingreso.js';
 import { createRegistrationService } from './services/servicio-registro.js';
 import { createRegistrationMailer } from './services/correo-registro.js';
+import { createSessionJwt } from './services/jwt-session-candidate.js';
 
 export function createApp(config, { catalogRepository, authService, authRepository, ingressObserverLogger, registrationService, registrationMailer } = {}) {
   const app = express();
@@ -64,7 +65,7 @@ export function createApp(config, { catalogRepository, authService, authReposito
       return callback(error);
     },
     methods: config.auth?.privacyEnabled ? ['GET', 'POST', 'PATCH', 'OPTIONS'] : ['GET', 'POST', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Auth-Format'],
     credentials: false,
     maxAge: 600,
   }));
@@ -80,15 +81,16 @@ export function createApp(config, { catalogRepository, authService, authReposito
   if (config.auth) {
     const needsRepository = !authService || (config.auth.registration && !registrationService) || config.auth.privacyEnabled;
     const hasher = needsRepository ? createPasswordHasher() : null;
-    const repository = needsRepository ? authRepository ?? createAuthRepository(config.auth.database, { registrationEnabled: Boolean(config.auth.registration), deletionEnabled: config.auth.deletionEnabled, privacyEnabled: config.auth.privacyEnabled }) : null;
-    const service = authService ?? createAuthService(repository, hasher, config.auth.limitKey);
+    const repository = needsRepository ? authRepository ?? createAuthRepository(config.auth.database, { registrationEnabled: Boolean(config.auth.registration), deletionEnabled: config.auth.deletionEnabled, privacyEnabled: config.auth.privacyEnabled, jwtEnabled: config.auth.jwtEnabled }) : null;
+    const jwt = config.auth.jwt ? createSessionJwt(config.auth.jwt) : null;
+    const service = authService ?? createAuthService(repository, hasher, config.auth.limitKey, jwt);
     if (repository) databases.push({ name: 'auth', repository });
     // The router rejects ambiguous transport before consuming an IP budget or body.
     const signup = config.auth.registration ? registrationService ?? createRegistrationService(repository, hasher, {
       key: config.auth.registration.key, mailer: registrationMailer ?? createRegistrationMailer(config.auth.registration.mail),
     }) : null;
     if (signup) draining.push(signup);
-    const privacy = config.auth.privacyEnabled ? createPrivacyController(repository) : null;
+    const privacy = config.auth.privacyEnabled ? createPrivacyController(repository, service.tokenHash) : null;
     app.use('/auth', createAuthRouter(service, config.auth, httpLimit, signup, privacy));
   }
   app.use(httpLimit);

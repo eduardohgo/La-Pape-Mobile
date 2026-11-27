@@ -17,12 +17,16 @@ function handle(operation) {
   };
 }
 
-export function createAuthController(service) {
+export function createAuthController(service, jwtEnabled = false) {
   return {
     login: handle(async (req, res) => {
       const credentials = validateLogin(req.body);
       if (!credentials) return res.status(400).json({ error: 'Correo o contraseña inválidos' });
-      const result = await service.login(credentials, ipKeyGenerator(clientAddress(req)));
+      const requested = req.get('X-Auth-Format');
+      if (requested && (requested !== 'jwt-v1' || !jwtEnabled)) {
+        return res.status(400).json({ error: 'Formato de sesión no disponible' });
+      }
+      const result = await service.login(credentials, ipKeyGenerator(clientAddress(req)), requested ? 'jwt' : 'opaque');
       if (result.status === 'limited') {
         res.set('Retry-After', '900');
         return res.status(429).json({ error: 'Demasiados intentos, intenta más tarde' });
@@ -57,6 +61,12 @@ export function createAuthController(service) {
       if (!token) return res.set('WWW-Authenticate', 'Bearer').status(401).json({ error: NO_SESSION });
       await service.logout(token);
       res.sendStatus(204);
+    }),
+    refresh: handle(async (req, res) => {
+      const token = readBearer(req.get('Authorization'));
+      const result = token ? await service.refresh(token) : null;
+      if (!result) return res.set('WWW-Authenticate', 'Bearer').status(401).json({ error: NO_SESSION });
+      res.status(200).json(result);
     }),
   };
 }
