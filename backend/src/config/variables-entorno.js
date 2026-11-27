@@ -2,6 +2,11 @@ import { isIP } from 'node:net';
 import { validEmail } from '../validators/validacion-registro.js';
 
 const DEFAULT_ORIGINS = 'http://localhost:8081,http://localhost:19006';
+const FREE_PUBLIC_INGRESS = new Map([
+  ['srv-dc2rth7lk1mc73arpul0', 'la-pape-mobile-auth-tigre10.onrender.com'],
+  ['srv-dc4q9pkipgvc738j3lq0', 'la-pape-mobile-jwt-arco-staging.onrender.com'],
+]);
+const JWT_STAGING_SERVICE = 'srv-dc4q9pkipgvc738j3lq0';
 
 function integer(value, fallback, name, minimum, maximum) {
   const input = String(value ?? '').trim();
@@ -281,10 +286,24 @@ export function loadConfig(env = process.env) {
     && (apiProfile !== 'auth-only' || env.AUTH_ENABLED !== 'true')) {
     throw new Error('Eliminar cuenta requiere auth-only y AUTH_ENABLED=true');
   }
-  if (flag(env.AUTH_PRIVACY_PHASE1_ENABLED, 'AUTH_PRIVACY_PHASE1_ENABLED')
-    && (nodeEnv === 'production' || env.APP_RUNTIME === 'render'
-      || apiProfile !== 'auth-only' || env.AUTH_ENABLED !== 'true')) {
-    throw new Error('Privacidad fase 1 requiere auth-only y autenticación en desarrollo o pruebas locales');
+  if (render && env.RENDER_SERVICE_ID === JWT_STAGING_SERVICE
+    && (flag(env.AUTH_REGISTRATION_ENABLED, 'AUTH_REGISTRATION_ENABLED')
+      || flag(env.AUTH_ACCOUNT_DELETION_ENABLED, 'AUTH_ACCOUNT_DELETION_ENABLED'))) {
+    throw new Error('El servicio JWT de pruebas no permite registro ni eliminación de cuentas');
+  }
+  const privacyEnabled = flag(env.AUTH_PRIVACY_PHASE1_ENABLED, 'AUTH_PRIVACY_PHASE1_ENABLED');
+  const stagingPrivacy = render && env.RENDER_SERVICE_ID === JWT_STAGING_SERVICE
+    && env.RENDER_EXTERNAL_URL === 'https://' + FREE_PUBLIC_INGRESS.get(JWT_STAGING_SERVICE)
+    && env.RENDER === 'true' && env.RENDER_SERVICE_TYPE === 'web'
+    && env.RENDER_FREE_PUBLIC_INGRESS === 'true' && env.AUTH_ENABLED === 'true'
+    && env.AUTH_JWT_ENABLED === 'true' && env.AUTH_REGISTRATION_ENABLED !== 'true'
+    && env.AUTH_PRIVACY_STAGING_DOCUMENT === 'DOCUMENTO DE PRUEBA';
+  if (env.AUTH_PRIVACY_STAGING_DOCUMENT && !stagingPrivacy) {
+    throw new Error('El documento de prueba solo se admite en el servicio JWT aislado');
+  }
+  if (privacyEnabled && (apiProfile !== 'auth-only' || env.AUTH_ENABLED !== 'true'
+    || (render && !stagingPrivacy) || (!render && nodeEnv === 'production'))) {
+    throw new Error('Privacidad fase 1 requiere un laboratorio autorizado');
   }
   const observer = ingressObservation(env, apiProfile);
   const host = String(env.HOST ?? (render ? '0.0.0.0' : '127.0.0.1')).trim();
@@ -305,11 +324,10 @@ export function loadConfig(env = process.env) {
   // Render Free web services have no private-network ingress. This opt-in
   // must never be used after an upgrade or on another provider or service.
   const managedFreeEdge = flag(env.RENDER_FREE_PUBLIC_INGRESS, 'RENDER_FREE_PUBLIC_INGRESS');
-  const expectedHost = 'la-pape-mobile-auth-tigre10.onrender.com';
+  const expectedHost = FREE_PUBLIC_INGRESS.get(env.RENDER_SERVICE_ID) ?? '';
   if (managedFreeEdge && (!render || nodeEnv !== 'production'
-    || apiProfile !== 'auth-only' || proxyIps.length
+    || apiProfile !== 'auth-only' || proxyIps.length || !expectedHost
     || env.RENDER !== 'true'
-    || env.RENDER_SERVICE_ID !== 'srv-dc2rth7lk1mc73arpul0'
     || env.RENDER_SERVICE_TYPE !== 'web'
     || env.RENDER_EXTERNAL_URL !== 'https://' + expectedHost)) {
     throw new Error('Render Free public ingress requires the approved isolated web service');

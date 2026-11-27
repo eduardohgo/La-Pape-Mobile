@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { randomBytes } from 'node:crypto';
+import { generateKeyPairSync, randomBytes } from 'node:crypto';
 import { once } from 'node:events';
 import { connect } from 'node:net';
 import test from 'node:test';
@@ -446,6 +446,50 @@ test('Render Free ingress opt-in is isolated and denied on other services or run
     { API_PROFILE: 'shared' },
   ]) assert.throws(() => loadConfig({ ...approved, ...change }));
   assert.equal(loadConfig({ ...approved, RENDER_FREE_PUBLIC_INGRESS: 'false', RENDER_TRUSTED_PROXY_IPS: '127.0.0.1' }).managedFreeEdge, false);
+});
+
+test('JWT staging accepts only its own Render identity and synthetic legal document marker', () => {
+  const pair = generateKeyPairSync('ed25519');
+  const staging = {
+    ...environment({ RENDER_TRUSTED_PROXY_IPS: '' }),
+    RENDER_FREE_PUBLIC_INGRESS: 'true', RENDER: 'true',
+    RENDER_SERVICE_ID: 'srv-dc4q9pkipgvc738j3lq0', RENDER_SERVICE_TYPE: 'web',
+    RENDER_EXTERNAL_URL: 'https://la-pape-mobile-jwt-arco-staging.onrender.com',
+    AUTH_JWT_ENABLED: 'true', AUTH_JWT_ISSUER: 'https://la-pape-mobile-jwt-arco-staging.onrender.com',
+    AUTH_JWT_AUDIENCE: 'lapape-staging', AUTH_JWT_KID: 'lab-1',
+    AUTH_JWT_PRIVATE_KEY_B64: Buffer.from(pair.privateKey.export({ type: 'pkcs8', format: 'pem' })).toString('base64'),
+    AUTH_JWT_PUBLIC_KEY_B64: Buffer.from(pair.publicKey.export({ type: 'spki', format: 'pem' })).toString('base64'),
+    AUTH_PRIVACY_PHASE1_ENABLED: 'true', AUTH_PRIVACY_STAGING_DOCUMENT: 'DOCUMENTO DE PRUEBA',
+  };
+  const config = loadConfig(staging);
+  assert.equal(config.expectedHost, 'la-pape-mobile-jwt-arco-staging.onrender.com');
+  assert.equal(config.auth.privacyEnabled, true);
+  assert.equal(config.auth.jwtEnabled, true);
+  const ingress = renderIngress([], { managedFreeEdge: true, expectedHost: config.expectedHost });
+  for (const [host, trusted] of [
+    ['la-pape-mobile-jwt-arco-staging.onrender.com', true],
+    ['la-pape-mobile-auth-tigre10.onrender.com', false],
+    ['unknown.onrender.com', false],
+  ]) {
+    const req = { socket: { remoteAddress: '10.1.2.3' }, ip: '10.1.2.3',
+      headers: { host, 'x-forwarded-proto': 'https', 'cf-connecting-ip': '203.0.113.44' } };
+    ingress(req, {}, () => {});
+    assert.equal(hasTrustedRenderHttps(req), trusted);
+  }
+  for (const change of [
+    { RENDER_SERVICE_ID: 'srv-other' },
+    { RENDER_SERVICE_ID: 'srv-dc2rth7lk1mc73arpul0' },
+    { RENDER_EXTERNAL_URL: 'https://la-pape-mobile-auth-tigre10.onrender.com' },
+    { RENDER_FREE_PUBLIC_INGRESS: 'false' },
+    { AUTH_JWT_ENABLED: 'false' },
+    { AUTH_PRIVACY_STAGING_DOCUMENT: 'AVISO VIGENTE' },
+    { AUTH_REGISTRATION_ENABLED: 'true' },
+    { AUTH_ACCOUNT_DELETION_ENABLED: 'true' },
+    { NODE_ENV: 'development', APP_RUNTIME: 'local' },
+  ]) assert.throws(() => loadConfig({ ...staging, ...change }));
+  assert.throws(() => loadConfig({ ...staging, AUTH_PRIVACY_STAGING_DOCUMENT: undefined }));
+  assert.throws(() => loadConfig({ ...staging, AUTH_PRIVACY_PHASE1_ENABLED: 'false',
+    AUTH_REGISTRATION_ENABLED: 'true', AUTH_PRIVACY_STAGING_DOCUMENT: undefined }));
 });
 
 test('Render Free public ingress rejects incorrect Host, scheme or missing CF client', () => {
