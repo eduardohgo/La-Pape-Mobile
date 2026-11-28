@@ -475,6 +475,18 @@ test('JWT staging accepts only its own Render identity and synthetic legal docum
   };
   assert.equal(loadConfig(deletion).auth.stagingDeletionUserId, deletion.AUTH_STAGING_DELETION_USER_ID);
   assert.equal(loadConfig(deletion).auth.deletionEnabled, true);
+  const pooledDeletion = {
+    ...deletion,
+    AUTH_DATABASE_HOST: deletion.AUTH_DATABASE_HOST.replace('.c-15.', '-pooler.c-15.'),
+    AUTH_DATABASE_URL: deletion.AUTH_DATABASE_URL.replace('.c-15.', '-pooler.c-15.'),
+  };
+  assert.equal(loadConfig(pooledDeletion).auth.stagingDeletionUserId, deletion.AUTH_STAGING_DELETION_USER_ID);
+  assert.throws(() => loadConfig({ ...pooledDeletion, AUTH_DATABASE_HOST: deletion.AUTH_DATABASE_HOST }));
+  assert.throws(() => loadConfig({
+    ...pooledDeletion,
+    AUTH_DATABASE_URL: pooledDeletion.AUTH_DATABASE_URL.replace('ep-flat-union-bbqi1nl3', 'ep-other'),
+    AUTH_DATABASE_HOST: pooledDeletion.AUTH_DATABASE_HOST.replace('ep-flat-union-bbqi1nl3', 'ep-other'),
+  }));
   for (const change of [
     { AUTH_STAGING_DELETION_ENABLED: undefined },
     { AUTH_STAGING_DELETION_USER_ID: undefined },

@@ -311,11 +311,12 @@ export function loadConfig(env = process.env) {
     || (render && env.RENDER_SERVICE_ID === JWT_STAGING_SERVICE
       && flag(env.AUTH_ACCOUNT_DELETION_ENABLED, 'AUTH_ACCOUNT_DELETION_ENABLED'))) {
     const db = database({ DATABASE_URL: env.AUTH_DATABASE_URL }, nodeEnv);
+    const databaseHost = db ? assertNeonRole(db, 'AUTH_DATABASE_URL', 'lapape_auth_runtime') : null;
+    const approvedHosts = [JWT_STAGING_DATABASE_HOST, JWT_STAGING_DATABASE_HOST.replace('.', '-pooler.')];
     if (!stagingDeletion || !stagingPrivacy || !privacyEnabled
       || !flag(env.AUTH_ACCOUNT_DELETION_ENABLED, 'AUTH_ACCOUNT_DELETION_ENABLED')
       || !/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(env.AUTH_STAGING_DELETION_USER_ID ?? '')
-      || !db || assertNeonRole(db, 'AUTH_DATABASE_URL', 'lapape_auth_runtime') !== JWT_STAGING_DATABASE_HOST
-      || env.AUTH_DATABASE_HOST !== JWT_STAGING_DATABASE_HOST) {
+      || !approvedHosts.includes(databaseHost) || env.AUTH_DATABASE_HOST !== databaseHost) {
       throw new Error('Cancelación sintética requiere el servicio, la base y el titular aislados de staging');
     }
   }
