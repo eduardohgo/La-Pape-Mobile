@@ -83,7 +83,8 @@ export function createApp(config, { catalogRepository, authService, authReposito
     const hasher = needsRepository ? createPasswordHasher() : null;
     const repository = needsRepository ? authRepository ?? createAuthRepository(config.auth.database, { registrationEnabled: Boolean(config.auth.registration), deletionEnabled: config.auth.deletionEnabled, privacyEnabled: config.auth.privacyEnabled, jwtEnabled: config.auth.jwtEnabled }) : null;
     const jwt = config.auth.jwt ? createSessionJwt(config.auth.jwt) : null;
-    const service = authService ?? createAuthService(repository, hasher, config.auth.limitKey, jwt);
+    const service = authService ?? createAuthService(repository, hasher, config.auth.limitKey, jwt,
+      config.auth.stagingDeletionUserId);
     if (repository) databases.push({ name: 'auth', repository });
     // The router rejects ambiguous transport before consuming an IP budget or body.
     const signup = config.auth.registration ? registrationService ?? createRegistrationService(repository, hasher, {

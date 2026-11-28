@@ -465,6 +465,33 @@ test('JWT staging accepts only its own Render identity and synthetic legal docum
   assert.equal(config.expectedHost, 'la-pape-mobile-jwt-arco-staging.onrender.com');
   assert.equal(config.auth.privacyEnabled, true);
   assert.equal(config.auth.jwtEnabled, true);
+  const deletion = {
+    ...staging,
+    AUTH_ACCOUNT_DELETION_ENABLED: 'true',
+    AUTH_STAGING_DELETION_ENABLED: 'true',
+    AUTH_STAGING_DELETION_USER_ID: '52683697-411c-4274-98c8-2734f635e78d',
+    AUTH_DATABASE_HOST: 'ep-flat-union-bbqi1nl3.c-15.us-east-1.aws.neon.tech',
+    AUTH_DATABASE_URL: 'postgresql://lapape_auth_runtime:fixture-only@ep-flat-union-bbqi1nl3.c-15.us-east-1.aws.neon.tech/lapape_mobile_dev?sslmode=verify-full',
+  };
+  assert.equal(loadConfig(deletion).auth.stagingDeletionUserId, deletion.AUTH_STAGING_DELETION_USER_ID);
+  assert.equal(loadConfig(deletion).auth.deletionEnabled, true);
+  for (const change of [
+    { AUTH_STAGING_DELETION_ENABLED: undefined },
+    { AUTH_STAGING_DELETION_USER_ID: undefined },
+    { AUTH_STAGING_DELETION_USER_ID: '*' },
+    { AUTH_ACCOUNT_DELETION_ENABLED: 'false' },
+    { AUTH_PRIVACY_PHASE1_ENABLED: 'false' },
+    { AUTH_PRIVACY_STAGING_DOCUMENT: undefined },
+    { AUTH_JWT_ENABLED: 'false' },
+    { AUTH_REGISTRATION_ENABLED: 'true' },
+    { RENDER_SERVICE_ID: 'srv-dc2rth7lk1mc73arpul0' },
+    { RENDER_EXTERNAL_URL: 'https://la-pape-mobile-auth-tigre10.onrender.com' },
+    { APP_RUNTIME: 'local', NODE_ENV: 'test' },
+    { AUTH_DATABASE_URL: staging.AUTH_DATABASE_URL },
+    { AUTH_DATABASE_HOST: staging.AUTH_DATABASE_HOST },
+    { AUTH_DATABASE_URL: deletion.AUTH_DATABASE_URL.replace('lapape_auth_runtime', 'lapape_staging_owner') },
+    { AUTH_DATABASE_URL: deletion.AUTH_DATABASE_URL.replace('lapape_mobile_dev', 'production') },
+  ]) assert.throws(() => loadConfig({ ...deletion, ...change }));
   const ingress = renderIngress([], { managedFreeEdge: true, expectedHost: config.expectedHost });
   for (const [host, trusted] of [
     ['la-pape-mobile-jwt-arco-staging.onrender.com', true],

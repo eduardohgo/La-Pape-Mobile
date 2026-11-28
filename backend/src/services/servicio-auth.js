@@ -4,7 +4,7 @@ function digest(token) {
   return createHash('sha256').update(token).digest();
 }
 
-export function createAuthService(repository, passwordHasher, limitKey, jwt = null) {
+export function createAuthService(repository, passwordHasher, limitKey, jwt = null, stagingDeletionUserId = null) {
   let pending = 0;
   const key = (...parts) => createHmac('sha256', limitKey).update(JSON.stringify(parts)).digest();
 
@@ -60,6 +60,7 @@ export function createAuthService(repository, passwordHasher, limitKey, jwt = nu
         if (!hash) return 'unauthorized';
         const candidate = await repository.deletionCandidate(hash);
         if (!candidate) return 'unauthorized';
+          if (stagingDeletionUserId && candidate.id !== stagingDeletionUserId) return 'unauthorized';
         const allowed = await repository.registrationBudget(
           key('deletion-origin', origin), key('deletion-account', candidate.id), 'verify',
         );

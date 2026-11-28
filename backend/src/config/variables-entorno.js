@@ -7,6 +7,7 @@ const FREE_PUBLIC_INGRESS = new Map([
   ['srv-dc4q9pkipgvc738j3lq0', 'la-pape-mobile-jwt-arco-staging.onrender.com'],
 ]);
 const JWT_STAGING_SERVICE = 'srv-dc4q9pkipgvc738j3lq0';
+const JWT_STAGING_DATABASE_HOST = 'ep-flat-union-bbqi1nl3.c-15.us-east-1.aws.neon.tech';
 
 function integer(value, fallback, name, minimum, maximum) {
   const input = String(value ?? '').trim();
@@ -189,6 +190,7 @@ function authentication(env, nodeEnv, render, catalogDatabase, proxyIps, managed
     throw new Error('Configuración inválida: AUTH_RATE_LIMIT_KEY');
   }
   const config = { allowLoopbackHttp, hosted: render, jwtEnabled,
+    stagingDeletionUserId: env.AUTH_STAGING_DELETION_USER_ID ?? null,
     deletionEnabled: flag(env.AUTH_ACCOUNT_DELETION_ENABLED, 'AUTH_ACCOUNT_DELETION_ENABLED') };
   let jwt = null;
   if (jwtEnabled) {
@@ -287,9 +289,8 @@ export function loadConfig(env = process.env) {
     throw new Error('Eliminar cuenta requiere auth-only y AUTH_ENABLED=true');
   }
   if (render && env.RENDER_SERVICE_ID === JWT_STAGING_SERVICE
-    && (flag(env.AUTH_REGISTRATION_ENABLED, 'AUTH_REGISTRATION_ENABLED')
-      || flag(env.AUTH_ACCOUNT_DELETION_ENABLED, 'AUTH_ACCOUNT_DELETION_ENABLED'))) {
-    throw new Error('El servicio JWT de pruebas no permite registro ni eliminación de cuentas');
+    && flag(env.AUTH_REGISTRATION_ENABLED, 'AUTH_REGISTRATION_ENABLED')) {
+    throw new Error('El servicio JWT de pruebas no permite registro público');
   }
   const privacyEnabled = flag(env.AUTH_PRIVACY_PHASE1_ENABLED, 'AUTH_PRIVACY_PHASE1_ENABLED');
   const stagingPrivacy = render && env.RENDER_SERVICE_ID === JWT_STAGING_SERVICE
@@ -304,6 +305,19 @@ export function loadConfig(env = process.env) {
   if (privacyEnabled && (apiProfile !== 'auth-only' || env.AUTH_ENABLED !== 'true'
     || (render && !stagingPrivacy) || (!render && nodeEnv === 'production'))) {
     throw new Error('Privacidad fase 1 requiere un laboratorio autorizado');
+  }
+  const stagingDeletion = flag(env.AUTH_STAGING_DELETION_ENABLED, 'AUTH_STAGING_DELETION_ENABLED');
+  if (stagingDeletion || env.AUTH_STAGING_DELETION_USER_ID
+    || (render && env.RENDER_SERVICE_ID === JWT_STAGING_SERVICE
+      && flag(env.AUTH_ACCOUNT_DELETION_ENABLED, 'AUTH_ACCOUNT_DELETION_ENABLED'))) {
+    const db = database({ DATABASE_URL: env.AUTH_DATABASE_URL }, nodeEnv);
+    if (!stagingDeletion || !stagingPrivacy || !privacyEnabled
+      || !flag(env.AUTH_ACCOUNT_DELETION_ENABLED, 'AUTH_ACCOUNT_DELETION_ENABLED')
+      || !/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(env.AUTH_STAGING_DELETION_USER_ID ?? '')
+      || !db || assertNeonRole(db, 'AUTH_DATABASE_URL', 'lapape_auth_runtime') !== JWT_STAGING_DATABASE_HOST
+      || env.AUTH_DATABASE_HOST !== JWT_STAGING_DATABASE_HOST) {
+      throw new Error('Cancelación sintética requiere el servicio, la base y el titular aislados de staging');
+    }
   }
   const observer = ingressObservation(env, apiProfile);
   const host = String(env.HOST ?? (render ? '0.0.0.0' : '127.0.0.1')).trim();
